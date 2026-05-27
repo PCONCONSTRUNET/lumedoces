@@ -4,7 +4,7 @@ import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { Link } from "@tanstack/react-router";
 import logo from "@/assets/logo.png";
 import { useCart } from "@/store/cart";
-import { useBusinessStatus } from "@/hooks/useBusinessStatus";
+
 
 const WPP = "5548933806781";
 
