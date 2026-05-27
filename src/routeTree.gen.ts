@@ -13,11 +13,14 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as AdminDashboardVisaoRouteImport } from './routes/admin.dashboard.visao'
 import { Route as AdminDashboardProdutosRouteImport } from './routes/admin.dashboard.produtos'
 import { Route as AdminDashboardPedidosRouteImport } from './routes/admin.dashboard.pedidos'
 import { Route as AdminDashboardPagamentosRouteImport } from './routes/admin.dashboard.pagamentos'
 import { Route as AdminDashboardHorariosRouteImport } from './routes/admin.dashboard.horarios'
+import { Route as AdminDashboardFinanceiroRouteImport } from './routes/admin.dashboard.financeiro'
 import { Route as AdminDashboardCategoriasRouteImport } from './routes/admin.dashboard.categorias'
+import { Route as AdminDashboardFinanceiroDreRouteImport } from './routes/admin.dashboard.financeiro.dre'
 
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
@@ -38,6 +41,11 @@ const AdminDashboardRoute = AdminDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AdminRoute,
+} as any)
+const AdminDashboardVisaoRoute = AdminDashboardVisaoRouteImport.update({
+  id: '/visao',
+  path: '/visao',
+  getParentRoute: () => AdminDashboardRoute,
 } as any)
 const AdminDashboardProdutosRoute = AdminDashboardProdutosRouteImport.update({
   id: '/produtos',
@@ -60,11 +68,23 @@ const AdminDashboardHorariosRoute = AdminDashboardHorariosRouteImport.update({
   path: '/horarios',
   getParentRoute: () => AdminDashboardRoute,
 } as any)
+const AdminDashboardFinanceiroRoute =
+  AdminDashboardFinanceiroRouteImport.update({
+    id: '/financeiro',
+    path: '/financeiro',
+    getParentRoute: () => AdminDashboardRoute,
+  } as any)
 const AdminDashboardCategoriasRoute =
   AdminDashboardCategoriasRouteImport.update({
     id: '/categorias',
     path: '/categorias',
     getParentRoute: () => AdminDashboardRoute,
+  } as any)
+const AdminDashboardFinanceiroDreRoute =
+  AdminDashboardFinanceiroDreRouteImport.update({
+    id: '/dre',
+    path: '/dre',
+    getParentRoute: () => AdminDashboardFinanceiroRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -73,20 +93,26 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard': typeof AdminDashboardRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/admin/dashboard/categorias': typeof AdminDashboardCategoriasRoute
+  '/admin/dashboard/financeiro': typeof AdminDashboardFinanceiroRouteWithChildren
   '/admin/dashboard/horarios': typeof AdminDashboardHorariosRoute
   '/admin/dashboard/pagamentos': typeof AdminDashboardPagamentosRoute
   '/admin/dashboard/pedidos': typeof AdminDashboardPedidosRoute
   '/admin/dashboard/produtos': typeof AdminDashboardProdutosRoute
+  '/admin/dashboard/visao': typeof AdminDashboardVisaoRoute
+  '/admin/dashboard/financeiro/dre': typeof AdminDashboardFinanceiroDreRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin/dashboard': typeof AdminDashboardRouteWithChildren
   '/admin': typeof AdminIndexRoute
   '/admin/dashboard/categorias': typeof AdminDashboardCategoriasRoute
+  '/admin/dashboard/financeiro': typeof AdminDashboardFinanceiroRouteWithChildren
   '/admin/dashboard/horarios': typeof AdminDashboardHorariosRoute
   '/admin/dashboard/pagamentos': typeof AdminDashboardPagamentosRoute
   '/admin/dashboard/pedidos': typeof AdminDashboardPedidosRoute
   '/admin/dashboard/produtos': typeof AdminDashboardProdutosRoute
+  '/admin/dashboard/visao': typeof AdminDashboardVisaoRoute
+  '/admin/dashboard/financeiro/dre': typeof AdminDashboardFinanceiroDreRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -95,10 +121,13 @@ export interface FileRoutesById {
   '/admin/dashboard': typeof AdminDashboardRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/admin/dashboard/categorias': typeof AdminDashboardCategoriasRoute
+  '/admin/dashboard/financeiro': typeof AdminDashboardFinanceiroRouteWithChildren
   '/admin/dashboard/horarios': typeof AdminDashboardHorariosRoute
   '/admin/dashboard/pagamentos': typeof AdminDashboardPagamentosRoute
   '/admin/dashboard/pedidos': typeof AdminDashboardPedidosRoute
   '/admin/dashboard/produtos': typeof AdminDashboardProdutosRoute
+  '/admin/dashboard/visao': typeof AdminDashboardVisaoRoute
+  '/admin/dashboard/financeiro/dre': typeof AdminDashboardFinanceiroDreRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -108,20 +137,26 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/'
     | '/admin/dashboard/categorias'
+    | '/admin/dashboard/financeiro'
     | '/admin/dashboard/horarios'
     | '/admin/dashboard/pagamentos'
     | '/admin/dashboard/pedidos'
     | '/admin/dashboard/produtos'
+    | '/admin/dashboard/visao'
+    | '/admin/dashboard/financeiro/dre'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin/dashboard'
     | '/admin'
     | '/admin/dashboard/categorias'
+    | '/admin/dashboard/financeiro'
     | '/admin/dashboard/horarios'
     | '/admin/dashboard/pagamentos'
     | '/admin/dashboard/pedidos'
     | '/admin/dashboard/produtos'
+    | '/admin/dashboard/visao'
+    | '/admin/dashboard/financeiro/dre'
   id:
     | '__root__'
     | '/'
@@ -129,10 +164,13 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/'
     | '/admin/dashboard/categorias'
+    | '/admin/dashboard/financeiro'
     | '/admin/dashboard/horarios'
     | '/admin/dashboard/pagamentos'
     | '/admin/dashboard/pedidos'
     | '/admin/dashboard/produtos'
+    | '/admin/dashboard/visao'
+    | '/admin/dashboard/financeiro/dre'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -170,6 +208,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/dashboard/visao': {
+      id: '/admin/dashboard/visao'
+      path: '/visao'
+      fullPath: '/admin/dashboard/visao'
+      preLoaderRoute: typeof AdminDashboardVisaoRouteImport
+      parentRoute: typeof AdminDashboardRoute
+    }
     '/admin/dashboard/produtos': {
       id: '/admin/dashboard/produtos'
       path: '/produtos'
@@ -198,6 +243,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardHorariosRouteImport
       parentRoute: typeof AdminDashboardRoute
     }
+    '/admin/dashboard/financeiro': {
+      id: '/admin/dashboard/financeiro'
+      path: '/financeiro'
+      fullPath: '/admin/dashboard/financeiro'
+      preLoaderRoute: typeof AdminDashboardFinanceiroRouteImport
+      parentRoute: typeof AdminDashboardRoute
+    }
     '/admin/dashboard/categorias': {
       id: '/admin/dashboard/categorias'
       path: '/categorias'
@@ -205,23 +257,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardCategoriasRouteImport
       parentRoute: typeof AdminDashboardRoute
     }
+    '/admin/dashboard/financeiro/dre': {
+      id: '/admin/dashboard/financeiro/dre'
+      path: '/dre'
+      fullPath: '/admin/dashboard/financeiro/dre'
+      preLoaderRoute: typeof AdminDashboardFinanceiroDreRouteImport
+      parentRoute: typeof AdminDashboardFinanceiroRoute
+    }
   }
 }
 
+interface AdminDashboardFinanceiroRouteChildren {
+  AdminDashboardFinanceiroDreRoute: typeof AdminDashboardFinanceiroDreRoute
+}
+
+const AdminDashboardFinanceiroRouteChildren: AdminDashboardFinanceiroRouteChildren =
+  {
+    AdminDashboardFinanceiroDreRoute: AdminDashboardFinanceiroDreRoute,
+  }
+
+const AdminDashboardFinanceiroRouteWithChildren =
+  AdminDashboardFinanceiroRoute._addFileChildren(
+    AdminDashboardFinanceiroRouteChildren,
+  )
+
 interface AdminDashboardRouteChildren {
   AdminDashboardCategoriasRoute: typeof AdminDashboardCategoriasRoute
+  AdminDashboardFinanceiroRoute: typeof AdminDashboardFinanceiroRouteWithChildren
   AdminDashboardHorariosRoute: typeof AdminDashboardHorariosRoute
   AdminDashboardPagamentosRoute: typeof AdminDashboardPagamentosRoute
   AdminDashboardPedidosRoute: typeof AdminDashboardPedidosRoute
   AdminDashboardProdutosRoute: typeof AdminDashboardProdutosRoute
+  AdminDashboardVisaoRoute: typeof AdminDashboardVisaoRoute
 }
 
 const AdminDashboardRouteChildren: AdminDashboardRouteChildren = {
   AdminDashboardCategoriasRoute: AdminDashboardCategoriasRoute,
+  AdminDashboardFinanceiroRoute: AdminDashboardFinanceiroRouteWithChildren,
   AdminDashboardHorariosRoute: AdminDashboardHorariosRoute,
   AdminDashboardPagamentosRoute: AdminDashboardPagamentosRoute,
   AdminDashboardPedidosRoute: AdminDashboardPedidosRoute,
   AdminDashboardProdutosRoute: AdminDashboardProdutosRoute,
+  AdminDashboardVisaoRoute: AdminDashboardVisaoRoute,
 }
 
 const AdminDashboardRouteWithChildren = AdminDashboardRoute._addFileChildren(

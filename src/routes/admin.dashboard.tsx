@@ -13,6 +13,8 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  BarChart3,
+  Wallet,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -22,7 +24,9 @@ export const Route = createFileRoute("/admin/dashboard")({
 });
 
 const navItems = [
+  { to: "/admin/dashboard/visao", label: "Dashboard", icon: BarChart3 },
   { to: "/admin/dashboard/pedidos", label: "Pedidos", icon: ShoppingBag },
+  { to: "/admin/dashboard/financeiro", label: "Financeiro", icon: Wallet },
   { to: "/admin/dashboard/pagamentos", label: "Pagamentos", icon: CreditCard },
   { to: "/admin/dashboard/categorias", label: "Categorias", icon: Tags },
   { to: "/admin/dashboard/produtos", label: "Produtos", icon: Package },
@@ -62,8 +66,9 @@ function AdminDashboardLayout() {
       setChecking(false);
 
       // se entrou em /admin/dashboard sem aba, vai pra Pedidos
+      // se entrou em /admin/dashboard sem aba, vai pra Dashboard
       if (pathname === "/admin/dashboard" || pathname === "/admin/dashboard/") {
-        navigate({ to: "/admin/dashboard/pedidos", replace: true });
+        navigate({ to: "/admin/dashboard/visao", replace: true });
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
