@@ -82,8 +82,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "Mini Coxinhas Delivery" },
       { name: "twitter:description", content: "Mini Coxinhas Delivery" },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/lXDtPqq8z6gJkDgJ553CSEpWldA2/social-images/social-1779859686969-ChatGPT_Image_27_05_2026,_01_38_21.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/lXDtPqq8z6gJkDgJ553CSEpWldA2/social-images/social-1779859686969-ChatGPT_Image_27_05_2026,_01_38_21.webp" },
+      {
+        property: "og:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/lXDtPqq8z6gJkDgJ553CSEpWldA2/social-images/social-1779859686969-ChatGPT_Image_27_05_2026,_01_38_21.webp",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/lXDtPqq8z6gJkDgJ553CSEpWldA2/social-images/social-1779859686969-ChatGPT_Image_27_05_2026,_01_38_21.webp",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

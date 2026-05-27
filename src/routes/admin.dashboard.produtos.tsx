@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Package, Plus, Loader2, Trash2, GripVertical, Save } from "lucide-react";
+import { Package, Plus, Loader2, Trash2, GripVertical, Save, ImagePlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +35,8 @@ type DraftVariation = {
   options: DraftOption[];
 };
 
+const PRODUCT_IMAGES_BUCKET = "product-images";
+
 function formatBRL(v: number) {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
@@ -42,6 +44,11 @@ function formatBRL(v: number) {
 function parsePrice(s: string): number {
   const n = Number(s.replace(/\./g, "").replace(",", "."));
   return Number.isFinite(n) ? n : 0;
+}
+
+function safeFileName(name: string) {
+  const ext = name.split(".").pop()?.toLowerCase() || "png";
+  return `${crypto.randomUUID()}.${ext.replace(/[^a-z0-9]/g, "") || "png"}`;
 }
 
 function ProdutosPage() {
@@ -168,6 +175,8 @@ function NovoProdutoDialog({
   const [description, setDescription] = useState("");
   const [basePrice, setBasePrice] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState("");
   const [categoryId, setCategoryId] = useState<string>("");
   const [isActive, setIsActive] = useState(true);
   const [variations, setVariations] = useState<DraftVariation[]>([]);
@@ -179,6 +188,8 @@ function NovoProdutoDialog({
     setDescription("");
     setBasePrice("");
     setImageUrl("");
+    setImageFile(null);
+    setImagePreview("");
     setCategoryId("");
     setIsActive(true);
     setVariations([]);
@@ -191,6 +202,44 @@ function NovoProdutoDialog({
       setCategories((data as Category[]) ?? []);
     })();
   }, [open]);
+
+  const onImageFileChange = (file: File | null) => {
+    if (!file) {
+      setImageFile(null);
+      setImagePreview("");
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Selecione um arquivo de imagem");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("A imagem deve ter no maximo 5MB");
+      return;
+    }
+
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const uploadImage = async () => {
+    if (!imageFile) return imageUrl.trim() || null;
+
+    const path = `products/${safeFileName(imageFile.name)}`;
+    const { error } = await supabase.storage
+      .from(PRODUCT_IMAGES_BUCKET)
+      .upload(path, imageFile, {
+        cacheControl: "31536000",
+        contentType: imageFile.type,
+      });
+
+    if (error) throw error;
+
+    const { data } = supabase.storage.from(PRODUCT_IMAGES_BUCKET).getPublicUrl(path);
+    return data.publicUrl;
+  };
 
   const addVariation = () =>
     setVariations((v) => [
@@ -232,13 +281,14 @@ function NovoProdutoDialog({
     }
     setSaving(true);
     try {
+      const finalImageUrl = await uploadImage();
       const { data: product, error: prodErr } = await supabase
         .from("products")
         .insert({
           name: name.trim(),
           description: description.trim() || null,
           base_price: parsePrice(basePrice),
-          image_url: imageUrl.trim() || null,
+          image_url: finalImageUrl,
           category_id: categoryId || null,
           is_active: isActive,
         })
@@ -340,7 +390,45 @@ function NovoProdutoDialog({
               </Field>
             </div>
 
-            <Field label="URL da imagem">
+            <Field label="Imagem do produto">
+              <div className="rounded-xl border border-border/60 bg-background p-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <div className="grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-xl bg-muted ring-1 ring-border/60">
+                    {imagePreview || imageUrl ? (
+                      <img
+                        src={imagePreview || imageUrl}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <ImagePlus className="h-8 w-8 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => onImageFileChange(e.target.files?.[0] ?? null)}
+                      className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-full file:border-0 file:bg-brand file:px-3 file:py-2 file:text-sm file:font-bold file:text-brand-foreground hover:file:opacity-95"
+                    />
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      PNG, JPG ou WebP ate 5MB. Se enviar arquivo, ele substitui a URL abaixo.
+                    </p>
+                    {imageFile && (
+                      <button
+                        type="button"
+                        onClick={() => onImageFileChange(null)}
+                        className="mt-2 text-xs font-bold text-red-600 hover:underline"
+                      >
+                        Remover imagem selecionada
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Field>
+
+            <Field label="URL da imagem (opcional)">
               <input
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}

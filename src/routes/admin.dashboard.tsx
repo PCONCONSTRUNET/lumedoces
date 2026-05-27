@@ -16,6 +16,7 @@ import {
   BarChart3,
   Wallet,
   ScrollText,
+  TicketPercent,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -27,8 +28,9 @@ export const Route = createFileRoute("/admin/dashboard")({
 const navItems = [
   { to: "/admin/dashboard/visao", label: "Dashboard", icon: BarChart3 },
   { to: "/admin/dashboard/pedidos", label: "Pedidos", icon: ShoppingBag },
-  { to: "/admin/dashboard/financeiro", label: "Financeiro", icon: Wallet },
   { to: "/admin/dashboard/pagamentos", label: "Pagamentos", icon: CreditCard },
+  { to: "/admin/dashboard/cupons", label: "Cupom", icon: TicketPercent },
+  { to: "/admin/dashboard/financeiro", label: "Financeiro", icon: Wallet },
   { to: "/admin/dashboard/categorias", label: "Categorias", icon: Tags },
   { to: "/admin/dashboard/produtos", label: "Produtos", icon: Package },
   { to: "/admin/dashboard/horarios", label: "Horários", icon: Clock },

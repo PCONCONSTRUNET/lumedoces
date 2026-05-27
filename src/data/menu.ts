@@ -4,6 +4,8 @@ import coxinhaCatupiry from "@/assets/coxinha-catupiry.jpg";
 import coxinhaCheddar from "@/assets/coxinha-cheddar.jpg";
 import coxinhaCombo from "@/assets/coxinha-combo.jpg";
 
+const comboImage = "/products/combo.png";
+
 export type Addon = { name: string; price: number };
 export type Product = {
   id: string;
@@ -60,7 +62,7 @@ export const products: Product[] = [
     name: "Combo Festa (100un)",
     description: "100 mini coxinhas mistas + 4 molhos da casa",
     price: 110,
-    image: coxinhaCombo,
+    image: comboImage,
     category: "combos",
     featured: true,
     addons: sauces,
@@ -70,7 +72,7 @@ export const products: Product[] = [
     name: "Trio Sabores (75un)",
     description: "25 frango + 25 catupiry + 25 cheddar bacon",
     price: 89,
-    image: coxinhaCombo,
+    image: comboImage,
     category: "combos",
     addons: sauces,
   },

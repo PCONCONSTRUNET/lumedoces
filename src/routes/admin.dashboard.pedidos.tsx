@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   BadgeCheck,
   Ban,
+  CheckCircle2,
   ChevronDown,
   ChevronUp,
   CircleDollarSign,
@@ -14,9 +15,11 @@ import {
   UtensilsCrossed,
   type LucideIcon,
 } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Enums, Tables } from "@/integrations/supabase/types";
 import { formatBRL } from "@/lib/finance-utils";
+import { formatOrderCode } from "@/lib/order-utils";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/dashboard/pedidos")({
@@ -56,6 +59,14 @@ const STATUS_BADGE_CLASSES: Record<OrderStatus, string> = {
   paid: "bg-emerald-500/15 text-emerald-700 ring-emerald-500/25",
   cancelled: "bg-rose-500/15 text-rose-700 ring-rose-500/25",
 };
+
+const STATUS_ACTIONS: Array<{ status: OrderStatus; label: string }> = [
+  { status: "pending", label: "Pendente" },
+  { status: "confirmed", label: "Confirmar" },
+  { status: "preparing", label: "Preparar" },
+  { status: "delivered", label: "Entregar" },
+  { status: "cancelled", label: "Cancelar" },
+];
 
 const FILTER_CARDS: Array<{
   key: FilterKey;
@@ -142,6 +153,7 @@ function PedidosPage() {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethodRow[]>([]);
   const [statusFilter, setStatusFilter] = useState<FilterKey>("all");
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
+  const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -220,6 +232,46 @@ function PedidosPage() {
     orders.forEach((order) => counts.set(order.status, (counts.get(order.status) ?? 0) + 1));
     return counts;
   }, [orders]);
+
+  const updateOrderStatus = async (order: OrderRow, status: OrderStatus) => {
+    if (updatingOrderId) return;
+
+    const nextPaidAt =
+      status === "paid" ? (order.paid_at ?? new Date().toISOString()) : null;
+
+    setUpdatingOrderId(order.id);
+    try {
+      const { data, error } = await supabase
+        .from("orders")
+        .update({
+          status,
+          paid_at: nextPaidAt,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", order.id)
+        .select("*")
+        .single();
+
+      if (error) throw error;
+
+      setOrders((current) =>
+        current.map((currentOrder) =>
+          currentOrder.id === order.id ? (data as OrderRow) : currentOrder,
+        ),
+      );
+      toast.success("Pedido atualizado");
+    } catch (err) {
+      console.error(err);
+      toast.error("Nao foi possivel atualizar o pedido");
+    } finally {
+      setUpdatingOrderId(null);
+    }
+  };
+
+  const toggleOrderPaid = (order: OrderRow) => {
+    const nextStatus: OrderStatus = order.status === "paid" ? "pending" : "paid";
+    void updateOrderStatus(order, nextStatus);
+  };
 
   return (
     <div>
@@ -309,12 +361,29 @@ function PedidosPage() {
             return (
               <div
                 key={order.id}
-                className="rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border/60"
+                className={cn(
+                  "relative overflow-hidden rounded-2xl p-4 ring-1 transition",
+                  isOpen
+                    ? "bg-[#fff8ed] shadow-lg shadow-brand/10 ring-brand/25"
+                    : "border border-orange-100 bg-gradient-to-r from-orange-50 via-white to-white shadow-md shadow-brand/5 ring-orange-100 hover:border-orange-200 hover:shadow-lg hover:shadow-brand/10",
+                )}
               >
+                <span
+                  aria-hidden
+                  className={cn(
+                    "absolute inset-y-0 left-0 w-1.5",
+                    order.status === "pending" && "bg-amber-400",
+                    order.status === "confirmed" && "bg-blue-400",
+                    order.status === "preparing" && "bg-indigo-400",
+                    order.status === "delivered" && "bg-cyan-400",
+                    order.status === "paid" && "bg-emerald-400",
+                    order.status === "cancelled" && "bg-rose-400",
+                  )}
+                />
                 <button
                   type="button"
                   onClick={() => setExpandedOrderId(isOpen ? null : order.id)}
-                  className="flex w-full items-center justify-between gap-3 text-left"
+                  className="flex w-full items-center justify-between gap-3 rounded-xl bg-white/70 px-3 py-2 text-left ring-1 ring-white/80"
                 >
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
@@ -331,11 +400,13 @@ function PedidosPage() {
                       </span>
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      #{order.id.slice(0, 8)} | {formatDateTimeBR(order.created_at)}
+                      {formatOrderCode(order.id)} | {formatDateTimeBR(order.created_at)}
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-3">
-                    <p className="text-sm font-bold text-foreground">{formatBRL(order.total)}</p>
+                    <p className="rounded-full bg-orange-50 px-3 py-1 text-sm font-bold text-brand ring-1 ring-orange-100">
+                      {formatBRL(order.total)}
+                    </p>
                     {isOpen ? (
                       <ChevronUp className="h-4 w-4 text-muted-foreground" />
                     ) : (
@@ -345,8 +416,8 @@ function PedidosPage() {
                 </button>
 
                 {isOpen && (
-                  <div className="mt-4 space-y-4 border-t border-border/60 pt-4">
-                    <div className="grid gap-2 text-sm sm:grid-cols-2">
+                  <div className="mt-4 space-y-4 rounded-2xl border border-brand/15 bg-white/90 p-4 shadow-inner shadow-brand/5">
+                    <div className="grid gap-3 text-sm sm:grid-cols-2">
                       <p>
                         <span className="font-semibold">Telefone:</span>{" "}
                         {order.customer_phone || "Nao informado"}
@@ -355,8 +426,18 @@ function PedidosPage() {
                         <span className="font-semibold">Pagamento:</span> {paymentName}
                       </p>
                       <p className="sm:col-span-2">
+                        <span className="font-semibold">Situacao do pagamento:</span>{" "}
+                        {order.status === "paid"
+                          ? `Pago em ${formatDateTimeBR(order.paid_at)}`
+                          : "Nao pago"}
+                      </p>
+                      <p className="sm:col-span-2">
                         <span className="font-semibold">Endereco:</span>{" "}
                         {order.customer_address || "Nao informado"}
+                      </p>
+                      <p className="sm:col-span-2">
+                        <span className="font-semibold">Referencia:</span>{" "}
+                        {order.address_reference || "Nao informado"}
                       </p>
                       <p className="sm:col-span-2">
                         <span className="font-semibold">Observacoes:</span>{" "}
@@ -364,8 +445,54 @@ function PedidosPage() {
                       </p>
                     </div>
 
-                    <div className="rounded-xl bg-muted/40 p-3">
-                      <h4 className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                    <div className="grid gap-3 rounded-xl border border-orange-100 bg-orange-50/70 p-3 lg:grid-cols-[1fr_auto]">
+                      <div>
+                        <h4 className="text-xs font-bold uppercase tracking-wide text-brand">
+                          Status do pedido
+                        </h4>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {STATUS_ACTIONS.map((action) => {
+                            const active = order.status === action.status;
+                            return (
+                              <button
+                                key={action.status}
+                                type="button"
+                                disabled={updatingOrderId === order.id}
+                                onClick={() => updateOrderStatus(order, action.status)}
+                                className={cn(
+                                  "rounded-full px-3 py-1.5 text-xs font-bold ring-1 transition disabled:cursor-wait disabled:opacity-60",
+                                  active
+                                    ? "bg-brand text-brand-foreground ring-brand"
+                                    : "bg-white text-foreground ring-orange-100 hover:bg-orange-100",
+                                )}
+                              >
+                                {action.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="flex items-end">
+                        <button
+                          type="button"
+                          disabled={updatingOrderId === order.id}
+                          onClick={() => toggleOrderPaid(order)}
+                          className={cn(
+                            "inline-flex min-w-36 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-bold ring-1 transition disabled:cursor-wait disabled:opacity-60",
+                            order.status === "paid"
+                              ? "bg-emerald-600 text-white ring-emerald-600 hover:bg-emerald-700"
+                              : "bg-white text-emerald-700 ring-emerald-200 hover:bg-emerald-50",
+                          )}
+                        >
+                          <CheckCircle2 className="h-4 w-4" />
+                          {order.status === "paid" ? "Pago" : "Marcar pago"}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="rounded-xl border border-orange-100 bg-orange-50/80 p-3">
+                      <h4 className="mb-2 text-xs font-bold uppercase tracking-wide text-brand">
                         Itens do pedido
                       </h4>
                       {detailsItems.length === 0 ? (
@@ -384,7 +511,7 @@ function PedidosPage() {
                       )}
                     </div>
 
-                    <div className="grid gap-1 text-sm sm:grid-cols-2">
+                    <div className="grid gap-2 rounded-xl border border-border/70 bg-background p-3 text-sm sm:grid-cols-2">
                       <p>
                         <span className="font-semibold">Subtotal:</span> {formatBRL(order.subtotal)}
                       </p>
@@ -395,7 +522,7 @@ function PedidosPage() {
                       <p>
                         <span className="font-semibold">Desconto:</span> {formatBRL(order.discount)}
                       </p>
-                      <p>
+                      <p className="font-bold text-brand">
                         <span className="font-semibold">Total:</span> {formatBRL(order.total)}
                       </p>
                     </div>

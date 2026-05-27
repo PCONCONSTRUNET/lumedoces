@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export type BusinessHour = {
@@ -71,6 +71,7 @@ function compute(hours: BusinessHour[]): Omit<BusinessStatus, "loading"> {
 }
 
 export function useBusinessStatus(refreshMs = 60_000): BusinessStatus {
+  const channelId = useId();
   const [hours, setHours] = useState<BusinessHour[] | null>(null);
   const [tick, setTick] = useState(0);
 
@@ -86,11 +87,9 @@ export function useBusinessStatus(refreshMs = 60_000): BusinessStatus {
 
     // realtime: refletir mudanças do admin imediatamente
     const channel = supabase
-      .channel("business_hours_changes")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "business_hours" },
-        () => load(),
+      .channel(`business_hours_changes_${channelId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "business_hours" }, () =>
+        load(),
       )
       .subscribe();
 
@@ -101,7 +100,7 @@ export function useBusinessStatus(refreshMs = 60_000): BusinessStatus {
       clearInterval(interval);
       supabase.removeChannel(channel);
     };
-  }, [refreshMs]);
+  }, [channelId, refreshMs]);
 
   // referenciamos `tick` só pra forçar recálculo a cada minuto
   void tick;
@@ -110,4 +109,3 @@ export function useBusinessStatus(refreshMs = 60_000): BusinessStatus {
   }
   return { loading: false, ...compute(hours) };
 }
-

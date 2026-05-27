@@ -20,6 +20,7 @@ import { Route as AdminDashboardPedidosRouteImport } from './routes/admin.dashbo
 import { Route as AdminDashboardPagamentosRouteImport } from './routes/admin.dashboard.pagamentos'
 import { Route as AdminDashboardHorariosRouteImport } from './routes/admin.dashboard.horarios'
 import { Route as AdminDashboardFinanceiroRouteImport } from './routes/admin.dashboard.financeiro'
+import { Route as AdminDashboardCuponsRouteImport } from './routes/admin.dashboard.cupons'
 import { Route as AdminDashboardCategoriasRouteImport } from './routes/admin.dashboard.categorias'
 import { Route as AdminDashboardAuditoriaRouteImport } from './routes/admin.dashboard.auditoria'
 import { Route as AdminDashboardFinanceiroDreRouteImport } from './routes/admin.dashboard.financeiro.dre'
@@ -81,6 +82,11 @@ const AdminDashboardFinanceiroRoute =
     path: '/financeiro',
     getParentRoute: () => AdminDashboardRoute,
   } as any)
+const AdminDashboardCuponsRoute = AdminDashboardCuponsRouteImport.update({
+  id: '/cupons',
+  path: '/cupons',
+  getParentRoute: () => AdminDashboardRoute,
+} as any)
 const AdminDashboardCategoriasRoute =
   AdminDashboardCategoriasRouteImport.update({
     id: '/categorias',
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/admin/dashboard/auditoria': typeof AdminDashboardAuditoriaRoute
   '/admin/dashboard/categorias': typeof AdminDashboardCategoriasRoute
+  '/admin/dashboard/cupons': typeof AdminDashboardCuponsRoute
   '/admin/dashboard/financeiro': typeof AdminDashboardFinanceiroRouteWithChildren
   '/admin/dashboard/horarios': typeof AdminDashboardHorariosRoute
   '/admin/dashboard/pagamentos': typeof AdminDashboardPagamentosRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/admin/dashboard/auditoria': typeof AdminDashboardAuditoriaRoute
   '/admin/dashboard/categorias': typeof AdminDashboardCategoriasRoute
+  '/admin/dashboard/cupons': typeof AdminDashboardCuponsRoute
   '/admin/dashboard/financeiro': typeof AdminDashboardFinanceiroRouteWithChildren
   '/admin/dashboard/horarios': typeof AdminDashboardHorariosRoute
   '/admin/dashboard/pagamentos': typeof AdminDashboardPagamentosRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/admin/dashboard/auditoria': typeof AdminDashboardAuditoriaRoute
   '/admin/dashboard/categorias': typeof AdminDashboardCategoriasRoute
+  '/admin/dashboard/cupons': typeof AdminDashboardCuponsRoute
   '/admin/dashboard/financeiro': typeof AdminDashboardFinanceiroRouteWithChildren
   '/admin/dashboard/horarios': typeof AdminDashboardHorariosRoute
   '/admin/dashboard/pagamentos': typeof AdminDashboardPagamentosRoute
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/dashboard/auditoria'
     | '/admin/dashboard/categorias'
+    | '/admin/dashboard/cupons'
     | '/admin/dashboard/financeiro'
     | '/admin/dashboard/horarios'
     | '/admin/dashboard/pagamentos'
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/dashboard/auditoria'
     | '/admin/dashboard/categorias'
+    | '/admin/dashboard/cupons'
     | '/admin/dashboard/financeiro'
     | '/admin/dashboard/horarios'
     | '/admin/dashboard/pagamentos'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/dashboard/auditoria'
     | '/admin/dashboard/categorias'
+    | '/admin/dashboard/cupons'
     | '/admin/dashboard/financeiro'
     | '/admin/dashboard/horarios'
     | '/admin/dashboard/pagamentos'
@@ -282,6 +294,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardFinanceiroRouteImport
       parentRoute: typeof AdminDashboardRoute
     }
+    '/admin/dashboard/cupons': {
+      id: '/admin/dashboard/cupons'
+      path: '/cupons'
+      fullPath: '/admin/dashboard/cupons'
+      preLoaderRoute: typeof AdminDashboardCuponsRouteImport
+      parentRoute: typeof AdminDashboardRoute
+    }
     '/admin/dashboard/categorias': {
       id: '/admin/dashboard/categorias'
       path: '/categorias'
@@ -323,6 +342,7 @@ const AdminDashboardFinanceiroRouteWithChildren =
 interface AdminDashboardRouteChildren {
   AdminDashboardAuditoriaRoute: typeof AdminDashboardAuditoriaRoute
   AdminDashboardCategoriasRoute: typeof AdminDashboardCategoriasRoute
+  AdminDashboardCuponsRoute: typeof AdminDashboardCuponsRoute
   AdminDashboardFinanceiroRoute: typeof AdminDashboardFinanceiroRouteWithChildren
   AdminDashboardHorariosRoute: typeof AdminDashboardHorariosRoute
   AdminDashboardPagamentosRoute: typeof AdminDashboardPagamentosRoute
@@ -334,6 +354,7 @@ interface AdminDashboardRouteChildren {
 const AdminDashboardRouteChildren: AdminDashboardRouteChildren = {
   AdminDashboardAuditoriaRoute: AdminDashboardAuditoriaRoute,
   AdminDashboardCategoriasRoute: AdminDashboardCategoriasRoute,
+  AdminDashboardCuponsRoute: AdminDashboardCuponsRoute,
   AdminDashboardFinanceiroRoute: AdminDashboardFinanceiroRouteWithChildren,
   AdminDashboardHorariosRoute: AdminDashboardHorariosRoute,
   AdminDashboardPagamentosRoute: AdminDashboardPagamentosRoute,

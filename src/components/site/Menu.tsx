@@ -7,6 +7,21 @@ import { formatBRL, useCart } from "@/store/cart";
 import { supabase } from "@/integrations/supabase/client";
 import type { Product, Addon } from "@/data/menu";
 
+type CategoryRow = {
+  id: string;
+  name: string;
+  sort_order?: number | null;
+};
+
+type ProductRow = {
+  id: string;
+  name: string;
+  description: string | null;
+  base_price: number;
+  image_url: string | null;
+  category_id: string | null;
+};
+
 const sauces: Addon[] = [
   { name: "Maionese da Casa", price: 3 },
   { name: "Molho Cheddar", price: 5 },
@@ -17,12 +32,25 @@ const sauces: Addon[] = [
 ];
 
 const PLACEHOLDER = "/products/placeholder.png";
+const COMBO_IMAGE = "/products/combo.png";
+const COMBO_FALLBACK: Product = {
+  id: "combo-festa",
+  name: "Combo Festa (100un)",
+  description: "100 mini coxinhas mistas + 4 molhos da casa",
+  price: 110,
+  image: COMBO_IMAGE,
+  category: "combos",
+  featured: true,
+  addons: sauces,
+};
+const FALLBACK_CATEGORIES: CategoryRow[] = [{ id: "combos", name: "Combos", sort_order: 4 }];
 
 function emojiFor(name: string): string {
   const n = name.toLowerCase();
   if (n.includes("coxinha")) return "🍗";
   if (n.includes("pastel") || n.includes("pasteis")) return "🥟";
-  if (n.includes("porç") || n.includes("batata") || n.includes("salsicha") || n.includes("bolinho")) return "🍟";
+  if (n.includes("porç") || n.includes("batata") || n.includes("salsicha") || n.includes("bolinho"))
+    return "🍟";
   if (n.includes("combo")) return "🎉";
   if (n.includes("doce") || n.includes("brigad")) return "🍫";
   if (n.includes("bebida") || n.includes("refri") || n.includes("suco")) return "🥤";
@@ -42,26 +70,45 @@ export function Menu({ menuRef }: { menuRef: React.RefObject<HTMLDivElement | nu
         supabase.from("categories").select("*").eq("is_active", true).order("sort_order"),
         supabase.from("products").select("*").eq("is_active", true).order("sort_order"),
       ]);
-      if (cats.error) throw cats.error;
-      if (prods.error) throw prods.error;
+      if (cats.error || prods.error) {
+        console.error(cats.error ?? prods.error);
+        return { categories: [], products: [] };
+      }
       return { categories: cats.data ?? [], products: prods.data ?? [] };
     },
   });
 
-  const categories = data?.categories ?? [];
-  const products: Product[] = useMemo(
-    () =>
-      (data?.products ?? []).map((p: any) => ({
-        id: p.id,
-        name: p.name,
-        description: p.description ?? "",
-        price: Number(p.base_price),
-        image: p.image_url || PLACEHOLDER,
-        category: p.category_id,
-        addons: sauces,
-      })),
-    [data],
+  const dbCategories = useMemo(() => (data?.categories ?? []) as CategoryRow[], [data?.categories]);
+  const comboCategory = useMemo(
+    () => dbCategories.find((c) => c.name.toLowerCase().includes("combo")),
+    [dbCategories],
   );
+  const comboCategoryId = comboCategory?.id ?? "combos";
+  const categories = useMemo(() => {
+    const baseCategories = dbCategories.length > 0 ? dbCategories : FALLBACK_CATEGORIES;
+    if (baseCategories.some((c) => c.name.toLowerCase().includes("combo"))) return baseCategories;
+    return [...baseCategories, { id: comboCategoryId, name: "Combos", sort_order: 4 }];
+  }, [comboCategoryId, dbCategories]);
+
+  const products: Product[] = useMemo(() => {
+    const dbProducts = ((data?.products ?? []) as ProductRow[]).map((p) => ({
+      id: p.id,
+      name: p.name,
+      description: p.description ?? "",
+      price: Number(p.base_price),
+      image: p.image_url || PLACEHOLDER,
+      category: p.category_id ?? "",
+      addons: sauces,
+    }));
+    const baseProducts = dbProducts.length > 0 ? dbProducts : [];
+    const comboFallback = baseProducts.some(
+      (product) => product.name.toLowerCase() === COMBO_FALLBACK.name.toLowerCase(),
+    )
+      ? []
+      : [{ ...COMBO_FALLBACK, category: comboCategoryId }];
+
+    return [...baseProducts, ...comboFallback];
+  }, [comboCategoryId, data]);
 
   const currentCat = active ?? "__all__";
 
@@ -108,7 +155,7 @@ export function Menu({ menuRef }: { menuRef: React.RefObject<HTMLDivElement | nu
                 <span>🍽️</span>
                 Todos
               </button>
-              {categories.map((c: any) => {
+              {categories.map((c) => {
                 const isActive = currentCat === c.id;
                 return (
                   <button
@@ -130,12 +177,16 @@ export function Menu({ menuRef }: { menuRef: React.RefObject<HTMLDivElement | nu
         )}
 
         {isLoading ? (
-          <p className="mt-5 py-10 text-center text-sm text-muted-foreground">Carregando cardápio...</p>
+          <p className="mt-5 py-10 text-center text-sm text-muted-foreground">
+            Carregando cardápio...
+          </p>
         ) : filtered.length === 0 ? (
-          <p className="mt-5 py-10 text-center text-sm text-muted-foreground">Nenhum produto encontrado.</p>
+          <p className="mt-5 py-10 text-center text-sm text-muted-foreground">
+            Nenhum produto encontrado.
+          </p>
         ) : currentCat === "__all__" ? (
           <div className="mt-5 space-y-8">
-            {categories.map((c: any) => {
+            {categories.map((c) => {
               const items = filtered.filter((p) => p.category === c.id);
               if (items.length === 0) return null;
               return (

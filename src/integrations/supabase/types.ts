@@ -110,6 +110,54 @@ export type Database = {
         }
         Relationships: []
       }
+      coupons: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          discount_type: Database["public"]["Enums"]["coupon_discount_type"]
+          discount_value: number
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          min_order_total: number
+          starts_at: string | null
+          updated_at: string
+          used_count: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          discount_type: Database["public"]["Enums"]["coupon_discount_type"]
+          discount_value: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_order_total?: number
+          starts_at?: string | null
+          updated_at?: string
+          used_count?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          discount_type?: Database["public"]["Enums"]["coupon_discount_type"]
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_order_total?: number
+          starts_at?: string | null
+          updated_at?: string
+          used_count?: number
+        }
+        Relationships: []
+      }
       finance_categories: {
         Row: {
           color: string
@@ -261,6 +309,8 @@ export type Database = {
       orders: {
         Row: {
           created_at: string
+          coupon_code: string | null
+          coupon_id: string | null
           customer_address: string | null
           customer_name: string
           customer_phone: string | null
@@ -270,6 +320,7 @@ export type Database = {
           notes: string | null
           paid_at: string | null
           payment_method_id: string | null
+          address_reference: string | null
           status: Database["public"]["Enums"]["order_status"]
           subtotal: number
           total: number
@@ -277,6 +328,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          coupon_code?: string | null
+          coupon_id?: string | null
           customer_address?: string | null
           customer_name: string
           customer_phone?: string | null
@@ -286,6 +339,7 @@ export type Database = {
           notes?: string | null
           paid_at?: string | null
           payment_method_id?: string | null
+          address_reference?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           subtotal?: number
           total?: number
@@ -293,6 +347,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          coupon_code?: string | null
+          coupon_id?: string | null
           customer_address?: string | null
           customer_name?: string
           customer_phone?: string | null
@@ -302,12 +358,20 @@ export type Database = {
           notes?: string | null
           paid_at?: string | null
           payment_method_id?: string | null
+          address_reference?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           subtotal?: number
           total?: number
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "orders_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "orders_payment_method_id_fkey"
             columns: ["payment_method_id"]
@@ -495,6 +559,7 @@ export type Database = {
     Enums: {
       app_role: "admin" | "user"
       audit_action: "INSERT" | "UPDATE" | "DELETE"
+      coupon_discount_type: "fixed" | "percent"
       finance_dre_group: "revenue" | "cost" | "expense"
       finance_kind: "revenue" | "expense"
       finance_status: "paid" | "pending"

@@ -4,7 +4,13 @@ import { formatBRL, useCart } from "@/store/cart";
 import type { Product } from "@/data/menu";
 import { toast } from "sonner";
 
-export function ProductModal({ product, onClose }: { product: Product | null; onClose: () => void }) {
+export function ProductModal({
+  product,
+  onClose,
+}: {
+  product: Product | null;
+  onClose: () => void;
+}) {
   const { add } = useCart();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [notes, setNotes] = useState("");
@@ -25,7 +31,11 @@ export function ProductModal({ product, onClose }: { product: Product | null; on
   const toggle = (name: string) =>
     setSelected((prev) => {
       const next = new Set(prev);
-      next.has(name) ? next.delete(name) : next.add(name);
+      if (next.has(name)) {
+        next.delete(name);
+      } else {
+        next.add(name);
+      }
       return next;
     });
 
@@ -47,12 +57,23 @@ export function ProductModal({ product, onClose }: { product: Product | null; on
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4 animate-in fade-in">
       <div className="relative flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl sm:rounded-3xl bg-background shadow-2xl animate-in slide-in-from-bottom">
-        <div className="relative h-56 w-full overflow-hidden bg-muted">
-          <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+        <div className="relative aspect-square max-h-[70vh] w-full shrink-0 overflow-hidden bg-muted">
+          <img
+            src={product.image}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 h-full w-full scale-110 object-cover opacity-45 blur-xl"
+          />
+          <div className="absolute inset-0 bg-black/5" />
+          <img
+            src={product.image}
+            alt={product.name}
+            className="relative z-10 h-full w-full object-cover"
+          />
           <button
             onClick={onClose}
             aria-label="Fechar"
-            className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-background/90 text-foreground hover:bg-background"
+            className="absolute right-3 top-3 z-20 grid h-9 w-9 place-items-center rounded-full bg-background/90 text-foreground hover:bg-background"
           >
             <X className="h-4 w-4" />
           </button>
@@ -79,7 +100,9 @@ export function ProductModal({ product, onClose }: { product: Product | null; on
                       }`}
                     >
                       <span className="font-medium">{a.name}</span>
-                      <span className="text-xs font-semibold text-brand">+{formatBRL(a.price)}</span>
+                      <span className="text-xs font-semibold text-brand">
+                        +{formatBRL(a.price)}
+                      </span>
                     </button>
                   );
                 })}

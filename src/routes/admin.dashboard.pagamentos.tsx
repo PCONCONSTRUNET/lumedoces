@@ -1,11 +1,270 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CreditCard } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Ban,
+  CalendarDays,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Clock3,
+  CreditCard,
+  Loader2,
+  ReceiptText,
+  RotateCcw,
+  type LucideIcon,
+} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
+import { formatBRL, formatDateBR } from "@/lib/finance-utils";
+import { formatOrderCode } from "@/lib/order-utils";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/dashboard/pagamentos")({
   component: PagamentosPage,
 });
 
+type FinanceTransaction = Tables<"finance_transactions">;
+type OrderRow = Tables<"orders">;
+type PaymentMethodRow = Tables<"payment_methods">;
+
+type PaymentRow = {
+  id: string;
+  orderId: string;
+  customerName: string;
+  amount: number;
+  status: PaymentStatus;
+  occurredAt: string;
+  paymentMethod: string;
+  source: "finance" | "order";
+};
+
+type PeriodFilter = "all" | "today" | "week" | "month";
+type StatusFilter = "all" | PaymentStatus;
+type PaymentStatus = "paid" | "pending" | "cancelled" | "refunded";
+
+const PERIOD_FILTERS: Array<{ key: PeriodFilter; label: string }> = [
+  { key: "all", label: "Todos" },
+  { key: "today", label: "Hoje" },
+  { key: "week", label: "Semana" },
+  { key: "month", label: "Mes" },
+];
+
+const STATUS_FILTERS: Array<{ key: StatusFilter; label: string; icon: LucideIcon }> = [
+  { key: "all", label: "Todos", icon: ReceiptText },
+  { key: "pending", label: "Pendente", icon: Clock3 },
+  { key: "paid", label: "Pago", icon: CheckCircle2 },
+  { key: "cancelled", label: "Cancelado", icon: Ban },
+  { key: "refunded", label: "Reembolsado", icon: RotateCcw },
+];
+
+function statusLabel(status: PaymentRow["status"]) {
+  if (status === "paid") return "Pago";
+  if (status === "cancelled") return "Cancelado";
+  if (status === "refunded") return "Reembolsado";
+  return "Pendente";
+}
+
+function statusIcon(status: PaymentStatus) {
+  if (status === "paid") return CheckCircle2;
+  if (status === "cancelled") return Ban;
+  if (status === "refunded") return RotateCcw;
+  return Clock3;
+}
+
+function formatDateTimeBR(value: string | null | undefined) {
+  if (!value) return "-";
+  return new Date(value).toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function statusClasses(status: PaymentStatus) {
+  if (status === "paid") return "bg-emerald-50 text-emerald-700 ring-emerald-100";
+  if (status === "cancelled") return "bg-rose-50 text-rose-700 ring-rose-100";
+  if (status === "refunded") return "bg-sky-50 text-sky-700 ring-sky-100";
+  return "bg-amber-50 text-amber-700 ring-amber-100";
+}
+
+function cardClasses(status: PaymentStatus) {
+  if (status === "paid") return "border-emerald-200 shadow-emerald-900/5 ring-emerald-100";
+  if (status === "cancelled") return "border-rose-200 shadow-rose-900/5 ring-rose-100";
+  if (status === "refunded") return "border-sky-200 shadow-sky-900/5 ring-sky-100";
+  return "border-amber-200 shadow-amber-900/5 ring-amber-100";
+}
+
+function sideBarClass(status: PaymentStatus) {
+  if (status === "paid") return "bg-emerald-500";
+  if (status === "cancelled") return "bg-rose-500";
+  if (status === "refunded") return "bg-sky-500";
+  return "bg-amber-500";
+}
+
+function paymentStatusFromOrder(order: OrderRow | undefined, fallback: "paid" | "pending") {
+  if (order?.status === "cancelled") return "cancelled";
+  return fallback;
+}
+
+function isWithinPeriod(value: string, period: PeriodFilter) {
+  if (period === "all") return true;
+
+  const date = new Date(value);
+  const now = new Date();
+  const start = new Date(now);
+  start.setHours(0, 0, 0, 0);
+
+  if (period === "today") return date >= start;
+
+  if (period === "week") {
+    start.setDate(start.getDate() - 6);
+    return date >= start;
+  }
+
+  start.setDate(1);
+  return date >= start;
+}
+
 function PagamentosPage() {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [transactions, setTransactions] = useState<FinanceTransaction[]>([]);
+  const [orders, setOrders] = useState<OrderRow[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethodRow[]>([]);
+  const [periodFilter, setPeriodFilter] = useState<PeriodFilter>("all");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [expandedPaymentId, setExpandedPaymentId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      setLoading(true);
+      setError(null);
+
+      const [txResult, ordersResult, methodsResult] = await Promise.all([
+        supabase
+          .from("finance_transactions")
+          .select("*")
+          .eq("kind", "revenue")
+          .not("order_id", "is", null)
+          .order("created_at", { ascending: false }),
+        supabase.from("orders").select("*").order("created_at", { ascending: false }),
+        supabase.from("payment_methods").select("*").order("sort_order", { ascending: true }),
+      ]);
+
+      if (cancelled) return;
+
+      if (txResult.error || ordersResult.error || methodsResult.error) {
+        setError("Nao foi possivel carregar os pagamentos.");
+        setLoading(false);
+        return;
+      }
+
+      setTransactions((txResult.data ?? []) as FinanceTransaction[]);
+      setOrders((ordersResult.data ?? []) as OrderRow[]);
+      setPaymentMethods((methodsResult.data ?? []) as PaymentMethodRow[]);
+      setLoading(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const paymentMethodNameById = useMemo(
+    () => new Map(paymentMethods.map((method) => [method.id, method.name])),
+    [paymentMethods],
+  );
+
+  const orderById = useMemo(() => new Map(orders.map((order) => [order.id, order])), [orders]);
+
+  const payments = useMemo(() => {
+    const rows: PaymentRow[] = transactions.map((transaction) => {
+      const order = transaction.order_id ? orderById.get(transaction.order_id) : undefined;
+      return {
+        id: transaction.id,
+        orderId: transaction.order_id ?? "",
+        customerName: order?.customer_name ?? transaction.description,
+        amount: transaction.amount,
+        status: paymentStatusFromOrder(order, transaction.status),
+        occurredAt: transaction.occurred_at,
+        paymentMethod: transaction.payment_method_id
+          ? (paymentMethodNameById.get(transaction.payment_method_id) ?? "Nao informado")
+          : "Nao informado",
+        source: "finance",
+      };
+    });
+
+    const transactionOrderIds = new Set(
+      transactions
+        .map((transaction) => transaction.order_id)
+        .filter((orderId): orderId is string => Boolean(orderId)),
+    );
+
+    for (const order of orders) {
+      if (transactionOrderIds.has(order.id)) continue;
+
+      rows.push({
+        id: `order-${order.id}`,
+        orderId: order.id,
+        customerName: order.customer_name,
+        amount: order.total,
+        status: paymentStatusFromOrder(order, order.status === "paid" ? "paid" : "pending"),
+        occurredAt: order.paid_at ?? order.created_at,
+        paymentMethod: order.payment_method_id
+          ? (paymentMethodNameById.get(order.payment_method_id) ?? "Nao informado")
+          : "Nao informado",
+        source: "order",
+      });
+    }
+
+    return rows.sort((a, b) => b.occurredAt.localeCompare(a.occurredAt));
+  }, [orderById, orders, paymentMethodNameById, transactions]);
+
+  const periodPayments = useMemo(
+    () => payments.filter((payment) => isWithinPeriod(payment.occurredAt, periodFilter)),
+    [payments, periodFilter],
+  );
+
+  const filteredPayments = useMemo(
+    () =>
+      periodPayments.filter((payment) =>
+        statusFilter === "all" ? true : payment.status === statusFilter,
+      ),
+    [periodPayments, statusFilter],
+  );
+
+  const countByStatus = useMemo(() => {
+    const counts = new Map<StatusFilter, number>([
+      ["all", periodPayments.length],
+      ["pending", 0],
+      ["paid", 0],
+      ["cancelled", 0],
+      ["refunded", 0],
+    ]);
+
+    periodPayments.forEach((payment) => {
+      counts.set(payment.status, (counts.get(payment.status) ?? 0) + 1);
+    });
+
+    return counts;
+  }, [periodPayments]);
+
+  const totals = useMemo(
+    () => ({
+      paid: periodPayments
+        .filter((payment) => payment.status === "paid")
+        .reduce((sum, payment) => sum + payment.amount, 0),
+      pending: periodPayments
+        .filter((payment) => payment.status === "pending")
+        .reduce((sum, payment) => sum + payment.amount, 0),
+    }),
+    [periodPayments],
+  );
+
   return (
     <div>
       <header className="mb-6 flex items-center gap-3">
@@ -14,17 +273,231 @@ function PagamentosPage() {
         </span>
         <div>
           <h1 className="font-display text-2xl text-foreground">Pagamentos</h1>
-          <p className="text-sm text-muted-foreground">
-            Histórico e status dos pagamentos.
-          </p>
+          <p className="text-sm text-muted-foreground">Historico e status dos pagamentos.</p>
         </div>
       </header>
 
-      <div className="rounded-2xl bg-card p-8 text-center shadow-sm ring-1 ring-border/60">
-        <p className="text-sm text-muted-foreground">
-          Em breve: integração e listagem dos pagamentos.
-        </p>
+      <div className="mb-4 grid gap-3 md:grid-cols-3">
+        <SummaryCard
+          icon={ReceiptText}
+          label="Pagamentos"
+          value={String(periodPayments.length)}
+          tone="bg-orange-50 text-brand ring-orange-100"
+        />
+        <SummaryCard
+          icon={CheckCircle2}
+          label="Recebido"
+          value={formatBRL(totals.paid)}
+          tone="bg-emerald-50 text-emerald-700 ring-emerald-100"
+        />
+        <SummaryCard
+          icon={Clock3}
+          label="Pendente"
+          value={formatBRL(totals.pending)}
+          tone="bg-amber-50 text-amber-700 ring-amber-100"
+        />
       </div>
+
+      <div className="mb-4 space-y-3 rounded-2xl border border-orange-100 bg-white p-3 shadow-sm ring-1 ring-orange-50">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-2 px-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+            <CalendarDays className="h-4 w-4" />
+            Periodo
+          </span>
+          {PERIOD_FILTERS.map((filter) => (
+            <button
+              key={filter.key}
+              type="button"
+              onClick={() => setPeriodFilter(filter.key)}
+              className={cn(
+                "rounded-full px-3 py-1.5 text-xs font-bold ring-1 transition",
+                periodFilter === filter.key
+                  ? "bg-brand text-brand-foreground ring-brand"
+                  : "bg-orange-50 text-brand ring-orange-100 hover:bg-orange-100",
+              )}
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-2 px-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+            <ReceiptText className="h-4 w-4" />
+            Status
+          </span>
+          {STATUS_FILTERS.map((filter) => {
+            const active = statusFilter === filter.key;
+            const Icon = filter.icon;
+            return (
+              <button
+                key={filter.key}
+                type="button"
+                onClick={() => setStatusFilter(filter.key)}
+                className={cn(
+                  "inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold ring-1 transition",
+                  active
+                    ? "bg-brand text-brand-foreground ring-brand"
+                    : "bg-white text-foreground ring-orange-100 hover:bg-orange-50",
+                )}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {filter.label}
+                <span
+                  className={cn(
+                    "rounded-full px-1.5 py-0.5 text-[10px]",
+                    active ? "bg-white/20" : "bg-orange-50 text-brand",
+                  )}
+                >
+                  {countByStatus.get(filter.key) ?? 0}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="grid place-items-center rounded-2xl bg-card p-10 shadow-sm ring-1 ring-border/60">
+          <Loader2 className="h-5 w-5 animate-spin text-brand" />
+        </div>
+      ) : error ? (
+        <div className="rounded-2xl bg-card p-8 text-center shadow-sm ring-1 ring-border/60">
+          <p className="text-sm text-rose-600">{error}</p>
+        </div>
+      ) : filteredPayments.length === 0 ? (
+        <div className="rounded-2xl bg-card p-8 text-center shadow-sm ring-1 ring-border/60">
+          <p className="text-sm text-muted-foreground">
+            Nenhum pagamento encontrado para este filtro.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filteredPayments.map((payment) => (
+            <PaymentCard
+              key={payment.id}
+              payment={payment}
+              expanded={expandedPaymentId === payment.id}
+              onToggle={() =>
+                setExpandedPaymentId(expandedPaymentId === payment.id ? null : payment.id)
+              }
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PaymentCard({
+  payment,
+  expanded,
+  onToggle,
+}: {
+  payment: PaymentRow;
+  expanded: boolean;
+  onToggle: () => void;
+}) {
+  const StatusIcon = statusIcon(payment.status);
+
+  return (
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-2xl border-2 bg-gradient-to-r from-orange-50 via-white to-white p-4 shadow-md ring-1 transition",
+        cardClasses(payment.status),
+      )}
+    >
+      <span
+        aria-hidden
+        className={cn("absolute inset-y-0 left-0 w-1.5", sideBarClass(payment.status))}
+      />
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full flex-wrap items-center justify-between gap-3 rounded-xl bg-white/75 px-3 py-2 text-left ring-1 ring-white/90"
+      >
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-sm font-bold text-foreground">{payment.customerName}</h3>
+            <span
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-bold ring-1",
+                statusClasses(payment.status),
+              )}
+            >
+              <StatusIcon className="h-3.5 w-3.5" />
+              {statusLabel(payment.status)}
+            </span>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Pedido {formatOrderCode(payment.orderId)} | {formatDateBR(payment.occurredAt)} |{" "}
+            {payment.paymentMethod}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3 text-right">
+          <div>
+            <p className="text-lg font-extrabold text-brand">{formatBRL(payment.amount)}</p>
+            {payment.source === "order" && (
+              <p className="text-xs text-amber-700">Aguardando sync financeiro</p>
+            )}
+          </div>
+          {expanded ? (
+            <ChevronUp className="h-4 w-4 text-muted-foreground" />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          )}
+        </div>
+      </button>
+
+      {expanded && (
+        <div className="mt-3 grid gap-2 rounded-xl border border-orange-100 bg-white/90 p-3 text-sm shadow-inner shadow-brand/5 sm:grid-cols-2">
+          <p>
+            <span className="font-semibold">Status:</span> {statusLabel(payment.status)}
+          </p>
+          <p>
+            <span className="font-semibold">Valor:</span> {formatBRL(payment.amount)}
+          </p>
+          <p>
+            <span className="font-semibold">Data e horario:</span>{" "}
+            {formatDateTimeBR(payment.occurredAt)}
+          </p>
+          <p>
+            <span className="font-semibold">Metodo:</span> {payment.paymentMethod}
+          </p>
+          <p>
+            <span className="font-semibold">Pedido:</span> {formatOrderCode(payment.orderId)}
+          </p>
+          <p>
+            <span className="font-semibold">Origem:</span>{" "}
+            {payment.source === "finance" ? "Financeiro" : "Pedido"}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SummaryCard({
+  icon: Icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: typeof CreditCard;
+  label: string;
+  value: string;
+  tone: string;
+}) {
+  return (
+    <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-border/60">
+      <div className="flex items-center justify-between gap-3">
+        <span className={cn("grid h-10 w-10 place-items-center rounded-full ring-1", tone)}>
+          <Icon className="h-5 w-5" />
+        </span>
+        <p className="text-right text-xl font-extrabold text-foreground">{value}</p>
+      </div>
+      <p className="mt-3 text-sm font-semibold text-muted-foreground">{label}</p>
     </div>
   );
 }
