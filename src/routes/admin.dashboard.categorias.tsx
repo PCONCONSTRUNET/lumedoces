@@ -1,8 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Tags, Plus, Trash2, Loader2, Save } from "lucide-react";
+import { Tags, Plus, Trash2, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/admin/dashboard/categorias")({
   component: CategoriasPage,
@@ -17,6 +24,7 @@ type Category = {
 
 function CategoriasPage() {
   const [rows, setRows] = useState<Category[] | null>(null);
+  const [open, setOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -55,6 +63,7 @@ function CategoriasPage() {
       return;
     }
     setNewName("");
+    setOpen(false);
     toast.success("Categoria criada");
     load();
   };
@@ -88,33 +97,17 @@ function CategoriasPage() {
         <span className="grid h-10 w-10 place-items-center rounded-full bg-brand/10 text-brand">
           <Tags className="h-5 w-5" />
         </span>
-        <div>
+        <div className="flex-1">
           <h1 className="font-display text-2xl text-foreground">Categorias</h1>
           <p className="text-sm text-muted-foreground">Organize seus produtos por categoria.</p>
         </div>
-      </header>
-
-      <form
-        onSubmit={onCreate}
-        className="mb-6 flex gap-2 rounded-2xl bg-card p-3 shadow-sm ring-1 ring-border/60"
-      >
-        <input
-          type="text"
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          maxLength={80}
-          placeholder="Nova categoria (ex: Salgados, Bebidas, Doces)"
-          className="flex-1 rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40"
-        />
         <button
-          type="submit"
-          disabled={saving || !newName.trim()}
-          className="inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-bold text-brand-foreground shadow-md hover:opacity-95 disabled:opacity-50 transition"
+          onClick={() => setOpen(true)}
+          className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2.5 text-sm font-bold text-brand-foreground shadow-md hover:opacity-95 transition"
         >
-          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-          Adicionar
+          <Plus className="h-4 w-4" /> Nova categoria
         </button>
-      </form>
+      </header>
 
       <div className="rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border/60">
         {!rows ? (
@@ -123,7 +116,7 @@ function CategoriasPage() {
           </div>
         ) : rows.length === 0 ? (
           <p className="text-center text-sm text-muted-foreground py-8">
-            Nenhuma categoria. Crie a primeira acima.
+            Nenhuma categoria. Clique em "Nova categoria" para criar.
           </p>
         ) : (
           <ul className="divide-y divide-border/60">
@@ -155,6 +148,46 @@ function CategoriasPage() {
           </ul>
         )}
       </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Nova categoria</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={onCreate} className="space-y-4">
+            <label className="block">
+              <span className="mb-1 block text-xs font-semibold text-foreground/80">
+                Nome
+              </span>
+              <input
+                autoFocus
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                maxLength={80}
+                placeholder="Ex: Salgados, Bebidas, Doces"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40"
+              />
+            </label>
+            <DialogFooter>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="inline-flex items-center gap-2 rounded-full bg-muted px-4 py-2.5 text-sm font-bold hover:bg-muted/70 transition"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={saving || !newName.trim()}
+                className="inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-bold text-brand-foreground shadow-md hover:opacity-95 disabled:opacity-50 transition"
+              >
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                Criar
+              </button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
