@@ -443,7 +443,7 @@ function NovoProdutoDialog({
                         {v.options.map((o, oi) => (
                           <div
                             key={oi}
-                            className="grid grid-cols-[1fr_110px_auto] gap-2 items-center"
+                            className="grid grid-cols-[1fr_130px_auto] gap-2 items-center"
                           >
                             <input
                               value={o.name}
@@ -455,7 +455,7 @@ function NovoProdutoDialog({
                               className="ipt"
                             />
                             <div className="relative">
-                              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                              <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground">
                                 +R$
                               </span>
                               <input
@@ -464,7 +464,7 @@ function NovoProdutoDialog({
                                   updateOption(vi, oi, { additional_price: e.target.value })
                                 }
                                 inputMode="decimal"
-                                className="ipt pl-11"
+                                className="ipt pl-12 text-right"
                                 placeholder="0,00"
                               />
                             </div>
