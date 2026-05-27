@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { Lock, Mail, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import adminBg from "@/assets/admin-bg.png";
-import coxinhaIcon from "@/assets/coxinha-icon.png";
 import { toast, Toaster } from "sonner";
 
 export const Route = createFileRoute("/admin/")({
@@ -85,11 +84,7 @@ function AdminLogin() {
       <div className="w-full max-w-sm rounded-3xl bg-card/95 backdrop-blur p-8 shadow-2xl ring-1 ring-white/40">
 
         <div className="text-center">
-          <div className="mx-auto grid place-items-center">
-            <img src={coxinhaIcon} alt="Coxinha" className="h-40 w-40 object-contain drop-shadow-xl" />
-          </div>
-
-          <h1 className="mt-4 font-display text-3xl text-brand">ADMIN</h1>
+          <h1 className="font-display text-3xl text-brand">ADMIN</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Acesso restrito — Mini Coxinhas
           </p>
