@@ -29,9 +29,9 @@ export function Hero({ onOrder }: { onOrder: () => void }) {
           <img
             src={logo}
             alt=""
-            className="mb-4 h-40 sm:h-48 w-auto object-contain drop-shadow-2xl"
-            width={384}
-            height={192}
+            className="mb-4 h-32 sm:h-40 w-auto object-contain drop-shadow-2xl"
+            width={320}
+            height={160}
           />
           <h1 className="font-display text-5xl sm:text-6xl text-white drop-shadow-lg">
             MINI <span className="text-highlight">COXINHAS</span>
