@@ -18,7 +18,7 @@ export function Header() {
   }, [dark]);
 
   return (
-    <header className="sticky top-0 z-40 backdrop-blur bg-cream/85 border-b border-border">
+    <header className="sticky top-0 z-40 bg-cream border-b border-border">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
         <Link to="/" className="flex items-center gap-2">
           <img src={logo} alt="Mini Coxinhas" className="h-12 sm:h-14 w-auto object-contain" width={168} height={56} />
@@ -60,7 +60,7 @@ export function Header() {
             className="absolute inset-0 bg-black/40"
             onClick={() => setNavOpen(false)}
           />
-          <aside className="absolute right-0 top-0 h-full w-[85%] max-w-sm shadow-2xl flex flex-col bg-background" style={{ backgroundColor: "#fbf7ec" }}>
+          <aside className="absolute right-0 top-0 h-full w-[85%] max-w-sm bg-card shadow-2xl flex flex-col">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
               <img src={logo} alt="Mini Coxinhas" className="h-14 w-auto object-contain" />
               <button
