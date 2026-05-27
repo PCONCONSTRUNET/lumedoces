@@ -12,7 +12,6 @@ export function Header() {
   const { count, setOpen } = useCart();
   const [dark, setDark] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
-  const status = useBusinessStatus();
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
