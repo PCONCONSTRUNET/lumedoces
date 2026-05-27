@@ -150,7 +150,7 @@ function CategoriasPage() {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="w-[calc(100vw-2rem)] sm:max-w-md p-4 sm:p-6 rounded-lg">
           <DialogHeader>
             <DialogTitle>Nova categoria</DialogTitle>
           </DialogHeader>
