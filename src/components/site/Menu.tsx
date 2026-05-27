@@ -6,7 +6,7 @@ import { ProductModal } from "./ProductModal";
 import { formatBRL, useCart } from "@/store/cart";
 
 export function Menu({ menuRef }: { menuRef: React.RefObject<HTMLDivElement | null> }) {
-  const [active, setActive] = useState<(typeof categories)[number]["id"]>("lanches");
+  const [active, setActive] = useState<(typeof categories)[number]["id"]>("salgados");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Product | null>(null);
   const { count, total, setOpen } = useCart();
