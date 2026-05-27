@@ -6,6 +6,7 @@ import { PixIcon } from "@/components/PaymentLabel";
 import { useBusinessStatus } from "@/hooks/useBusinessStatus";
 
 export function Hero({ onOrder }: { onOrder: () => void }) {
+  const status = useBusinessStatus();
   return (
     <section id="top" className="relative overflow-hidden">
       <div className="relative h-[78vh] min-h-[560px] w-full">
