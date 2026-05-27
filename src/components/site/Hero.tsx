@@ -3,6 +3,7 @@ import hero from "@/assets/hero-bg.jpg";
 import logo from "@/assets/logo.png";
 import mascot from "@/assets/mascot.png";
 import { PixIcon } from "@/components/PaymentLabel";
+import { useBusinessStatus } from "@/hooks/useBusinessStatus";
 
 export function Hero({ onOrder }: { onOrder: () => void }) {
   return (
