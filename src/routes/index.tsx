@@ -3,6 +3,7 @@ import { useRef } from "react";
 import { Header } from "@/components/site/Header";
 import { Hero } from "@/components/site/Hero";
 import { MascotStrip } from "@/components/site/MascotStrip";
+import { ExperimenteBanner } from "@/components/site/ExperimenteBanner";
 import { Menu } from "@/components/site/Menu";
 import { CartDrawer } from "@/components/site/CartDrawer";
 import { CartProvider } from "@/store/cart";
@@ -39,6 +40,7 @@ function Index() {
         <main>
           <Hero onOrder={scrollToMenu} />
           <MascotStrip />
+          <ExperimenteBanner />
           <Menu menuRef={menuRef} />
         </main>
         <CartDrawer />
