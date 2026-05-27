@@ -130,7 +130,7 @@ export function CartDrawer() {
             <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Forma de pagamento</h3>
             <div className="mt-2 grid grid-cols-3 gap-2">
               {([
-                { id: "pix", label: "PIX", emoji: "📱" },
+                { id: "pix", label: "PIX", emoji: "pix" },
                 { id: "cartao", label: "Cartão", emoji: "💳" },
                 { id: "dinheiro", label: "Dinheiro", emoji: "💵" },
               ] as const).map((p) => {
@@ -143,7 +143,11 @@ export function CartDrawer() {
                       active ? "border-brand bg-brand/10 ring-2 ring-brand/40" : "border-border bg-card hover:border-brand/50"
                     }`}
                   >
-                    <span className="text-xl">{p.emoji}</span>
+                    {p.emoji === "pix" ? (
+                      <PixIcon className="h-6 w-6" />
+                    ) : (
+                      <span className="text-xl">{p.emoji}</span>
+                    )}
                     <span className="font-semibold">{p.label}</span>
                   </button>
                 );
