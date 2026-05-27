@@ -122,7 +122,7 @@ export function Header() {
                 rel="noreferrer"
                 className="flex items-center justify-center gap-2 w-full rounded-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 shadow-md transition"
               >
-                <MessageCircle className="h-5 w-5" />
+                <WhatsAppIcon className="h-5 w-5" />
                 Chamar no WhatsApp
               </a>
             </div>
