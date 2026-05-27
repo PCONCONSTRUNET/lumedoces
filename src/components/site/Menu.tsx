@@ -1,31 +1,77 @@
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Search, Star, ShoppingCart } from "lucide-react";
-import { categories, products, type Product } from "@/data/menu";
 import { ProductCard } from "./ProductCard";
 import { ProductModal } from "./ProductModal";
 import { formatBRL, useCart } from "@/store/cart";
+import { supabase } from "@/integrations/supabase/client";
+import type { Product, Addon } from "@/data/menu";
+
+const sauces: Addon[] = [
+  { name: "Maionese da Casa", price: 3 },
+  { name: "Molho Cheddar", price: 5 },
+  { name: "Molho Barbecue", price: 4 },
+  { name: "Molho Picante", price: 4 },
+  { name: "Catupiry Extra", price: 5 },
+  { name: "Ketchup", price: 2 },
+];
+
+const PLACEHOLDER = "/products/placeholder.png";
+
+function emojiFor(name: string): string {
+  const n = name.toLowerCase();
+  if (n.includes("coxinha")) return "🍗";
+  if (n.includes("pastel") || n.includes("pasteis")) return "🥟";
+  if (n.includes("porç") || n.includes("batata") || n.includes("salsicha") || n.includes("bolinho")) return "🍟";
+  if (n.includes("combo")) return "🎉";
+  if (n.includes("doce") || n.includes("brigad")) return "🍫";
+  if (n.includes("bebida") || n.includes("refri") || n.includes("suco")) return "🥤";
+  return "✨";
+}
 
 export function Menu({ menuRef }: { menuRef: React.RefObject<HTMLDivElement | null> }) {
-  const [active, setActive] = useState<(typeof categories)[number]["id"]>("salgados");
+  const [active, setActive] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Product | null>(null);
   const { count, total, setOpen } = useCart();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["menu-data"],
+    queryFn: async () => {
+      const [cats, prods] = await Promise.all([
+        supabase.from("categories").select("*").eq("is_active", true).order("sort_order"),
+        supabase.from("products").select("*").eq("is_active", true).order("sort_order"),
+      ]);
+      if (cats.error) throw cats.error;
+      if (prods.error) throw prods.error;
+      return { categories: cats.data ?? [], products: prods.data ?? [] };
+    },
+  });
+
+  const categories = data?.categories ?? [];
+  const products: Product[] = useMemo(
+    () =>
+      (data?.products ?? []).map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        description: p.description ?? "",
+        price: Number(p.base_price),
+        image: p.image_url || PLACEHOLDER,
+        category: p.category_id,
+        addons: sauces,
+      })),
+    [data],
+  );
+
+  const currentCat = active ?? categories[0]?.id ?? null;
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return products.filter((p) => {
       if (q && !`${p.name} ${p.description}`.toLowerCase().includes(q)) return false;
-      return p.category === active;
+      return p.category === currentCat;
     });
-  }, [active, query]);
-
-  const featured = useMemo(
-    () =>
-      products.filter(
-        (p) => p.featured && (!query || `${p.name} ${p.description}`.toLowerCase().includes(query.toLowerCase())),
-      ),
-    [query],
-  );
+  }, [products, currentCat, query]);
 
   return (
     <section ref={menuRef} className="relative bg-cream pb-32 pt-10">
@@ -47,46 +93,36 @@ export function Menu({ menuRef }: { menuRef: React.RefObject<HTMLDivElement | nu
           />
         </div>
 
-        {featured.length > 0 && (
-          <div className="mt-8">
-            <h3 className="flex items-center gap-2 font-hand text-xl font-bold uppercase tracking-wide">
-              <span className="grid h-7 w-7 place-items-center rounded-full bg-highlight text-highlight-foreground">
-                <Star className="h-4 w-4 fill-current" />
-              </span>
-              Destaques
-            </h3>
-            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-              {featured.map((p) => (
-                <ProductCard key={p.id} product={p} onClick={() => setSelected(p)} />
-              ))}
+        {categories.length > 0 && (
+          <div className="sticky top-[68px] z-30 -mx-4 mt-8 bg-cream/90 px-4 py-3 backdrop-blur">
+            <div className="no-scrollbar flex gap-2 overflow-x-auto rounded-full bg-card p-1.5 shadow-sm ring-1 ring-border/60">
+              {categories.map((c: any) => {
+                const isActive = currentCat === c.id;
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => setActive(c.id)}
+                    className={`flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition ${
+                      isActive
+                        ? "bg-brand text-brand-foreground shadow"
+                        : "text-foreground/70 hover:bg-muted"
+                    }`}
+                  >
+                    <span>{emojiFor(c.name)}</span>
+                    {c.name}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
 
-        <div className="sticky top-[68px] z-30 -mx-4 mt-8 bg-cream/90 px-4 py-3 backdrop-blur">
-          <div className="no-scrollbar flex gap-2 overflow-x-auto rounded-full bg-card p-1.5 shadow-sm ring-1 ring-border/60">
-            {categories.map((c) => {
-              const isActive = active === c.id;
-              return (
-                <button
-                  key={c.id}
-                  onClick={() => setActive(c.id)}
-                  className={`flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition ${
-                    isActive
-                      ? "bg-brand text-brand-foreground shadow"
-                      : "text-foreground/70 hover:bg-muted"
-                  }`}
-                >
-                  <span>{c.emoji}</span>
-                  {c.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
         <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {filtered.length === 0 ? (
+          {isLoading ? (
+            <p className="col-span-full py-10 text-center text-sm text-muted-foreground">
+              Carregando cardápio...
+            </p>
+          ) : filtered.length === 0 ? (
             <p className="col-span-full py-10 text-center text-sm text-muted-foreground">
               Nenhum produto encontrado.
             </p>

@@ -11,7 +11,7 @@ export type Product = {
   description: string;
   price: number;
   image: string;
-  category: "salgados" | "combos" | "doces" | "bebidas";
+  category: string;
   featured?: boolean;
   addons?: Addon[];
 };
