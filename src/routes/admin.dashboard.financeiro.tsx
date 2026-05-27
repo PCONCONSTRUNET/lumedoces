@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { PaymentLabel } from "@/components/PaymentLabel";
 import {
   Wallet,
   Plus,
@@ -491,7 +492,7 @@ function FinanceiroPage() {
                       </div>
                     </td>
                     <td>{categories.find((c) => c.id === t.category_id)?.name ?? "—"}</td>
-                    <td>{methods.find((m) => m.id === t.payment_method_id)?.name ?? "—"}</td>
+                    <td><PaymentLabel name={methods.find((m) => m.id === t.payment_method_id)?.name} /></td>
                     <td>
                       <span
                         className={

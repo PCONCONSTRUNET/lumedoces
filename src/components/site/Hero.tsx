@@ -2,6 +2,7 @@ import { MapPin, CreditCard } from "lucide-react";
 import hero from "@/assets/hero-bg.jpg";
 import logo from "@/assets/logo.png";
 import mascot from "@/assets/mascot.png";
+import { PixIcon } from "@/components/PaymentLabel";
 
 export function Hero({ onOrder }: { onOrder: () => void }) {
   return (
@@ -55,6 +56,7 @@ export function Hero({ onOrder }: { onOrder: () => void }) {
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-black/40 backdrop-blur px-3 py-1.5 text-xs text-white border border-white/15">
               <CreditCard className="h-3.5 w-3.5" />
+              <PixIcon className="h-3.5 w-3.5" />
               Pix, Cartão, Dinheiro
             </span>
           </div>
