@@ -36,51 +36,53 @@ export function CartDrawer() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/50 animate-in fade-in">
-      <div className="flex h-full w-full max-w-md flex-col bg-background shadow-2xl animate-in slide-in-from-right">
-        <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <h2 className="flex items-center gap-2 font-hand text-xl font-bold">
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/50 animate-in fade-in sm:items-stretch">
+      <div className="flex h-[100dvh] w-full max-w-md flex-col bg-background shadow-2xl animate-in slide-in-from-right sm:h-full">
+        {/* Header (sticky) */}
+        <div className="flex shrink-0 items-center justify-between border-b border-border bg-background px-4 py-3 pt-[max(env(safe-area-inset-top),0.75rem)]">
+          <h2 className="flex items-center gap-2 font-hand text-lg font-bold sm:text-xl">
             <ShoppingBag className="h-5 w-5 text-brand" /> SEU PEDIDO
           </h2>
           <button
             onClick={() => setOpen(false)}
-            className="grid h-9 w-9 place-items-center rounded-full bg-muted hover:bg-muted/70"
+            className="grid h-10 w-10 place-items-center rounded-full bg-muted hover:bg-muted/70"
             aria-label="Fechar"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-4">
+        {/* Scroll area */}
+        <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-3">
           {items.length === 0 ? (
-            <div className="mt-8 flex flex-col items-center text-center">
-              <img src={mascot} alt="" className="h-40 w-auto animate-mascot-wave drop-shadow-lg" />
+            <div className="mt-6 flex flex-col items-center text-center">
+              <img src={mascot} alt="" className="h-32 w-auto animate-mascot-wave drop-shadow-lg sm:h-40" />
               <p className="mt-3 font-hand text-lg font-bold text-foreground">Seu carrinho tá vazio!</p>
               <p className="mt-1 text-sm text-muted-foreground">Escolhe umas coxinhas pra mim preparar 🧡</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {items.map((it) => (
-                <div key={it.uid} className="rounded-2xl border border-border bg-card p-3">
-                  <div className="flex items-start gap-3">
+                <div key={it.uid} className="rounded-2xl border border-border bg-card p-2.5">
+                  <div className="flex items-start gap-2.5">
                     <img
                       src={it.image}
                       alt={it.name}
-                      className="h-16 w-16 shrink-0 rounded-xl object-cover ring-1 ring-border/60"
+                      className="h-14 w-14 shrink-0 rounded-xl object-cover ring-1 ring-border/60"
                       loading="lazy"
                     />
-                    <div className="flex-1">
-                      <h3 className="font-hand text-base font-bold leading-tight">{it.name}</h3>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-hand text-[15px] font-bold leading-tight">{it.name}</h3>
                       {it.addons.length > 0 && (
-                        <p className="mt-0.5 text-[11px] text-muted-foreground">
+                        <p className="mt-0.5 line-clamp-2 text-[11px] text-muted-foreground">
                           + {it.addons.map((a) => a.name).join(", ")}
                         </p>
                       )}
-                      {it.notes && <p className="mt-0.5 text-[11px] italic text-muted-foreground">"{it.notes}"</p>}
+                      {it.notes && <p className="mt-0.5 line-clamp-2 text-[11px] italic text-muted-foreground">"{it.notes}"</p>}
                     </div>
                     <button
                       onClick={() => remove(it.uid)}
-                      className="grid h-8 w-8 place-items-center rounded-full text-destructive hover:bg-destructive/10"
+                      className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-destructive hover:bg-destructive/10"
                       aria-label="Remover"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -88,22 +90,24 @@ export function CartDrawer() {
                   </div>
 
                   <div className="mt-2 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       <button
                         onClick={() => setQty(it.uid, it.quantity - 1)}
-                        className="grid h-8 w-8 place-items-center rounded-full bg-muted hover:bg-muted/70"
+                        className="grid h-9 w-9 place-items-center rounded-full bg-muted hover:bg-muted/70 active:scale-95"
+                        aria-label="Diminuir"
                       >
                         <Minus className="h-3.5 w-3.5" />
                       </button>
-                      <span className="w-6 text-center text-sm font-bold">{it.quantity}</span>
+                      <span className="w-6 text-center text-sm font-bold tabular-nums">{it.quantity}</span>
                       <button
                         onClick={() => setQty(it.uid, it.quantity + 1)}
-                        className="grid h-8 w-8 place-items-center rounded-full bg-brand text-brand-foreground hover:opacity-90"
+                        className="grid h-9 w-9 place-items-center rounded-full bg-brand text-brand-foreground hover:opacity-90 active:scale-95"
+                        aria-label="Aumentar"
                       >
                         <Plus className="h-3.5 w-3.5" />
                       </button>
                     </div>
-                    <span className="font-extrabold text-brand">{formatBRL(it.unitPrice * it.quantity)}</span>
+                    <span className="font-extrabold text-brand tabular-nums">{formatBRL(it.unitPrice * it.quantity)}</span>
                   </div>
                 </div>
               ))}
@@ -117,13 +121,16 @@ export function CartDrawer() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Seu nome *"
-                className="w-full rounded-xl border border-border bg-muted/50 px-3 py-3 text-sm placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40"
+                autoComplete="name"
+                className="w-full rounded-xl border border-border bg-muted/50 px-3 py-3 text-base placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40 sm:text-sm"
               />
               <input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="Telefone (XX) XXXXX-XXXX *"
-                className="w-full rounded-xl border border-border bg-muted/50 px-3 py-3 text-sm placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40"
+                inputMode="tel"
+                autoComplete="tel"
+                className="w-full rounded-xl border border-border bg-muted/50 px-3 py-3 text-base placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40 sm:text-sm"
               />
             </div>
           </div>
@@ -141,7 +148,7 @@ export function CartDrawer() {
                   <button
                     key={p.id}
                     onClick={() => setPay(p.id)}
-                    className={`flex flex-col items-center gap-1 rounded-xl border px-2 py-3 text-xs transition ${
+                    className={`flex flex-col items-center gap-1 rounded-xl border px-2 py-2.5 text-xs transition ${
                       active ? "border-brand bg-brand/10 ring-2 ring-brand/40" : "border-border bg-card hover:border-brand/50"
                     }`}
                   >
@@ -162,12 +169,12 @@ export function CartDrawer() {
             onChange={(e) => setObs(e.target.value)}
             placeholder="Observações do pedido (opcional)"
             rows={2}
-            className="mt-3 w-full resize-none rounded-xl border border-border bg-muted/50 px-3 py-2.5 text-sm placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40"
+            className="mt-3 w-full resize-none rounded-xl border border-border bg-muted/50 px-3 py-2.5 text-base placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40 sm:text-sm"
           />
 
           {!isOpenStore && (
-            <div className="mt-4 flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-3">
-              <Clock className="mt-0.5 h-4 w-4 text-destructive" />
+            <div className="mt-4 flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-2.5">
+              <Clock className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
               <div>
                 <p className="text-sm font-bold text-destructive">Estamos fechados</p>
                 <p className="text-xs text-destructive/80">Abrimos às 18:00</p>
@@ -176,15 +183,16 @@ export function CartDrawer() {
           )}
         </div>
 
-        <div className="border-t border-border bg-background px-4 py-3">
+        {/* Footer (sticky) */}
+        <div className="shrink-0 border-t border-border bg-background px-4 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] shadow-[0_-8px_20px_-12px_rgba(0,0,0,0.15)]">
           <div className="flex items-center justify-between">
-            <span className="font-hand text-xl font-bold">TOTAL</span>
-            <span className="text-xl font-extrabold text-brand">{formatBRL(total)}</span>
+            <span className="font-hand text-lg font-bold sm:text-xl">TOTAL</span>
+            <span className="text-xl font-extrabold text-brand tabular-nums">{formatBRL(total)}</span>
           </div>
           <button
             onClick={handleCheckout}
             disabled={!isOpenStore}
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-muted py-3.5 font-bold text-muted-foreground disabled:opacity-100 enabled:bg-highlight enabled:text-highlight-foreground enabled:hover:opacity-95 transition"
+            className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-full bg-muted py-3.5 text-[15px] font-bold text-muted-foreground transition disabled:opacity-100 enabled:bg-highlight enabled:text-highlight-foreground enabled:hover:opacity-95 enabled:active:scale-[0.99]"
           >
             <WhatsAppIcon className="h-4 w-4" />
             {isOpenStore ? "Enviar pedido" : "Pedidos fechados"}
@@ -194,3 +202,4 @@ export function CartDrawer() {
     </div>
   );
 }
+
