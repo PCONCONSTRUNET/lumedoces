@@ -1,8 +1,8 @@
-import heroBurger from "@/assets/hero-burger.jpg";
-import fries from "@/assets/fries.jpg";
-import maxCheddar from "@/assets/max-cheddar.jpg";
-import maxCheddarTriplo from "@/assets/max-cheddar-triplo.jpg";
-import combo from "@/assets/combo.jpg";
+import heroCoxinha from "@/assets/hero-coxinha.jpg";
+import coxinhaFrango from "@/assets/coxinha-frango.jpg";
+import coxinhaCatupiry from "@/assets/coxinha-catupiry.jpg";
+import coxinhaCheddar from "@/assets/coxinha-cheddar.jpg";
+import coxinhaCombo from "@/assets/coxinha-combo.jpg";
 
 export type Addon = { name: string; price: number };
 export type Product = {
@@ -11,94 +11,99 @@ export type Product = {
   description: string;
   price: number;
   image: string;
-  category: "lanches" | "porcoes" | "combos" | "tabuas";
+  category: "salgados" | "combos" | "doces" | "bebidas";
   featured?: boolean;
   addons?: Addon[];
 };
 
-const burgerAddons: Addon[] = [
-  { name: "Bacon", price: 7 },
-  { name: "Calabresa", price: 7 },
-  { name: "Carne", price: 7 },
-  { name: "Cebola", price: 2 },
-  { name: "Cheddar", price: 3 },
-  { name: "Coração", price: 7 },
-  { name: "Coxinha da Asa", price: 7 },
-  { name: "Ovo", price: 3 },
-  { name: "Queijo", price: 3 },
+const sauces: Addon[] = [
+  { name: "Maionese da Casa", price: 3 },
+  { name: "Molho Cheddar", price: 5 },
+  { name: "Molho Barbecue", price: 4 },
+  { name: "Molho Picante", price: 4 },
+  { name: "Catupiry Extra", price: 5 },
+  { name: "Ketchup", price: 2 },
 ];
 
 export const products: Product[] = [
   {
-    id: "batata-frita-1kg",
-    name: "Batata Frita (1kg)",
-    description: "Mega porção de batatas fritas para compartilhar",
+    id: "coxinha-frango-50",
+    name: "Mini Coxinhas Frango (50un)",
+    description: "Cinquenta mini coxinhas de frango desfiado temperado",
     price: 48,
-    image: fries,
-    category: "porcoes",
+    image: coxinhaFrango,
+    category: "salgados",
     featured: true,
-    addons: burgerAddons,
+    addons: sauces,
   },
   {
-    id: "max-cheddar-triplo",
-    name: "Max Cheddar Triplo",
-    description: "Triplo hambúrguer com muito cheddar cremoso e cebola caramelizada",
-    price: 30,
-    image: maxCheddarTriplo,
-    category: "lanches",
+    id: "coxinha-catupiry-50",
+    name: "Frango c/ Catupiry (50un)",
+    description: "Mini coxinhas recheadas com frango e catupiry cremoso",
+    price: 55,
+    image: coxinhaCatupiry,
+    category: "salgados",
     featured: true,
-    addons: burgerAddons,
+    addons: sauces,
   },
   {
-    id: "max-cheddar",
-    name: "Max Cheddar",
-    description: "Hambúrguer artesanal com cheddar cremoso e cebola caramelizada",
-    price: 25,
-    image: maxCheddar,
-    category: "lanches",
-    addons: burgerAddons,
+    id: "coxinha-cheddar-50",
+    name: "Cheddar Bacon (50un)",
+    description: "Mini coxinhas recheadas com cheddar e bacon crocante",
+    price: 58,
+    image: coxinhaCheddar,
+    category: "salgados",
+    addons: sauces,
   },
   {
-    id: "combo-classico",
-    name: "Combo Clássico",
-    description: "Burger artesanal, queijo, presunto, bacon + batata + refri",
-    price: 50,
-    image: combo,
+    id: "combo-festa",
+    name: "Combo Festa (100un)",
+    description: "100 mini coxinhas mistas + 4 molhos da casa",
+    price: 110,
+    image: coxinhaCombo,
     category: "combos",
     featured: true,
-    addons: burgerAddons,
+    addons: sauces,
   },
   {
-    id: "demarch-especial",
-    name: "Demarch Especial",
-    description: "O lanche da casa: pão brioche, blend 180g, bacon e cheddar duplo",
+    id: "combo-trio",
+    name: "Trio Sabores (75un)",
+    description: "25 frango + 25 catupiry + 25 cheddar bacon",
+    price: 89,
+    image: coxinhaCombo,
+    category: "combos",
+    addons: sauces,
+  },
+  {
+    id: "coxinha-frango-25",
+    name: "Mini Coxinhas Frango (25un)",
+    description: "Porção menor para matar a vontade",
+    price: 28,
+    image: coxinhaFrango,
+    category: "salgados",
+    addons: sauces,
+  },
+  {
+    id: "brigadeiro-20",
+    name: "Brigadeiros Gourmet (20un)",
+    description: "Brigadeiros tradicionais com granulado belga",
     price: 35,
-    image: heroBurger,
-    category: "lanches",
-    addons: burgerAddons,
+    image: coxinhaCatupiry,
+    category: "doces",
   },
   {
-    id: "tabua-familia",
-    name: "Tábua da Família",
-    description: "4 lanches + 2 porções de batata para dividir",
-    price: 120,
-    image: combo,
-    category: "tabuas",
-  },
-  {
-    id: "porcao-frango",
-    name: "Porção Frango Crispy",
-    description: "500g de frango empanado crocante com molho da casa",
-    price: 38,
-    image: fries,
-    category: "porcoes",
-    addons: burgerAddons,
+    id: "refri-2l",
+    name: "Refrigerante 2L",
+    description: "Coca-Cola, Guaraná ou Fanta — escolha na observação",
+    price: 12,
+    image: coxinhaCombo,
+    category: "bebidas",
   },
 ];
 
 export const categories = [
-  { id: "lanches", label: "Lanches", emoji: "🍔" },
-  { id: "porcoes", label: "Porções", emoji: "🍟" },
-  { id: "combos", label: "Combos", emoji: "🎁" },
-  { id: "tabuas", label: "Tábuas", emoji: "🥩" },
+  { id: "salgados", label: "Salgados", emoji: "🍗" },
+  { id: "combos", label: "Combos", emoji: "🎉" },
+  { id: "doces", label: "Doces", emoji: "🍫" },
+  { id: "bebidas", label: "Bebidas", emoji: "🥤" },
 ] as const;

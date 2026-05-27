@@ -11,16 +11,16 @@ export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
     meta: [
-      { title: "Demarch Lanches — Delivery de hambúrgueres artesanais" },
+      { title: "Mini Coxinhas — Delivery de mini coxinhas crocantes" },
       {
         name: "description",
         content:
-          "Peça online os melhores lanches artesanais da região. Hambúrgueres, porções, combos e tábuas com entrega rápida.",
+          "Peça online as melhores mini coxinhas da região. Frango, catupiry, cheddar bacon e combos para festas com entrega rápida.",
       },
-      { property: "og:title", content: "Demarch Lanches — Delivery" },
+      { property: "og:title", content: "Mini Coxinhas — Delivery" },
       {
         property: "og:description",
-        content: "Hambúrgueres artesanais, porções e combos. Faça seu pedido!",
+        content: "Mini coxinhas crocantes, combos e doces. Faça seu pedido!",
       },
     ],
   }),
