@@ -1,0 +1,1 @@
+UPDATE products SET name = 'Salsichinha' WHERE id = '0764e685-2d7f-49e9-85b9-da34b8e252ff';
