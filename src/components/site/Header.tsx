@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Moon, ShoppingCart, Sun, Menu as MenuIcon, X, Home, UtensilsCrossed, Phone, MessageCircle } from "lucide-react";
+import { Moon, ShoppingCart, Sun, Menu as MenuIcon, X, Home, UtensilsCrossed, Phone } from "lucide-react";
+import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { Link } from "@tanstack/react-router";
 import logo from "@/assets/logo.png";
 import { useCart } from "@/store/cart";
