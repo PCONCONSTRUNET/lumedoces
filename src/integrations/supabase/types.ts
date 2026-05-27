@@ -65,6 +65,237 @@ export type Database = {
         }
         Relationships: []
       }
+      finance_categories: {
+        Row: {
+          color: string
+          created_at: string
+          dre_group: Database["public"]["Enums"]["finance_dre_group"]
+          id: string
+          is_active: boolean
+          kind: Database["public"]["Enums"]["finance_kind"]
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          dre_group?: Database["public"]["Enums"]["finance_dre_group"]
+          id?: string
+          is_active?: boolean
+          kind: Database["public"]["Enums"]["finance_kind"]
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          dre_group?: Database["public"]["Enums"]["finance_dre_group"]
+          id?: string
+          is_active?: boolean
+          kind?: Database["public"]["Enums"]["finance_kind"]
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      finance_transactions: {
+        Row: {
+          amount: number
+          category_id: string | null
+          created_at: string
+          description: string
+          id: string
+          is_auto: boolean
+          kind: Database["public"]["Enums"]["finance_kind"]
+          occurred_at: string
+          order_id: string | null
+          payment_method_id: string | null
+          status: Database["public"]["Enums"]["finance_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category_id?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          is_auto?: boolean
+          kind: Database["public"]["Enums"]["finance_kind"]
+          occurred_at?: string
+          order_id?: string | null
+          payment_method_id?: string | null
+          status?: Database["public"]["Enums"]["finance_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category_id?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          is_auto?: boolean
+          kind?: Database["public"]["Enums"]["finance_kind"]
+          occurred_at?: string
+          order_id?: string | null
+          payment_method_id?: string | null
+          status?: Database["public"]["Enums"]["finance_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_transactions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "finance_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "finance_transactions_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_items: {
+        Row: {
+          id: string
+          order_id: string
+          product_id: string | null
+          product_name: string
+          quantity: number
+          total_price: number
+          unit_price: number
+          variations_snapshot: Json
+        }
+        Insert: {
+          id?: string
+          order_id: string
+          product_id?: string | null
+          product_name: string
+          quantity?: number
+          total_price?: number
+          unit_price?: number
+          variations_snapshot?: Json
+        }
+        Update: {
+          id?: string
+          order_id?: string
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          total_price?: number
+          unit_price?: number
+          variations_snapshot?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          created_at: string
+          customer_address: string | null
+          customer_name: string
+          customer_phone: string | null
+          delivery_fee: number
+          discount: number
+          id: string
+          notes: string | null
+          paid_at: string | null
+          payment_method_id: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          subtotal: number
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_address?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          delivery_fee?: number
+          discount?: number
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          payment_method_id?: string | null
+          status?: Database["public"]["Enums"]["order_status"]
+          subtotal?: number
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_address?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          delivery_fee?: number
+          discount?: number
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          payment_method_id?: string | null
+          status?: Database["public"]["Enums"]["order_status"]
+          subtotal?: number
+          total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_payment_method_id_fkey"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_methods: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       product_variation_options: {
         Row: {
           additional_price: number
@@ -218,6 +449,16 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      finance_dre_group: "revenue" | "cost" | "expense"
+      finance_kind: "revenue" | "expense"
+      finance_status: "paid" | "pending"
+      order_status:
+        | "pending"
+        | "confirmed"
+        | "preparing"
+        | "delivered"
+        | "paid"
+        | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -346,6 +587,17 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      finance_dre_group: ["revenue", "cost", "expense"],
+      finance_kind: ["revenue", "expense"],
+      finance_status: ["paid", "pending"],
+      order_status: [
+        "pending",
+        "confirmed",
+        "preparing",
+        "delivered",
+        "paid",
+        "cancelled",
+      ],
     },
   },
 } as const
