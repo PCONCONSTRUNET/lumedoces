@@ -117,3 +117,20 @@
   h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: 0.02em; }
   .font-hand { font-family: var(--font-handwritten); }
 }
+
+@layer utilities {
+  @keyframes mascot-float {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-14px) rotate(2deg); }
+  }
+  .animate-mascot-float { animation: mascot-float 4s ease-in-out infinite; }
+
+  @keyframes mascot-wave {
+    0%, 100% { transform: rotate(-6deg); }
+    50% { transform: rotate(6deg); }
+  }
+  .animate-mascot-wave { animation: mascot-wave 3s ease-in-out infinite; transform-origin: bottom center; }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
