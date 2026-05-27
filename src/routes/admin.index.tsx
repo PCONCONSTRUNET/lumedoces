@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Lock, Mail, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import adminBg from "@/assets/admin-bg.png";
 import { toast, Toaster } from "sonner";
 
 export const Route = createFileRoute("/admin/")({
@@ -66,9 +67,18 @@ function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen grid place-items-center bg-cream px-4">
+    <div
+      className="min-h-screen grid place-items-center px-4"
+      style={{
+        backgroundColor: "#ff8a1f",
+        backgroundImage: `url(${adminBg})`,
+        backgroundRepeat: "repeat",
+        backgroundSize: "240px 240px",
+      }}
+    >
       <Toaster position="top-center" richColors />
-      <div className="w-full max-w-sm rounded-3xl bg-card p-8 shadow-xl ring-1 ring-border/60">
+      <div className="w-full max-w-sm rounded-3xl bg-card/95 backdrop-blur p-8 shadow-2xl ring-1 ring-white/40">
+
         <div className="text-center">
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-brand text-brand-foreground shadow">
             <Lock className="h-6 w-6" />
