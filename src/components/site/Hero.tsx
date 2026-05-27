@@ -38,10 +38,8 @@ export function Hero({ onOrder }: { onOrder: () => void }) {
           <p className="mt-3 text-white/90 text-base sm:text-lg">
             Crocantes por fora, cremosas por dentro 🤤
           </p>
-          <p className="mt-2 flex items-center gap-1.5 text-white/85 text-sm">
-            <MapPin className="h-4 w-4 text-highlight" />
-            Praça Henrique Lage, ao lado da lotérica — LM
-          </p>
+          {/* Address hidden by request */}
+
 
           <button
             onClick={onOrder}
