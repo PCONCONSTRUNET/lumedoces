@@ -1,11 +1,12 @@
 import { MapPin, CreditCard } from "lucide-react";
 import hero from "@/assets/hero-coxinha.jpg";
 import logo from "@/assets/logo.png";
+import mascot from "@/assets/mascot.png";
 
 export function Hero({ onOrder }: { onOrder: () => void }) {
   return (
     <section id="top" className="relative overflow-hidden">
-      <div className="relative h-[78vh] min-h-[520px] w-full">
+      <div className="relative h-[78vh] min-h-[560px] w-full">
         <img
           src={hero}
           alt="Mini coxinhas crocantes Mini Coxinhas"
@@ -13,7 +14,15 @@ export function Hero({ onOrder }: { onOrder: () => void }) {
           width={1280}
           height={1600}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/70" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/75" />
+
+        {/* Floating mascot — desktop right side */}
+        <img
+          src={mascot}
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute bottom-6 right-4 hidden h-[78%] max-h-[520px] w-auto object-contain drop-shadow-2xl animate-mascot-float md:block"
+        />
 
         <div className="relative z-10 mx-auto flex h-full max-w-3xl flex-col items-center justify-center px-6 text-center">
           <img
@@ -52,6 +61,14 @@ export function Hero({ onOrder }: { onOrder: () => void }) {
             </span>
           </div>
         </div>
+
+        {/* Mobile mascot peeking from bottom */}
+        <img
+          src={mascot}
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute -bottom-4 right-2 z-10 h-40 w-auto object-contain drop-shadow-2xl animate-mascot-float md:hidden"
+        />
       </div>
     </section>
   );
