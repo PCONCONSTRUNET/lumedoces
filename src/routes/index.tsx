@@ -1,26 +1,47 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useRef } from "react";
+import { Header } from "@/components/site/Header";
+import { Hero } from "@/components/site/Hero";
+import { Menu } from "@/components/site/Menu";
+import { CartDrawer } from "@/components/site/CartDrawer";
+import { CartProvider } from "@/store/cart";
+import { Toaster } from "sonner";
 
 export const Route = createFileRoute("/")({
   component: Index,
+  head: () => ({
+    meta: [
+      { title: "Demarch Lanches — Delivery de hambúrgueres artesanais" },
+      {
+        name: "description",
+        content:
+          "Peça online os melhores lanches artesanais da região. Hambúrgueres, porções, combos e tábuas com entrega rápida.",
+      },
+      { property: "og:title", content: "Demarch Lanches — Delivery" },
+      {
+        property: "og:description",
+        content: "Hambúrgueres artesanais, porções e combos. Faça seu pedido!",
+      },
+    ],
+  }),
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
-
 function Index() {
-  return <PlaceholderIndex />;
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const scrollToMenu = () =>
+    menuRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  return (
+    <CartProvider>
+      <div className="min-h-screen bg-cream">
+        <Header />
+        <main>
+          <Hero onOrder={scrollToMenu} />
+          <Menu menuRef={menuRef} />
+        </main>
+        <CartDrawer />
+        <Toaster position="top-center" richColors />
+      </div>
+    </CartProvider>
+  );
 }
