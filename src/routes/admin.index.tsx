@@ -82,8 +82,8 @@ function AdminLogin() {
       <div className="w-full max-w-sm rounded-3xl bg-card/95 backdrop-blur p-8 shadow-2xl ring-1 ring-white/40">
 
         <div className="text-center">
-          <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-brand shadow-lg ring-4 ring-white">
-            <img src={coxinhaIcon} alt="Coxinha" className="h-14 w-14 object-contain drop-shadow" />
+          <div className="mx-auto grid place-items-center">
+            <img src={coxinhaIcon} alt="Coxinha" className="h-40 w-40 object-contain drop-shadow-xl" />
           </div>
 
           <h1 className="mt-4 font-display text-3xl text-brand">ADMIN</h1>
