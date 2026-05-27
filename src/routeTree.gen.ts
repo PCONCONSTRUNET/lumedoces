@@ -14,6 +14,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminDashboardPedidosRouteImport } from './routes/admin.dashboard.pedidos'
+import { Route as AdminDashboardPagamentosRouteImport } from './routes/admin.dashboard.pagamentos'
 
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
@@ -40,18 +41,26 @@ const AdminDashboardPedidosRoute = AdminDashboardPedidosRouteImport.update({
   path: '/pedidos',
   getParentRoute: () => AdminDashboardRoute,
 } as any)
+const AdminDashboardPagamentosRoute =
+  AdminDashboardPagamentosRouteImport.update({
+    id: '/pagamentos',
+    path: '/pagamentos',
+    getParentRoute: () => AdminDashboardRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/admin/dashboard': typeof AdminDashboardRouteWithChildren
   '/admin/': typeof AdminIndexRoute
+  '/admin/dashboard/pagamentos': typeof AdminDashboardPagamentosRoute
   '/admin/dashboard/pedidos': typeof AdminDashboardPedidosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin/dashboard': typeof AdminDashboardRouteWithChildren
   '/admin': typeof AdminIndexRoute
+  '/admin/dashboard/pagamentos': typeof AdminDashboardPagamentosRoute
   '/admin/dashboard/pedidos': typeof AdminDashboardPedidosRoute
 }
 export interface FileRoutesById {
@@ -60,6 +69,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/admin/dashboard': typeof AdminDashboardRouteWithChildren
   '/admin/': typeof AdminIndexRoute
+  '/admin/dashboard/pagamentos': typeof AdminDashboardPagamentosRoute
   '/admin/dashboard/pedidos': typeof AdminDashboardPedidosRoute
 }
 export interface FileRouteTypes {
@@ -69,15 +79,22 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/dashboard'
     | '/admin/'
+    | '/admin/dashboard/pagamentos'
     | '/admin/dashboard/pedidos'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin/dashboard' | '/admin' | '/admin/dashboard/pedidos'
+  to:
+    | '/'
+    | '/admin/dashboard'
+    | '/admin'
+    | '/admin/dashboard/pagamentos'
+    | '/admin/dashboard/pedidos'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/admin/dashboard'
     | '/admin/'
+    | '/admin/dashboard/pagamentos'
     | '/admin/dashboard/pedidos'
   fileRoutesById: FileRoutesById
 }
@@ -123,14 +140,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardPedidosRouteImport
       parentRoute: typeof AdminDashboardRoute
     }
+    '/admin/dashboard/pagamentos': {
+      id: '/admin/dashboard/pagamentos'
+      path: '/pagamentos'
+      fullPath: '/admin/dashboard/pagamentos'
+      preLoaderRoute: typeof AdminDashboardPagamentosRouteImport
+      parentRoute: typeof AdminDashboardRoute
+    }
   }
 }
 
 interface AdminDashboardRouteChildren {
+  AdminDashboardPagamentosRoute: typeof AdminDashboardPagamentosRoute
   AdminDashboardPedidosRoute: typeof AdminDashboardPedidosRoute
 }
 
 const AdminDashboardRouteChildren: AdminDashboardRouteChildren = {
+  AdminDashboardPagamentosRoute: AdminDashboardPagamentosRoute,
   AdminDashboardPedidosRoute: AdminDashboardPedidosRoute,
 }
 
