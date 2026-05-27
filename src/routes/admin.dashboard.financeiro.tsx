@@ -598,12 +598,30 @@ function Select<T extends string>({
   onChange,
   label,
   children,
+  compact = false,
 }: {
   value: T;
   onChange: (v: T) => void;
   label: string;
   children: React.ReactNode;
+  compact?: boolean;
 }) {
+  if (compact) {
+    return (
+      <label className="inline-flex items-center gap-1.5 text-xs">
+        <span className="font-semibold text-muted-foreground uppercase tracking-wide">
+          {label}:
+        </span>
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value as T)}
+          className="rounded-md border border-border bg-background px-2 py-1 text-xs font-medium"
+        >
+          {children}
+        </select>
+      </label>
+    );
+  }
   return (
     <label className="block text-xs">
       <span className="mb-1 block font-semibold text-muted-foreground uppercase tracking-wide">
@@ -619,6 +637,7 @@ function Select<T extends string>({
     </label>
   );
 }
+
 
 function TxModal({
   open,
