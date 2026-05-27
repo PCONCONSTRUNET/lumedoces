@@ -66,8 +66,9 @@ function AdminDashboardLayout() {
       setChecking(false);
 
       // se entrou em /admin/dashboard sem aba, vai pra Pedidos
+      // se entrou em /admin/dashboard sem aba, vai pra Dashboard
       if (pathname === "/admin/dashboard" || pathname === "/admin/dashboard/") {
-        navigate({ to: "/admin/dashboard/pedidos", replace: true });
+        navigate({ to: "/admin/dashboard/visao", replace: true });
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
