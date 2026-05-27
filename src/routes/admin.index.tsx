@@ -68,7 +68,7 @@ function AdminLogin() {
       setLoading(false);
     }
   };
-  };
+
 
   return (
     <div
