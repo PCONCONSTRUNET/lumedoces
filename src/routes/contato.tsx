@@ -92,6 +92,25 @@ function ContatoPage() {
               </div>
               <p className="mt-3 text-sm text-foreground/60">Toque para abrir no Google Maps.</p>
             </a>
+
+            <div className="sm:col-span-2 rounded-2xl border border-border bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-3">
+                <span className="grid h-12 w-12 place-items-center rounded-full bg-amber-100 text-amber-700">
+                  <Clock className="h-5 w-5" />
+                </span>
+                <div>
+                  <h2 className="font-bold text-foreground">Horário de atendimento</h2>
+                </div>
+              </div>
+              <div className="mt-3 grid gap-1">
+                {HORARIOS.map((h) => (
+                  <div key={h.dia} className="flex items-center justify-between text-sm">
+                    <span className="text-foreground/80">{h.dia}</span>
+                    <span className={`font-medium ${h.hora === "Fechado" ? "text-red-500" : "text-foreground"}`}>{h.hora}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </main>
         <CartDrawer />
