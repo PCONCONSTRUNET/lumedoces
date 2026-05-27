@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: Database["public"]["Enums"]["audit_action"]
+          changed_fields: string[] | null
+          created_at: string
+          id: string
+          new_data: Json | null
+          old_data: Json | null
+          record_id: string | null
+          table_name: string
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["audit_action"]
+          changed_fields?: string[] | null
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id?: string | null
+          table_name: string
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["audit_action"]
+          changed_fields?: string[] | null
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id?: string | null
+          table_name?: string
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       business_hours: {
         Row: {
           close_time: string
@@ -449,6 +488,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      audit_action: "INSERT" | "UPDATE" | "DELETE"
       finance_dre_group: "revenue" | "cost" | "expense"
       finance_kind: "revenue" | "expense"
       finance_status: "paid" | "pending"
@@ -587,6 +627,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      audit_action: ["INSERT", "UPDATE", "DELETE"],
       finance_dre_group: ["revenue", "cost", "expense"],
       finance_kind: ["revenue", "expense"],
       finance_status: ["paid", "pending"],
