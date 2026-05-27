@@ -3,6 +3,7 @@ import { Clock, Minus, Plus, ShoppingBag, Trash2, X, MessageCircle } from "lucid
 import { formatBRL, useCart } from "@/store/cart";
 import { toast } from "sonner";
 import mascot from "@/assets/mascot.png";
+import { PixIcon } from "@/components/PaymentLabel";
 
 type PayMethod = "pix" | "cartao" | "dinheiro";
 
