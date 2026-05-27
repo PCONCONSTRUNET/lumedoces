@@ -35,6 +35,7 @@ function AdminDashboardLayout() {
   const [checking, setChecking] = useState(true);
   const [email, setEmail] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   // fechar drawer ao trocar rota
   useEffect(() => {
