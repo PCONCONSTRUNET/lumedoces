@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { MapPin, Phone, Instagram } from "lucide-react";
+import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { Header } from "@/components/site/Header";
 import { CartDrawer } from "@/components/site/CartDrawer";
 import { CartProvider } from "@/store/cart";
@@ -40,7 +41,7 @@ function ContatoPage() {
             >
               <div className="flex items-center gap-3">
                 <span className="grid h-12 w-12 place-items-center rounded-full bg-green-100 text-green-700">
-                  <Phone className="h-5 w-5" />
+                  <WhatsAppIcon className="h-6 w-6" />
                 </span>
                 <div>
                   <h2 className="font-bold text-foreground">WhatsApp</h2>

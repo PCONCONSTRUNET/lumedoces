@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Clock, Minus, Plus, ShoppingBag, Trash2, X, MessageCircle } from "lucide-react";
+import { Clock, Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
+import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { formatBRL, useCart } from "@/store/cart";
 import { toast } from "sonner";
 import mascot from "@/assets/mascot.png";
@@ -185,7 +186,7 @@ export function CartDrawer() {
             disabled={!isOpenStore}
             className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-muted py-3.5 font-bold text-muted-foreground disabled:opacity-100 enabled:bg-highlight enabled:text-highlight-foreground enabled:hover:opacity-95 transition"
           >
-            <MessageCircle className="h-4 w-4" />
+            <WhatsAppIcon className="h-4 w-4" />
             {isOpenStore ? "Enviar pedido" : "Pedidos fechados"}
           </button>
         </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Moon, ShoppingCart, Sun, Menu as MenuIcon, X, Home, UtensilsCrossed, Phone, MessageCircle } from "lucide-react";
+import { Moon, ShoppingCart, Sun, Menu as MenuIcon, X, Home, UtensilsCrossed, Phone } from "lucide-react";
+import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { Link } from "@tanstack/react-router";
 import logo from "@/assets/logo.png";
 import { useCart } from "@/store/cart";
@@ -21,7 +22,7 @@ export function Header() {
     <header className="sticky top-0 z-40 backdrop-blur bg-cream/85 border-b border-border">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
         <Link to="/" className="flex items-center gap-2">
-          <img src={logo} alt="Mini Coxinhas" className="h-16 w-auto object-contain" width={192} height={64} />
+          <img src={logo} alt="Mini Coxinhas" className="h-12 sm:h-14 w-auto object-contain" width={168} height={56} />
           {!status.loading && (
             <span
               className={`hidden sm:inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold ${
@@ -76,7 +77,7 @@ export function Header() {
             className="absolute inset-0 bg-black/40"
             onClick={() => setNavOpen(false)}
           />
-          <aside className="absolute right-0 top-0 h-full w-[85%] max-w-sm bg-cream shadow-2xl flex flex-col">
+          <aside className="absolute right-0 top-0 h-full w-[85%] max-w-sm shadow-2xl flex flex-col" style={{ backgroundColor: "var(--cream)" }}>
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
               <img src={logo} alt="Mini Coxinhas" className="h-14 w-auto object-contain" />
               <button
@@ -121,7 +122,7 @@ export function Header() {
                 rel="noreferrer"
                 className="flex items-center justify-center gap-2 w-full rounded-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 shadow-md transition"
               >
-                <MessageCircle className="h-5 w-5" />
+                <WhatsAppIcon className="h-5 w-5" />
                 Chamar no WhatsApp
               </a>
             </div>
