@@ -21,7 +21,7 @@ export function Header() {
     <header className="sticky top-0 z-40 backdrop-blur bg-cream/85 border-b border-border">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
         <Link to="/" className="flex items-center gap-2">
-          <img src={logo} alt="Mini Coxinhas" className="h-10 w-auto object-contain" width={120} height={40} />
+          <img src={logo} alt="Mini Coxinhas" className="h-16 w-auto object-contain" width={192} height={64} />
           {!status.loading && (
             <span
               className={`hidden sm:inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold ${
@@ -78,7 +78,7 @@ export function Header() {
           />
           <aside className="absolute right-0 top-0 h-full w-[85%] max-w-sm bg-cream shadow-2xl flex flex-col">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-              <img src={logo} alt="Mini Coxinhas" className="h-9 w-auto object-contain" />
+              <img src={logo} alt="Mini Coxinhas" className="h-14 w-auto object-contain" />
               <button
                 onClick={() => setNavOpen(false)}
                 className="grid h-10 w-10 place-items-center rounded-full hover:bg-muted transition"
