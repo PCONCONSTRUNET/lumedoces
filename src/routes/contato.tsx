@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { MapPin, Phone, Instagram } from "lucide-react";
+import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { Header } from "@/components/site/Header";
 import { CartDrawer } from "@/components/site/CartDrawer";
 import { CartProvider } from "@/store/cart";
