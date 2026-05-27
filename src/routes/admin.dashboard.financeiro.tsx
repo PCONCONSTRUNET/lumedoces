@@ -448,36 +448,6 @@ function FinanceiroPage() {
           </div>
         </ChartCard>
 
-        <ChartCard title="Filtros">
-          <div className="grid grid-cols-2 gap-2">
-            <Select value={kindFilter} onChange={setKindFilter} label="Tipo">
-              <option value="">Todos</option>
-              <option value="revenue">Receita</option>
-              <option value="expense">Despesa</option>
-            </Select>
-            <Select value={statusFilter} onChange={setStatusFilter} label="Status">
-              <option value="">Todos</option>
-              <option value="paid">Pago</option>
-              <option value="pending">Pendente</option>
-            </Select>
-            <Select value={catFilter} onChange={setCatFilter} label="Categoria">
-              <option value="">Todas</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </Select>
-            <Select value={pmFilter} onChange={setPmFilter} label="Pagamento">
-              <option value="">Todos</option>
-              {methods.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name}
-                </option>
-              ))}
-            </Select>
-          </div>
-        </ChartCard>
       </div>
 
       <div className="rounded-2xl bg-card shadow-sm ring-1 ring-border/60 overflow-hidden">
