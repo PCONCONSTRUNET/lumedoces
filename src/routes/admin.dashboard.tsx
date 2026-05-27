@@ -9,6 +9,8 @@ import {
   Tags,
   Package,
   Clock,
+  Menu,
+  X,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -29,6 +31,12 @@ function AdminDashboardLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [checking, setChecking] = useState(true);
   const [email, setEmail] = useState<string | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // fechar drawer ao trocar rota
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     (async () => {
@@ -71,20 +79,63 @@ function AdminDashboardLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-cream flex">
+    <div className="min-h-screen bg-cream md:flex">
+      {/* Topbar mobile */}
+      <header className="md:hidden sticky top-0 z-30 flex items-center justify-between gap-3 bg-card border-b border-border/60 px-4 py-3">
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="grid h-10 w-10 place-items-center rounded-xl bg-muted text-foreground"
+          aria-label="Abrir menu"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+        <div className="flex items-center gap-2">
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-brand text-brand-foreground">
+            <ShieldCheck className="h-4 w-4" />
+          </span>
+          <h1 className="font-display text-base text-brand leading-none">ADMIN</h1>
+        </div>
+        <button
+          onClick={onLogout}
+          className="grid h-10 w-10 place-items-center rounded-xl bg-muted text-foreground"
+          aria-label="Sair"
+        >
+          <LogOut className="h-4 w-4" />
+        </button>
+      </header>
+
+      {/* Overlay mobile */}
+      {mobileOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-40 bg-black/50"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 shrink-0 bg-card border-r border-border/60 flex flex-col">
+      <aside
+        className={`fixed md:static inset-y-0 left-0 z-50 w-72 max-w-[85vw] md:w-64 shrink-0 bg-card border-r border-border/60 flex flex-col transition-transform duration-200 md:translate-x-0 ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        }`}
+      >
         <div className="p-5 border-b border-border/60 flex items-center gap-3">
           <span className="grid h-10 w-10 place-items-center rounded-full bg-brand text-brand-foreground">
             <ShieldCheck className="h-5 w-5" />
           </span>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h1 className="font-display text-lg text-brand leading-none">ADMIN</h1>
             <p className="text-[11px] text-muted-foreground truncate">{email}</p>
           </div>
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="md:hidden grid h-8 w-8 place-items-center rounded-lg hover:bg-muted"
+            aria-label="Fechar menu"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
 
-        <nav className="flex-1 p-3 space-y-1">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = pathname.startsWith(item.to);
@@ -116,7 +167,7 @@ function AdminDashboardLayout() {
       </aside>
 
       {/* Conteúdo */}
-      <main className="flex-1 p-6 md:p-8 overflow-auto">
+      <main className="flex-1 min-w-0 p-4 md:p-8 overflow-x-hidden">
         <Outlet />
       </main>
     </div>
