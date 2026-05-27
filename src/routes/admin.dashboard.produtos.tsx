@@ -525,14 +525,16 @@ function NovoProdutoDialog({
           .ipt {
             width: 100%;
             border-radius: 0.5rem;
-            border: 1px solid hsl(var(--border));
-            background: hsl(var(--background));
+            border: 1px solid var(--border);
+            background: var(--background);
+            color: var(--foreground);
             padding: 0.5rem 0.75rem;
             font-size: 0.875rem;
             outline: none;
           }
           .ipt:focus {
-            box-shadow: 0 0 0 2px color-mix(in oklab, hsl(var(--primary)) 35%, transparent);
+            border-color: var(--brand);
+            box-shadow: 0 0 0 2px color-mix(in oklab, var(--brand) 35%, transparent);
           }
         `}</style>
       </DialogContent>
