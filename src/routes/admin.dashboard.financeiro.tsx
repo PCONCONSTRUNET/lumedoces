@@ -296,6 +296,54 @@ function FinanceiroPage() {
         setCustomTo={setCustomTo}
       />
 
+      <div className="rounded-2xl bg-card shadow-sm ring-1 ring-border/60 px-3 py-2.5">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mr-1">
+            Filtros
+          </span>
+          <Select value={kindFilter} onChange={setKindFilter} label="Tipo" compact>
+            <option value="">Todos</option>
+            <option value="revenue">Receita</option>
+            <option value="expense">Despesa</option>
+          </Select>
+          <Select value={statusFilter} onChange={setStatusFilter} label="Status" compact>
+            <option value="">Todos</option>
+            <option value="paid">Pago</option>
+            <option value="pending">Pendente</option>
+          </Select>
+          <Select value={catFilter} onChange={setCatFilter} label="Categoria" compact>
+            <option value="">Todas</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </Select>
+          <Select value={pmFilter} onChange={setPmFilter} label="Pagamento" compact>
+            <option value="">Todos</option>
+            {methods.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name}
+              </option>
+            ))}
+          </Select>
+          {(kindFilter || statusFilter || catFilter || pmFilter) && (
+            <button
+              type="button"
+              onClick={() => {
+                setKindFilter("");
+                setStatusFilter("");
+                setCatFilter("");
+                setPmFilter("");
+              }}
+              className="ml-auto text-xs font-semibold text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+            >
+              Limpar
+            </button>
+          )}
+        </div>
+      </div>
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Stat
           icon={<TrendingUp className="h-4 w-4" />}
@@ -400,36 +448,6 @@ function FinanceiroPage() {
           </div>
         </ChartCard>
 
-        <ChartCard title="Filtros">
-          <div className="grid grid-cols-2 gap-2">
-            <Select value={kindFilter} onChange={setKindFilter} label="Tipo">
-              <option value="">Todos</option>
-              <option value="revenue">Receita</option>
-              <option value="expense">Despesa</option>
-            </Select>
-            <Select value={statusFilter} onChange={setStatusFilter} label="Status">
-              <option value="">Todos</option>
-              <option value="paid">Pago</option>
-              <option value="pending">Pendente</option>
-            </Select>
-            <Select value={catFilter} onChange={setCatFilter} label="Categoria">
-              <option value="">Todas</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </Select>
-            <Select value={pmFilter} onChange={setPmFilter} label="Pagamento">
-              <option value="">Todos</option>
-              {methods.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name}
-                </option>
-              ))}
-            </Select>
-          </div>
-        </ChartCard>
       </div>
 
       <div className="rounded-2xl bg-card shadow-sm ring-1 ring-border/60 overflow-hidden">
@@ -580,12 +598,30 @@ function Select<T extends string>({
   onChange,
   label,
   children,
+  compact = false,
 }: {
   value: T;
   onChange: (v: T) => void;
   label: string;
   children: React.ReactNode;
+  compact?: boolean;
 }) {
+  if (compact) {
+    return (
+      <label className="inline-flex items-center gap-1.5 text-xs">
+        <span className="font-semibold text-muted-foreground uppercase tracking-wide">
+          {label}:
+        </span>
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value as T)}
+          className="rounded-md border border-border bg-background px-2 py-1 text-xs font-medium"
+        >
+          {children}
+        </select>
+      </label>
+    );
+  }
   return (
     <label className="block text-xs">
       <span className="mb-1 block font-semibold text-muted-foreground uppercase tracking-wide">
@@ -601,6 +637,7 @@ function Select<T extends string>({
     </label>
   );
 }
+
 
 function TxModal({
   open,
