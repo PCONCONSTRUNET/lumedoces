@@ -31,6 +31,12 @@ function AdminDashboardLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [checking, setChecking] = useState(true);
   const [email, setEmail] = useState<string | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // fechar drawer ao trocar rota
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     (async () => {
