@@ -11,8 +11,11 @@ import {
   Clock,
   Menu,
   X,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/dashboard")({
   component: AdminDashboardLayout,
