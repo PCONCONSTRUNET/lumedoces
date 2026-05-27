@@ -103,8 +103,11 @@ export function useBusinessStatus(refreshMs = 60_000): BusinessStatus {
     };
   }, [refreshMs]);
 
+  // referenciamos `tick` só pra forçar recálculo a cada minuto
+  void tick;
   if (!hours) {
     return { loading: true, isOpen: false, todayHour: null, label: "..." };
   }
-  return { loading: false, ...compute(hours), ...{ /* tick keeps eslint happy */ _t: tick } as object };
+  return { loading: false, ...compute(hours) };
 }
+
