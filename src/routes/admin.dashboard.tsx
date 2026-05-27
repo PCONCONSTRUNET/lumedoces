@@ -8,6 +8,7 @@ import {
   CreditCard,
   Tags,
   Package,
+  Clock,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -20,6 +21,7 @@ const navItems = [
   { to: "/admin/dashboard/pagamentos", label: "Pagamentos", icon: CreditCard },
   { to: "/admin/dashboard/categorias", label: "Categorias", icon: Tags },
   { to: "/admin/dashboard/produtos", label: "Produtos", icon: Package },
+  { to: "/admin/dashboard/horarios", label: "Horários", icon: Clock },
 ] as const;
 
 function AdminDashboardLayout() {
