@@ -96,10 +96,10 @@ export function Menu({ menuRef }: { menuRef: React.RefObject<HTMLDivElement | nu
 
         {categories.length > 0 && (
           <div className="sticky top-[68px] z-30 -mx-4 mt-8 bg-cream/90 px-4 py-3 backdrop-blur">
-            <div className="no-scrollbar flex gap-2 overflow-x-auto rounded-full bg-card p-1.5 shadow-sm ring-1 ring-border/60">
+            <div className="no-scrollbar flex gap-2 overflow-x-auto overscroll-x-contain rounded-full bg-card p-1.5 shadow-sm ring-1 ring-border/60 snap-x snap-mandatory touch-pan-x [-webkit-overflow-scrolling:touch] sm:justify-center sm:overflow-visible sm:snap-none">
               <button
                 onClick={() => setActive("__all__")}
-                className={`flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition ${
+                className={`flex shrink-0 snap-start items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${
                   currentCat === "__all__"
                     ? "bg-brand text-brand-foreground shadow"
                     : "text-foreground/70 hover:bg-muted"
@@ -114,7 +114,7 @@ export function Menu({ menuRef }: { menuRef: React.RefObject<HTMLDivElement | nu
                   <button
                     key={c.id}
                     onClick={() => setActive(c.id)}
-                    className={`flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition ${
+                    className={`flex shrink-0 snap-start items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${
                       isActive
                         ? "bg-brand text-brand-foreground shadow"
                         : "text-foreground/70 hover:bg-muted"

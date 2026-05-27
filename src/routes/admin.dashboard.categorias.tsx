@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Tags, Plus, Trash2, Loader2 } from "lucide-react";
+import { Tags, Plus, Trash2, Loader2, GripVertical } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,6 +27,8 @@ function CategoriasPage() {
   const [open, setOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [saving, setSaving] = useState(false);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
 
   const load = async () => {
     const { data, error } = await supabase
@@ -80,6 +82,33 @@ function CategoriasPage() {
     load();
   };
 
+  const saveCategoryOrder = async (ordered: Category[]) => {
+    const normalized = ordered.map((c, i) => ({ ...c, sort_order: i + 1 }));
+    setRows(normalized);
+
+    const results = await Promise.all(
+      normalized.map((c) =>
+        supabase.from("categories").update({ sort_order: c.sort_order }).eq("id", c.id),
+      ),
+    );
+    if (results.some((r) => r.error)) {
+      toast.error("Não foi possível salvar a ordem");
+      load();
+      return;
+    }
+    toast.success("Ordem atualizada");
+  };
+
+  const reorderCategory = async (fromIndex: number, toIndex: number) => {
+    if (!rows) return;
+    if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return;
+
+    const next = [...rows];
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(toIndex, 0, moved);
+    await saveCategoryOrder(next);
+  };
+
   const onDelete = async (c: Category) => {
     if (!confirm(`Excluir "${c.name}"? Produtos ficarão sem categoria.`)) return;
     const { error } = await supabase.from("categories").delete().eq("id", c.id);
@@ -120,8 +149,46 @@ function CategoriasPage() {
           </p>
         ) : (
           <ul className="divide-y divide-border/60">
-            {rows.map((c) => (
-              <li key={c.id} className="flex items-center gap-3 py-2">
+            {rows.map((c, index) => (
+              <li
+                key={c.id}
+                draggable
+                onDragStart={(e) => {
+                  e.dataTransfer.effectAllowed = "move";
+                  e.dataTransfer.setData("text/plain", String(index));
+                  setDraggingId(c.id);
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = "move";
+                  setDragOverId(c.id);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const fromIndex = Number(e.dataTransfer.getData("text/plain"));
+                  setDraggingId(null);
+                  setDragOverId(null);
+                  void reorderCategory(fromIndex, index);
+                }}
+                onDragEnd={() => {
+                  setDraggingId(null);
+                  setDragOverId(null);
+                }}
+                className={`flex items-center gap-3 py-2 transition ${
+                  draggingId === c.id ? "opacity-45" : ""
+                } ${
+                  dragOverId === c.id && draggingId !== c.id
+                    ? "bg-brand/5 ring-1 ring-inset ring-brand/20"
+                    : ""
+                }`}
+              >
+                <span
+                  className="grid h-8 w-8 cursor-grab place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground active:cursor-grabbing"
+                  aria-label="Arrastar categoria"
+                  title="Arrastar para ordenar"
+                >
+                  <GripVertical className="h-4 w-4" />
+                </span>
                 <input
                   defaultValue={c.name}
                   onBlur={(e) => onRename(c, e.target.value)}

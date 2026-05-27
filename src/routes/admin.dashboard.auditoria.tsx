@@ -31,6 +31,8 @@ interface AuditLog {
   changed_fields: string[] | null;
   user_id: string | null;
   user_email: string | null;
+  ip_address: string | null;
+  user_agent: string | null;
   created_at: string;
 }
 
@@ -101,6 +103,8 @@ function AuditoriaPage() {
     return logs.filter(
       (l) =>
         (l.user_email ?? "").toLowerCase().includes(s) ||
+        (l.ip_address ?? "").toLowerCase().includes(s) ||
+        getDeviceLabel(l.user_agent).toLowerCase().includes(s) ||
         (l.record_id ?? "").toLowerCase().includes(s) ||
         l.table_name.toLowerCase().includes(s) ||
         JSON.stringify(l.new_data ?? l.old_data ?? {}).toLowerCase().includes(s),
@@ -114,6 +118,8 @@ function AuditoriaPage() {
       Ação: l.action,
       "ID do registro": l.record_id ?? "",
       Usuário: l.user_email ?? "Sistema",
+      IP: l.ip_address ?? "",
+      Dispositivo: getDeviceLabel(l.user_agent),
       "Campos alterados": (l.changed_fields ?? []).join(", "),
     }));
     if (rows.length === 0) return;
@@ -298,6 +304,7 @@ function AuditoriaPage() {
                     <th className="text-left px-4 py-2">Tabela</th>
                     <th className="text-left px-4 py-2">ID</th>
                     <th className="text-left px-4 py-2">Usuário</th>
+                    <th className="text-left px-4 py-2">Origem</th>
                     <th className="text-left px-4 py-2">Campos alterados</th>
                     <th className="px-4 py-2"></th>
                   </tr>
@@ -324,6 +331,14 @@ function AuditoriaPage() {
                         {l.user_email ?? (
                           <span className="text-muted-foreground italic">Sistema</span>
                         )}
+                      </td>
+                      <td className="px-4 py-2 text-xs">
+                        <div className="space-y-0.5">
+                          <div className="font-mono">{l.ip_address ?? "—"}</div>
+                          <div className="text-[10px] text-muted-foreground">
+                            {getDeviceLabel(l.user_agent)}
+                          </div>
+                        </div>
                       </td>
                       <td className="px-4 py-2 text-xs">
                         {l.changed_fields && l.changed_fields.length > 0 ? (
@@ -458,7 +473,13 @@ function DetailModal({ log, onClose }: { log: AuditLog; onClose: () => void }) {
           <div className="grid grid-cols-2 gap-3 text-xs">
             <Info label="ID do registro" value={log.record_id ?? "—"} mono />
             <Info label="Tabela (técnico)" value={log.table_name} mono />
+            <Info label="IP" value={log.ip_address ?? "—"} mono />
+            <Info label="Dispositivo" value={getDeviceLabel(log.user_agent)} />
           </div>
+
+          {log.user_agent && (
+            <Info label="User agent completo" value={log.user_agent} mono />
+          )}
 
           {isUpdate && log.changed_fields && log.changed_fields.length > 0 && (
             <div>
@@ -528,6 +549,41 @@ function Info({ label, value, mono = false }: { label: string; value: string; mo
       <div className={cn("text-xs mt-0.5 break-all", mono && "font-mono")}>{value}</div>
     </div>
   );
+}
+
+function getDeviceLabel(userAgent: string | null): string {
+  if (!userAgent) return "—";
+
+  const ua = userAgent.toLowerCase();
+  const device = /mobile|android|iphone|ipod/.test(ua)
+    ? "Celular"
+    : /ipad|tablet/.test(ua)
+      ? "Tablet"
+      : "Desktop";
+  const browser = ua.includes("edg/")
+    ? "Edge"
+    : ua.includes("opr/") || ua.includes("opera")
+      ? "Opera"
+      : ua.includes("chrome/")
+        ? "Chrome"
+        : ua.includes("firefox/")
+          ? "Firefox"
+          : ua.includes("safari/")
+            ? "Safari"
+            : "Navegador";
+  const os = ua.includes("windows")
+    ? "Windows"
+    : ua.includes("android")
+      ? "Android"
+      : ua.includes("iphone") || ua.includes("ipad") || ua.includes("ios")
+        ? "iOS"
+        : ua.includes("mac os") || ua.includes("macintosh")
+          ? "macOS"
+          : ua.includes("linux")
+            ? "Linux"
+            : "";
+
+  return [device, browser, os].filter(Boolean).join(" • ");
 }
 
 function fmt(v: unknown): string {

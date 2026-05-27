@@ -251,6 +251,7 @@ function DashboardVisaoPage() {
                     <XAxis dataKey="day" stroke="var(--muted-foreground)" fontSize={11} />
                     <YAxis stroke="var(--muted-foreground)" fontSize={11} />
                     <Tooltip
+                      cursor={{ stroke: "var(--border)", strokeWidth: 1 }}
                       contentStyle={{
                         background: "var(--card)",
                         border: "1px solid var(--border)",
@@ -297,6 +298,7 @@ function DashboardVisaoPage() {
                       ))}
                     </Pie>
                     <Tooltip
+                      cursor={{ fill: "var(--card)", fillOpacity: 1 }}
                       contentStyle={{
                         background: "var(--card)",
                         border: "1px solid var(--border)",
@@ -316,6 +318,7 @@ function DashboardVisaoPage() {
                     <XAxis dataKey="name" stroke="var(--muted-foreground)" fontSize={11} />
                     <YAxis stroke="var(--muted-foreground)" fontSize={11} />
                     <Tooltip
+                      cursor={{ fill: "var(--card)", fillOpacity: 1 }}
                       formatter={(v: number) => formatBRL(v)}
                       contentStyle={{
                         background: "var(--card)",

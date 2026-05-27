@@ -20,36 +20,42 @@ export type Database = {
           changed_fields: string[] | null
           created_at: string
           id: string
+          ip_address: string | null
           new_data: Json | null
           old_data: Json | null
           record_id: string | null
           table_name: string
           user_email: string | null
           user_id: string | null
+          user_agent: string | null
         }
         Insert: {
           action: Database["public"]["Enums"]["audit_action"]
           changed_fields?: string[] | null
           created_at?: string
           id?: string
+          ip_address?: string | null
           new_data?: Json | null
           old_data?: Json | null
           record_id?: string | null
           table_name: string
           user_email?: string | null
           user_id?: string | null
+          user_agent?: string | null
         }
         Update: {
           action?: Database["public"]["Enums"]["audit_action"]
           changed_fields?: string[] | null
           created_at?: string
           id?: string
+          ip_address?: string | null
           new_data?: Json | null
           old_data?: Json | null
           record_id?: string | null
           table_name?: string
           user_email?: string | null
           user_id?: string | null
+          user_agent?: string | null
         }
         Relationships: []
       }
