@@ -77,7 +77,7 @@ export function Header() {
             className="absolute inset-0 bg-black/40"
             onClick={() => setNavOpen(false)}
           />
-          <aside className="absolute right-0 top-0 h-full w-[85%] max-w-sm bg-cream shadow-2xl flex flex-col" style={{ backgroundColor: "hsl(var(--cream, 40 60% 96%))" }}>
+          <aside className="absolute right-0 top-0 h-full w-[85%] max-w-sm shadow-2xl flex flex-col" style={{ backgroundColor: "var(--cream)" }}>
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
               <img src={logo} alt="Mini Coxinhas" className="h-14 w-auto object-contain" />
               <button
