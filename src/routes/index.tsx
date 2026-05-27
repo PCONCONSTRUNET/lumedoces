@@ -38,6 +38,7 @@ function Index() {
         <Header />
         <main>
           <Hero onOrder={scrollToMenu} />
+          <MascotStrip />
           <Menu menuRef={menuRef} />
         </main>
         <CartDrawer />

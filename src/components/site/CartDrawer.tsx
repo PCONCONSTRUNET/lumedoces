@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Clock, Minus, Plus, ShoppingBag, Trash2, X, MessageCircle } from "lucide-react";
 import { formatBRL, useCart } from "@/store/cart";
 import { toast } from "sonner";
+import mascot from "@/assets/mascot.png";
 
 type PayMethod = "pix" | "cartao" | "dinheiro";
 
@@ -50,9 +51,11 @@ export function CartDrawer() {
 
         <div className="flex-1 overflow-y-auto px-4 py-4">
           {items.length === 0 ? (
-            <p className="mt-12 text-center text-sm text-muted-foreground">
-              Seu carrinho está vazio. Adicione lanches do cardápio!
-            </p>
+            <div className="mt-8 flex flex-col items-center text-center">
+              <img src={mascot} alt="" className="h-40 w-auto animate-mascot-wave drop-shadow-lg" />
+              <p className="mt-3 font-hand text-lg font-bold text-foreground">Seu carrinho tá vazio!</p>
+              <p className="mt-1 text-sm text-muted-foreground">Escolhe umas coxinhas pra mim preparar 🧡</p>
+            </div>
           ) : (
             <div className="space-y-3">
               {items.map((it) => (
