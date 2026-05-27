@@ -394,37 +394,39 @@ function NovoProdutoDialog({
                   <div className="flex items-start gap-2">
                     <GripVertical className="h-4 w-4 text-muted-foreground mt-2.5" />
                     <div className="flex-1 space-y-2">
-                      <div className="grid grid-cols-[1fr_70px_70px_auto] gap-2">
-                        <input
-                          value={v.name}
-                          onChange={(e) => updateVariation(vi, { name: e.target.value })}
-                          placeholder="Nome (ex: Tamanho)"
-                          maxLength={60}
-                          className="ipt"
-                        />
-                        <input
-                          type="number"
-                          min={0}
-                          value={v.min_select}
-                          onChange={(e) =>
-                            updateVariation(vi, { min_select: Number(e.target.value) || 0 })
-                          }
-                          title="Mínimo"
-                          className="ipt"
-                          placeholder="Mín"
-                        />
-                        <input
-                          type="number"
-                          min={1}
-                          value={v.max_select}
-                          onChange={(e) =>
-                            updateVariation(vi, { max_select: Number(e.target.value) || 1 })
-                          }
-                          title="Máximo"
-                          className="ipt"
-                          placeholder="Máx"
-                        />
-                        <label className="flex items-center gap-1.5 text-xs font-medium cursor-pointer select-none px-1">
+                      <input
+                        value={v.name}
+                        onChange={(e) => updateVariation(vi, { name: e.target.value })}
+                        placeholder="Nome da variação (ex: Tamanho)"
+                        maxLength={60}
+                        className="ipt"
+                      />
+                      <div className="grid grid-cols-2 sm:grid-cols-[1fr_1fr_auto] gap-2 items-end">
+                        <label className="block">
+                          <span className="mb-1 block text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Mínimo</span>
+                          <input
+                            type="number"
+                            min={0}
+                            value={v.min_select}
+                            onChange={(e) =>
+                              updateVariation(vi, { min_select: Number(e.target.value) || 0 })
+                            }
+                            className="ipt"
+                          />
+                        </label>
+                        <label className="block">
+                          <span className="mb-1 block text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Máximo</span>
+                          <input
+                            type="number"
+                            min={1}
+                            value={v.max_select}
+                            onChange={(e) =>
+                              updateVariation(vi, { max_select: Number(e.target.value) || 1 })
+                            }
+                            className="ipt"
+                          />
+                        </label>
+                        <label className="flex items-center gap-1.5 text-xs font-medium cursor-pointer select-none px-1 col-span-2 sm:col-span-1 sm:pb-2">
                           <input
                             type="checkbox"
                             checked={v.is_required}
@@ -433,7 +435,7 @@ function NovoProdutoDialog({
                             }
                             className="h-4 w-4 accent-brand"
                           />
-                          Obrig.
+                          Obrigatório
                         </label>
                       </div>
 
