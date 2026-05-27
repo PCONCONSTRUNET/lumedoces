@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Lock, Mail, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import adminBg from "@/assets/admin-bg.png";
+import coxinhaIcon from "@/assets/coxinha-icon.png";
 import { toast, Toaster } from "sonner";
 
 export const Route = createFileRoute("/admin/")({
