@@ -3,8 +3,10 @@ import hero from "@/assets/hero-bg.jpg";
 import logo from "@/assets/logo.png";
 import mascot from "@/assets/mascot.png";
 import { PixIcon } from "@/components/PaymentLabel";
+import { useBusinessStatus } from "@/hooks/useBusinessStatus";
 
 export function Hero({ onOrder }: { onOrder: () => void }) {
+  const status = useBusinessStatus();
   return (
     <section id="top" className="relative overflow-hidden">
       <div className="relative h-[78vh] min-h-[560px] w-full">
@@ -50,6 +52,12 @@ export function Hero({ onOrder }: { onOrder: () => void }) {
           </button>
 
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+            {!status.loading && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-black/40 backdrop-blur px-3 py-1.5 text-xs text-white border border-white/15">
+                <span className={`h-2 w-2 rounded-full ${status.isOpen ? "bg-green-500 animate-pulse" : "bg-red-500"}`} />
+                {status.label}
+              </span>
+            )}
             <span className="inline-flex items-center gap-1.5 rounded-full bg-black/40 backdrop-blur px-3 py-1.5 text-xs text-white border border-white/15">
               <CreditCard className="h-3.5 w-3.5" />
               <PixIcon className="h-3.5 w-3.5" />
