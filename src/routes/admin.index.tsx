@@ -21,13 +21,11 @@ function AdminLogin() {
     (async () => {
       const { data } = await supabase.auth.getUser();
       if (!data.user) return;
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", data.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-      if (roles) navigate({ to: "/admin/dashboard", replace: true });
+      const { data: isAdmin } = await supabase.rpc("has_role", {
+        _user_id: data.user.id,
+        _role: "admin",
+      });
+      if (isAdmin) navigate({ to: "/admin/dashboard", replace: true });
     })();
   }, [navigate]);
 
@@ -44,14 +42,18 @@ function AdminLogin() {
         return;
       }
 
-      const { data: roleRow } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", data.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
+      const { data: isAdmin, error: roleErr } = await supabase.rpc("has_role", {
+        _user_id: data.user.id,
+        _role: "admin",
+      });
 
-      if (!roleRow) {
+      if (roleErr) {
+        console.error(roleErr);
+        toast.error("Erro ao verificar permissão.");
+        return;
+      }
+
+      if (!isAdmin) {
         await supabase.auth.signOut();
         toast.error("Esta conta não tem permissão de admin.");
         return;
@@ -66,6 +68,7 @@ function AdminLogin() {
       setLoading(false);
     }
   };
+
 
   return (
     <div
