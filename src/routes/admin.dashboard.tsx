@@ -15,6 +15,7 @@ import {
   ChevronRight,
   BarChart3,
   Wallet,
+  ScrollText,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -31,7 +32,9 @@ const navItems = [
   { to: "/admin/dashboard/categorias", label: "Categorias", icon: Tags },
   { to: "/admin/dashboard/produtos", label: "Produtos", icon: Package },
   { to: "/admin/dashboard/horarios", label: "Horários", icon: Clock },
+  { to: "/admin/dashboard/auditoria", label: "Auditoria", icon: ScrollText },
 ] as const;
+
 
 function AdminDashboardLayout() {
   const navigate = useNavigate();
