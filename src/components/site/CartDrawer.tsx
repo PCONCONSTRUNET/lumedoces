@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Clock, Minus, Plus, ShoppingBag, Trash2, X, MessageCircle } from "lucide-react";
+import { Clock, Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
+import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { formatBRL, useCart } from "@/store/cart";
 import { toast } from "sonner";
 import mascot from "@/assets/mascot.png";
