@@ -41,6 +41,147 @@ export type Database = {
         }
         Relationships: []
       }
+      categories: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      product_variation_options: {
+        Row: {
+          additional_price: number
+          id: string
+          is_active: boolean
+          name: string
+          sort_order: number
+          variation_id: string
+        }
+        Insert: {
+          additional_price?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          sort_order?: number
+          variation_id: string
+        }
+        Update: {
+          additional_price?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+          variation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variation_options_variation_id_fkey"
+            columns: ["variation_id"]
+            isOneToOne: false
+            referencedRelation: "product_variations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_variations: {
+        Row: {
+          id: string
+          is_required: boolean
+          max_select: number
+          min_select: number
+          name: string
+          product_id: string
+          sort_order: number
+        }
+        Insert: {
+          id?: string
+          is_required?: boolean
+          max_select?: number
+          min_select?: number
+          name: string
+          product_id: string
+          sort_order?: number
+        }
+        Update: {
+          id?: string
+          is_required?: boolean
+          max_select?: number
+          min_select?: number
+          name?: string
+          product_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          base_price: number
+          category_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          base_price?: number
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          base_price?: number
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
