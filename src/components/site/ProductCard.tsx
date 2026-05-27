@@ -25,9 +25,10 @@ export function ProductCard({ product, onClick }: { product: Product; onClick: (
         <h3 className="font-hand text-lg font-bold leading-tight text-foreground">{product.name}</h3>
         <p className="line-clamp-2 text-xs text-muted-foreground">{product.description}</p>
         <div className="mt-2 flex items-center justify-between">
-          <span className="text-base font-extrabold text-highlight-foreground">
+          <span className="text-base font-extrabold text-brand">
             {formatBRL(product.price)}
           </span>
+
           <span className="inline-flex items-center gap-1 text-xs font-semibold text-brand">
             <Plus className="h-3.5 w-3.5" /> Adicionar
           </span>
