@@ -284,7 +284,7 @@ function NovoProdutoDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-lg">
         <DialogHeader>
           <DialogTitle>Novo produto</DialogTitle>
         </DialogHeader>
