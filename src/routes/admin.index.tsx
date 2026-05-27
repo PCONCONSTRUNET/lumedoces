@@ -73,7 +73,8 @@ function AdminLogin() {
         backgroundColor: "#ff8a1f",
         backgroundImage: `url(${adminBg})`,
         backgroundRepeat: "repeat",
-        backgroundSize: "240px 240px",
+        backgroundSize: "520px 520px",
+
       }}
     >
       <Toaster position="top-center" richColors />
