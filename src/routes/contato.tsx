@@ -23,6 +23,12 @@ const WPP_LABEL = "+55 48 93380-6781";
 const IG = "minicoxinhaslm";
 const ENDERECO = "R. Wâlter Vetterli — Lauro Müller, SC, 88880-000, Brasil";
 
+const HORARIOS = [
+  { dia: "Seg. a Sex.", hora: "14:00 – 22:00" },
+  { dia: "Sábado", hora: "14:00 – 19:00" },
+  { dia: "Domingo", hora: "Fechado" },
+];
+
 function ContatoPage() {
   return (
     <CartProvider>
