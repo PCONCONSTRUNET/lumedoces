@@ -16,6 +16,7 @@ import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminDashboardProdutosRouteImport } from './routes/admin.dashboard.produtos'
 import { Route as AdminDashboardPedidosRouteImport } from './routes/admin.dashboard.pedidos'
 import { Route as AdminDashboardPagamentosRouteImport } from './routes/admin.dashboard.pagamentos'
+import { Route as AdminDashboardHorariosRouteImport } from './routes/admin.dashboard.horarios'
 import { Route as AdminDashboardCategoriasRouteImport } from './routes/admin.dashboard.categorias'
 
 const AdminRoute = AdminRouteImport.update({
@@ -54,6 +55,11 @@ const AdminDashboardPagamentosRoute =
     path: '/pagamentos',
     getParentRoute: () => AdminDashboardRoute,
   } as any)
+const AdminDashboardHorariosRoute = AdminDashboardHorariosRouteImport.update({
+  id: '/horarios',
+  path: '/horarios',
+  getParentRoute: () => AdminDashboardRoute,
+} as any)
 const AdminDashboardCategoriasRoute =
   AdminDashboardCategoriasRouteImport.update({
     id: '/categorias',
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard': typeof AdminDashboardRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/admin/dashboard/categorias': typeof AdminDashboardCategoriasRoute
+  '/admin/dashboard/horarios': typeof AdminDashboardHorariosRoute
   '/admin/dashboard/pagamentos': typeof AdminDashboardPagamentosRoute
   '/admin/dashboard/pedidos': typeof AdminDashboardPedidosRoute
   '/admin/dashboard/produtos': typeof AdminDashboardProdutosRoute
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/admin/dashboard': typeof AdminDashboardRouteWithChildren
   '/admin': typeof AdminIndexRoute
   '/admin/dashboard/categorias': typeof AdminDashboardCategoriasRoute
+  '/admin/dashboard/horarios': typeof AdminDashboardHorariosRoute
   '/admin/dashboard/pagamentos': typeof AdminDashboardPagamentosRoute
   '/admin/dashboard/pedidos': typeof AdminDashboardPedidosRoute
   '/admin/dashboard/produtos': typeof AdminDashboardProdutosRoute
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/admin/dashboard': typeof AdminDashboardRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/admin/dashboard/categorias': typeof AdminDashboardCategoriasRoute
+  '/admin/dashboard/horarios': typeof AdminDashboardHorariosRoute
   '/admin/dashboard/pagamentos': typeof AdminDashboardPagamentosRoute
   '/admin/dashboard/pedidos': typeof AdminDashboardPedidosRoute
   '/admin/dashboard/produtos': typeof AdminDashboardProdutosRoute
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/'
     | '/admin/dashboard/categorias'
+    | '/admin/dashboard/horarios'
     | '/admin/dashboard/pagamentos'
     | '/admin/dashboard/pedidos'
     | '/admin/dashboard/produtos'
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin'
     | '/admin/dashboard/categorias'
+    | '/admin/dashboard/horarios'
     | '/admin/dashboard/pagamentos'
     | '/admin/dashboard/pedidos'
     | '/admin/dashboard/produtos'
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/'
     | '/admin/dashboard/categorias'
+    | '/admin/dashboard/horarios'
     | '/admin/dashboard/pagamentos'
     | '/admin/dashboard/pedidos'
     | '/admin/dashboard/produtos'
@@ -179,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardPagamentosRouteImport
       parentRoute: typeof AdminDashboardRoute
     }
+    '/admin/dashboard/horarios': {
+      id: '/admin/dashboard/horarios'
+      path: '/horarios'
+      fullPath: '/admin/dashboard/horarios'
+      preLoaderRoute: typeof AdminDashboardHorariosRouteImport
+      parentRoute: typeof AdminDashboardRoute
+    }
     '/admin/dashboard/categorias': {
       id: '/admin/dashboard/categorias'
       path: '/categorias'
@@ -191,6 +210,7 @@ declare module '@tanstack/react-router' {
 
 interface AdminDashboardRouteChildren {
   AdminDashboardCategoriasRoute: typeof AdminDashboardCategoriasRoute
+  AdminDashboardHorariosRoute: typeof AdminDashboardHorariosRoute
   AdminDashboardPagamentosRoute: typeof AdminDashboardPagamentosRoute
   AdminDashboardPedidosRoute: typeof AdminDashboardPedidosRoute
   AdminDashboardProdutosRoute: typeof AdminDashboardProdutosRoute
@@ -198,6 +218,7 @@ interface AdminDashboardRouteChildren {
 
 const AdminDashboardRouteChildren: AdminDashboardRouteChildren = {
   AdminDashboardCategoriasRoute: AdminDashboardCategoriasRoute,
+  AdminDashboardHorariosRoute: AdminDashboardHorariosRoute,
   AdminDashboardPagamentosRoute: AdminDashboardPagamentosRoute,
   AdminDashboardPedidosRoute: AdminDashboardPedidosRoute,
   AdminDashboardProdutosRoute: AdminDashboardProdutosRoute,
@@ -226,3 +247,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
