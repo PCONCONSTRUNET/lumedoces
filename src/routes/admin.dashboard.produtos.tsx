@@ -103,14 +103,6 @@ function ProdutosPage() {
                   />
                   Ativo
                 </label>
-                <Link
-                  to="/admin/dashboard/produtos/$id"
-                  params={{ id: p.id }}
-                  className="grid h-8 w-8 place-items-center rounded-lg text-foreground/70 hover:bg-muted"
-                  aria-label="Editar"
-                >
-                  <Pencil className="h-4 w-4" />
-                </Link>
                 <button
                   onClick={() => onDelete(p)}
                   className="grid h-8 w-8 place-items-center rounded-lg text-red-600 hover:bg-red-50"
