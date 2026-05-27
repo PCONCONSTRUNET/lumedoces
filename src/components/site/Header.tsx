@@ -15,7 +15,7 @@ export function Header() {
     <header className="sticky top-0 z-40 backdrop-blur bg-cream/85 border-b border-border">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
         <a href="#top" className="flex items-center gap-2">
-          <img src={logo} alt="Demarch Lanches" className="h-10 w-auto" width={40} height={40} />
+          <img src={logo} alt="Mini Coxinhas" className="h-10 w-auto object-contain" width={120} height={40} />
         </a>
         <div className="flex items-center gap-2">
           <button
