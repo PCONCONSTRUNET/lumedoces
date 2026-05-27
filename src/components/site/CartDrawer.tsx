@@ -60,9 +60,15 @@ export function CartDrawer() {
             <div className="space-y-3">
               {items.map((it) => (
                 <div key={it.uid} className="rounded-2xl border border-border bg-card p-3">
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-start gap-3">
+                    <img
+                      src={it.image}
+                      alt={it.name}
+                      className="h-16 w-16 shrink-0 rounded-xl object-cover ring-1 ring-border/60"
+                      loading="lazy"
+                    />
                     <div className="flex-1">
-                      <h3 className="font-hand text-base font-bold">{it.name}</h3>
+                      <h3 className="font-hand text-base font-bold leading-tight">{it.name}</h3>
                       {it.addons.length > 0 && (
                         <p className="mt-0.5 text-[11px] text-muted-foreground">
                           + {it.addons.map((a) => a.name).join(", ")}
@@ -78,6 +84,7 @@ export function CartDrawer() {
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
+
                   <div className="mt-2 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <button
