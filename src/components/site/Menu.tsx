@@ -63,12 +63,13 @@ export function Menu({ menuRef }: { menuRef: React.RefObject<HTMLDivElement | nu
     [data],
   );
 
-  const currentCat = active ?? categories[0]?.id ?? null;
+  const currentCat = active ?? "__all__";
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return products.filter((p) => {
       if (q && !`${p.name} ${p.description}`.toLowerCase().includes(q)) return false;
+      if (currentCat === "__all__") return true;
       return p.category === currentCat;
     });
   }, [products, currentCat, query]);
