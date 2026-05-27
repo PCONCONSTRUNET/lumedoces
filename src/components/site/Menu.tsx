@@ -129,19 +129,36 @@ export function Menu({ menuRef }: { menuRef: React.RefObject<HTMLDivElement | nu
           </div>
         )}
 
-        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {isLoading ? (
-            <p className="col-span-full py-10 text-center text-sm text-muted-foreground">
-              Carregando cardápio...
-            </p>
-          ) : filtered.length === 0 ? (
-            <p className="col-span-full py-10 text-center text-sm text-muted-foreground">
-              Nenhum produto encontrado.
-            </p>
-          ) : (
-            filtered.map((p) => <ProductCard key={p.id} product={p} onClick={() => setSelected(p)} />)
-          )}
-        </div>
+        {isLoading ? (
+          <p className="mt-5 py-10 text-center text-sm text-muted-foreground">Carregando cardápio...</p>
+        ) : filtered.length === 0 ? (
+          <p className="mt-5 py-10 text-center text-sm text-muted-foreground">Nenhum produto encontrado.</p>
+        ) : currentCat === "__all__" ? (
+          <div className="mt-5 space-y-8">
+            {categories.map((c: any) => {
+              const items = filtered.filter((p) => p.category === c.id);
+              if (items.length === 0) return null;
+              return (
+                <div key={c.id}>
+                  <h3 className="mb-3 flex items-center gap-2 font-display text-2xl text-brand">
+                    <span>{emojiFor(c.name)}</span> {c.name}
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                    {items.map((p) => (
+                      <ProductCard key={p.id} product={p} onClick={() => setSelected(p)} />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {filtered.map((p) => (
+              <ProductCard key={p.id} product={p} onClick={() => setSelected(p)} />
+            ))}
+          </div>
+        )}
       </div>
 
       {count > 0 && (
