@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { Moon, ShoppingCart, Sun, Menu as MenuIcon, X, Home, UtensilsCrossed, Phone } from "lucide-react";
+import { Moon, ShoppingCart, Sun, Menu as MenuIcon, X, ArrowRight, MessageCircle } from "lucide-react";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { Link } from "@tanstack/react-router";
 import logo from "@/assets/logo.png";
 import { useCart } from "@/store/cart";
-
 
 const WPP = "5548933806781";
 
@@ -18,100 +17,99 @@ export function Header() {
   }, [dark]);
 
   return (
-    <header className="sticky top-0 z-40 bg-cream border-b border-border">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-        <Link to="/" className="flex items-center gap-2">
-          <img src={logo} alt="Mini Coxinhas" className="h-12 sm:h-14 w-auto object-contain" width={168} height={56} />
-        </Link>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setDark((d) => !d)}
-            className="grid h-10 w-10 place-items-center rounded-full bg-muted text-foreground/70 hover:bg-muted/70 transition"
-            aria-label="Alternar tema"
-          >
-            {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </button>
-          <button
-            onClick={() => setOpen(true)}
-            className="relative grid h-10 w-10 place-items-center rounded-full bg-brand text-brand-foreground shadow-md hover:opacity-90 transition"
-            aria-label="Abrir carrinho"
-          >
-            <ShoppingCart className="h-5 w-5" />
-            {count > 0 && (
-              <span className="absolute -top-1 -right-1 grid h-5 min-w-5 place-items-center rounded-full bg-highlight px-1 text-[11px] font-bold text-highlight-foreground">
-                {count}
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => setNavOpen(true)}
-            className="grid h-10 w-10 place-items-center rounded-full text-foreground/70 hover:bg-muted transition"
-            aria-label="Menu"
-          >
-            <MenuIcon className="h-5 w-5" />
-          </button>
+    <>
+      <header className="fixed left-1/2 top-4 z-50 w-[95%] max-w-5xl -translate-x-1/2 rounded-[2rem] bg-white/40 px-4 py-2 shadow-sm backdrop-blur-md border border-white/40 dark:bg-black/30 dark:border-white/10 transition-all duration-300">
+        <div className="flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2">
+            <img src={logo} alt="Mini Coxinhas" className="h-10 sm:h-12 w-auto object-contain drop-shadow-sm" width={144} height={48} />
+          </Link>
+          
+          <div className="flex items-center">
+            <button
+              onClick={() => setNavOpen(true)}
+              className="grid h-10 w-11 place-items-center rounded-xl border-2 border-highlight bg-white text-highlight shadow-sm transition hover:bg-highlight/10 dark:bg-transparent"
+              aria-label="Menu"
+            >
+              <MenuIcon className="h-6 w-6 stroke-[2.5]" />
+            </button>
+          </div>
         </div>
-      </div>
+      </header>
 
       {/* Side nav drawer */}
       {navOpen && (
         <div className="fixed inset-0 z-50">
+          {/* Overlay fundo escuro leve */}
           <div
-            className="absolute inset-0 bg-black/40"
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             onClick={() => setNavOpen(false)}
           />
-          <aside className="absolute right-0 top-0 h-full w-[85%] max-w-sm bg-card shadow-2xl flex flex-col">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-              <img src={logo} alt="Mini Coxinhas" className="h-14 w-auto object-contain" />
+          {/* Drawer glassmorphism */}
+          <aside className="absolute right-0 top-0 h-full w-[85%] max-w-sm bg-white/30 backdrop-blur-md shadow-2xl flex flex-col dark:bg-black/40">
+            
+            <div className="flex items-center justify-between px-6 py-8">
+              <img src={logo} alt="Mini Coxinhas" className="h-10 w-auto object-contain drop-shadow-sm" />
               <button
                 onClick={() => setNavOpen(false)}
-                className="grid h-10 w-10 place-items-center rounded-full hover:bg-muted transition"
+                className="grid h-10 w-10 place-items-center rounded-2xl border border-foreground/10 bg-white/20 text-foreground hover:bg-white/40 transition"
                 aria-label="Fechar menu"
               >
-                <X className="h-5 w-5" />
+                <X className="h-5 w-5 stroke-[1.5]" />
               </button>
             </div>
-            <nav className="flex-1 p-4 space-y-1">
+            
+            <nav className="flex-1 px-6 space-y-4 mt-4">
               <Link
                 to="/"
                 onClick={() => setNavOpen(false)}
-                className="flex items-center gap-3 rounded-xl px-3 py-3 text-foreground hover:bg-muted transition"
+                className="flex items-center justify-between py-3 text-foreground/90 font-medium hover:text-foreground transition"
               >
-                <Home className="h-5 w-5 text-foreground/60" />
-                <span className="font-medium">Início</span>
+                <span>Início</span>
+                <ArrowRight className="h-4 w-4 opacity-50" />
               </Link>
               <Link
                 to="/"
                 hash="menu"
                 onClick={() => setNavOpen(false)}
-                className="flex items-center gap-3 rounded-xl px-3 py-3 text-foreground hover:bg-muted transition"
+                className="flex items-center justify-between py-3 text-foreground/90 font-medium hover:text-foreground transition"
               >
-                <UtensilsCrossed className="h-5 w-5 text-foreground/60" />
-                <span className="font-medium">Cardápio</span>
+                <span>Produtos</span>
+                <ArrowRight className="h-4 w-4 opacity-50" />
               </Link>
               <Link
                 to="/contato"
                 onClick={() => setNavOpen(false)}
-                className="flex items-center gap-3 rounded-xl px-3 py-3 text-foreground hover:bg-muted transition"
+                className="flex items-center justify-between py-3 text-foreground/90 font-medium hover:text-foreground transition"
               >
-                <Phone className="h-5 w-5 text-foreground/60" />
-                <span className="font-medium">Contato</span>
+                <span>Contato</span>
+                <ArrowRight className="h-4 w-4 opacity-50" />
               </Link>
-            </nav>
-            <div className="p-4 border-t border-border">
+              
+              <hr className="my-6 border-foreground/10" />
+              
               <a
                 href={`https://wa.me/${WPP}`}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center justify-center gap-2 w-full rounded-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 shadow-md transition"
+                className="flex items-center justify-center gap-2 w-full rounded-2xl bg-highlight hover:bg-highlight/90 text-white font-bold py-4 shadow-lg transition"
               >
-                <WhatsAppIcon className="h-5 w-5" />
-                Chamar no WhatsApp
+                <MessageCircle className="h-5 w-5 fill-white" />
+                Fazer pedido
               </a>
-            </div>
+            </nav>
+
+            {/* Floating green whatsapp button at the bottom right */}
+            <a
+              href={`https://wa.me/${WPP}`}
+              target="_blank"
+              rel="noreferrer"
+              className="absolute bottom-8 right-6 grid h-14 w-14 place-items-center rounded-full bg-[#25D366] text-white shadow-xl hover:scale-105 transition"
+            >
+              <WhatsAppIcon className="h-7 w-7" />
+            </a>
           </aside>
         </div>
       )}
-    </header>
+    </>
   );
 }

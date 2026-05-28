@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, Star, ShoppingCart } from "lucide-react";
+import { Search, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
 import { ProductCard } from "./ProductCard";
 import { ProductModal } from "./ProductModal";
 import { formatBRL, useCart } from "@/store/cart";
@@ -45,20 +45,71 @@ const COMBO_FALLBACK: Product = {
 };
 const FALLBACK_CATEGORIES: CategoryRow[] = [{ id: "combos", name: "Combos", sort_order: 4 }];
 
-function emojiFor(name: string): string {
-  const n = name.toLowerCase();
-  if (n.includes("coxinha")) return "🍗";
-  if (n.includes("pastel") || n.includes("pasteis")) return "🥟";
-  if (n.includes("porç") || n.includes("batata") || n.includes("salsicha") || n.includes("bolinho"))
-    return "🍟";
-  if (n.includes("combo")) return "🎉";
-  if (n.includes("doce") || n.includes("brigad")) return "🍫";
-  if (n.includes("bebida") || n.includes("refri") || n.includes("suco")) return "🥤";
-  return "✨";
+function CategoryRow({ category, products, onSelect }: { category: CategoryRow, products: Product[], onSelect: (p: Product) => void }) {
+  const rowRef = useRef<HTMLDivElement>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (rowRef.current) {
+      const scrollAmount = direction === 'left' ? -320 : 320;
+      rowRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const handleScroll = () => {
+    if (rowRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = rowRef.current;
+      const maxScroll = scrollWidth - clientWidth;
+      if (maxScroll <= 0) return;
+      const progress = (scrollLeft / maxScroll) * 100;
+      setScrollProgress(progress);
+    }
+  };
+
+  return (
+    <div className="mb-16">
+      <div className="mb-6 flex items-end justify-between">
+        <div>
+          <h3 className="font-serif text-3xl font-extrabold tracking-tight text-foreground">{category.name}</h3>
+          <p className="mt-1 text-sm text-muted-foreground/80">Sabores clássicos e especiais</p>
+        </div>
+        <div className="hidden sm:flex items-center gap-2">
+          <button onClick={() => scroll('left')} className="grid h-10 w-10 place-items-center rounded-full border border-border bg-white text-foreground hover:bg-muted transition" aria-label="Anterior">
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button onClick={() => scroll('right')} className="grid h-10 w-10 place-items-center rounded-full border border-border bg-white text-foreground hover:bg-muted transition" aria-label="Próximo">
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+      
+      <div 
+        ref={rowRef}
+        onScroll={handleScroll}
+        className="no-scrollbar flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 -mx-4 px-4 sm:mx-0 sm:px-0"
+      >
+        {products.map((p) => (
+          <div key={p.id} className="snap-start shrink-0 w-[70vw] sm:w-[280px]">
+            <ProductCard product={p} onClick={() => onSelect(p)} />
+          </div>
+        ))}
+      </div>
+
+      {/* Indicador de rolagem mobile */}
+      {products.length > 1 && (
+        <div className="mt-2 mx-auto h-1.5 w-16 bg-muted rounded-full overflow-hidden sm:hidden">
+          <div 
+            className="h-full bg-highlight transition-all duration-150 ease-out"
+            style={{ width: `${Math.max(15, scrollProgress)}%` }}
+          />
+        </div>
+      )}
+    </div>
+  );
 }
 
+
 export function Menu({ menuRef }: { menuRef: React.RefObject<HTMLDivElement | null> }) {
-  const [active, setActive] = useState<string | null>("__all__");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Product | null>(null);
   const { count, total, setOpen } = useCart();
@@ -110,71 +161,31 @@ export function Menu({ menuRef }: { menuRef: React.RefObject<HTMLDivElement | nu
     return [...baseProducts, ...comboFallback];
   }, [comboCategoryId, data]);
 
-  const currentCat = active ?? "__all__";
-
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return products.filter((p) => {
-      if (q && !`${p.name} ${p.description}`.toLowerCase().includes(q)) return false;
-      if (currentCat === "__all__") return true;
-      return p.category === currentCat;
-    });
-  }, [products, currentCat, query]);
+    if (!q) return products;
+    return products.filter((p) => `${p.name} ${p.description}`.toLowerCase().includes(q));
+  }, [products, query]);
 
   return (
-    <section ref={menuRef} className="relative bg-cream pb-32 pt-10">
+    <section ref={menuRef} id="menu" className="relative bg-[#FAF9F6] dark:bg-background pb-32 pt-20">
       <div className="mx-auto max-w-5xl px-4">
-        <div className="text-center">
-          <h2 className="font-display text-4xl sm:text-5xl text-brand">NOSSO CARDÁPIO</h2>
-          <p className="mx-auto mt-2 max-w-md text-sm text-foreground/80">
-            Feitos com ingredientes frescos e muito amor. Escolha o seu favorito!
+        <div className="text-center mb-12">
+          <h2 className="font-serif text-4xl sm:text-5xl text-foreground font-extrabold tracking-tight">Nosso Cardápio</h2>
+          <p className="mx-auto mt-3 max-w-md text-base text-muted-foreground">
+            Explore nossa variedade de mini coxinhas e combos feitos na hora pra você.
           </p>
         </div>
 
-        <div className="relative mx-auto mt-6 max-w-xl">
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <div className="relative mx-auto mt-6 max-w-xl mb-16">
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar produtos..."
-            className="w-full rounded-full border border-border bg-card py-3.5 pl-11 pr-4 text-sm shadow-sm placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40"
+            placeholder="Buscar por sabor..."
+            className="w-full rounded-full border border-border bg-white py-4 pl-12 pr-6 text-base shadow-sm placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-highlight/50 transition-all dark:bg-card"
           />
         </div>
-
-        {categories.length > 0 && (
-          <div className="sticky top-[68px] z-30 -mx-4 mt-8 bg-cream/90 px-4 py-3 backdrop-blur">
-            <div className="no-scrollbar flex gap-2 overflow-x-auto overscroll-x-contain rounded-full bg-card p-1.5 shadow-sm ring-1 ring-border/60 snap-x snap-mandatory touch-pan-x [-webkit-overflow-scrolling:touch] sm:justify-center sm:overflow-visible sm:snap-none">
-              <button
-                onClick={() => setActive("__all__")}
-                className={`flex shrink-0 snap-start items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  currentCat === "__all__"
-                    ? "bg-brand text-brand-foreground shadow"
-                    : "text-foreground/70 hover:bg-muted"
-                }`}
-              >
-                <span>🍽️</span>
-                Todos
-              </button>
-              {categories.map((c) => {
-                const isActive = currentCat === c.id;
-                return (
-                  <button
-                    key={c.id}
-                    onClick={() => setActive(c.id)}
-                    className={`flex shrink-0 snap-start items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${
-                      isActive
-                        ? "bg-brand text-brand-foreground shadow"
-                        : "text-foreground/70 hover:bg-muted"
-                    }`}
-                  >
-                    <span>{emojiFor(c.name)}</span>
-                    {c.name}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
         {isLoading ? (
           <p className="mt-5 py-10 text-center text-sm text-muted-foreground">
@@ -184,30 +195,13 @@ export function Menu({ menuRef }: { menuRef: React.RefObject<HTMLDivElement | nu
           <p className="mt-5 py-10 text-center text-sm text-muted-foreground">
             Nenhum produto encontrado.
           </p>
-        ) : currentCat === "__all__" ? (
-          <div className="mt-5 space-y-8">
+        ) : (
+          <div className="mt-5">
             {categories.map((c) => {
               const items = filtered.filter((p) => p.category === c.id);
               if (items.length === 0) return null;
-              return (
-                <div key={c.id}>
-                  <h3 className="mb-3 flex items-center gap-2 font-display text-2xl text-brand">
-                    <span>{emojiFor(c.name)}</span> {c.name}
-                  </h3>
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                    {items.map((p) => (
-                      <ProductCard key={p.id} product={p} onClick={() => setSelected(p)} />
-                    ))}
-                  </div>
-                </div>
-              );
+              return <CategoryRow key={c.id} category={c} products={items} onSelect={setSelected} />;
             })}
-          </div>
-        ) : (
-          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {filtered.map((p) => (
-              <ProductCard key={p.id} product={p} onClick={() => setSelected(p)} />
-            ))}
           </div>
         )}
       </div>
@@ -216,15 +210,15 @@ export function Menu({ menuRef }: { menuRef: React.RefObject<HTMLDivElement | nu
         <div className="fixed inset-x-3 bottom-3 z-40 mx-auto max-w-md">
           <button
             onClick={() => setOpen(true)}
-            className="flex w-full items-center justify-between gap-3 rounded-full bg-brand px-4 py-3 text-brand-foreground shadow-2xl hover:opacity-95 transition"
+            className="flex w-full items-center justify-between gap-3 rounded-full bg-highlight px-5 py-4 text-white shadow-2xl hover:opacity-95 transition-all"
           >
             <span className="flex items-center gap-2">
-              <span className="grid h-7 w-7 place-items-center rounded-full bg-brand-foreground/15">
+              <span className="grid h-8 w-8 place-items-center rounded-full bg-white/20">
                 <ShoppingCart className="h-4 w-4" />
               </span>
-              <span className="font-semibold">{count} · Ver Carrinho</span>
+              <span className="font-bold text-lg">{count} · Ver Carrinho</span>
             </span>
-            <span className="rounded-full bg-highlight px-3 py-1 text-sm font-bold text-highlight-foreground">
+            <span className="rounded-full bg-white px-4 py-1 text-sm font-bold text-highlight shadow-sm">
               {formatBRL(total)}
             </span>
           </button>

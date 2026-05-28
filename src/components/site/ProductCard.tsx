@@ -6,32 +6,41 @@ export function ProductCard({ product, onClick }: { product: Product; onClick: (
   return (
     <button
       onClick={onClick}
-      className="group flex flex-col overflow-hidden rounded-3xl bg-card text-left shadow-sm ring-1 ring-border/60 hover:shadow-lg hover:-translate-y-0.5 transition"
+      className="group relative flex aspect-[4/5] w-full flex-col overflow-hidden rounded-[2rem] bg-card text-left shadow-md ring-1 ring-border/50 transition-all hover:-translate-y-1 hover:shadow-xl"
     >
-      <div className="relative aspect-square w-full overflow-hidden bg-muted">
+      {/* Imagem de Fundo com Degradê */}
+      <div className="absolute inset-0 z-0 bg-muted">
         <img
           src={product.image}
           alt={product.name}
           loading="lazy"
-          className="h-full w-full object-cover group-hover:scale-105 transition duration-500"
+          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
-        {product.featured && (
-          <span className="absolute left-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-highlight text-highlight-foreground shadow">
-            <Star className="h-3.5 w-3.5 fill-current" />
-          </span>
-        )}
+        {/* Degradê sutil para escurecer o topo e garantir leitura da estrela, e um pouco na base */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10 mix-blend-multiply" />
       </div>
-      <div className="flex flex-1 flex-col gap-1 p-3">
-        <h3 className="font-hand text-lg font-bold leading-tight text-foreground">{product.name}</h3>
-        <p className="line-clamp-2 text-xs text-muted-foreground">{product.description}</p>
-        <div className="mt-2 flex items-center justify-between">
-          <span className="text-base font-extrabold text-brand">
-            {formatBRL(product.price)}
-          </span>
 
-          <span className="inline-flex items-center gap-1 text-xs font-semibold text-brand">
-            <Plus className="h-3.5 w-3.5" /> Adicionar
-          </span>
+      {product.featured && (
+        <span className="absolute left-4 top-4 z-10 grid h-8 w-8 place-items-center rounded-full bg-highlight text-white shadow-lg">
+          <Star className="h-4 w-4 fill-current" />
+        </span>
+      )}
+
+      <div className="flex flex-1 flex-col justify-end p-2 z-10">
+        {/* Bloco Branco Inferior */}
+        <div className="flex w-full items-center justify-between rounded-2xl bg-white p-4 shadow-sm dark:bg-card">
+          <div className="flex flex-col">
+            <h3 className="font-serif text-lg sm:text-xl font-bold leading-tight text-foreground">{product.name}</h3>
+            {product.description && (
+              <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{product.description}</p>
+            )}
+          </div>
+          
+          <div className="flex shrink-0 items-center gap-2 pl-2">
+            <span className="text-sm font-bold text-highlight sm:text-base whitespace-nowrap">
+              {formatBRL(product.price)}
+            </span>
+          </div>
         </div>
       </div>
     </button>

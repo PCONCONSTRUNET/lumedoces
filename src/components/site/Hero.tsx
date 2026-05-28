@@ -1,79 +1,65 @@
-import { MapPin, CreditCard } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import hero from "@/assets/hero-bg.jpg";
 import logo from "@/assets/logo.png";
-import mascot from "@/assets/mascot.png";
-import { PixIcon } from "@/components/PaymentLabel";
-import { useBusinessStatus } from "@/hooks/useBusinessStatus";
+import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 
 export function Hero({ onOrder }: { onOrder: () => void }) {
-  const status = useBusinessStatus();
   return (
-    <section id="top" className="relative overflow-hidden">
-      <div className="relative h-[78vh] min-h-[560px] w-full">
+    <section id="top" className="relative flex min-h-[90vh] sm:min-h-[85vh] w-full flex-col items-center justify-center overflow-hidden pb-12 pt-28">
+      {/* Background Image & Overlay */}
+      <div className="absolute inset-0 z-0">
         <img
           src={hero}
-          alt="Mini coxinhas crocantes Mini Coxinhas"
-          className="absolute inset-0 h-full w-full object-cover"
+          alt="Mini coxinhas crocantes"
+          className="h-full w-full object-cover object-center"
           width={1280}
           height={1600}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/75" />
+        <div className="absolute inset-0 bg-white/40 dark:bg-black/60 backdrop-blur-[2px]" />
+      </div>
 
-        {/* Floating mascot — desktop right side */}
-        <img
-          src={mascot}
-          alt=""
-          aria-hidden
-          className="pointer-events-none absolute bottom-6 right-4 hidden h-[78%] max-h-[520px] w-auto object-contain drop-shadow-2xl animate-mascot-float md:block"
-        />
-
-        <div className="relative z-10 mx-auto flex h-full max-w-3xl flex-col items-center justify-center px-6 text-center">
+      <div className="relative z-10 flex w-full max-w-5xl flex-col items-center justify-center px-6 sm:px-12 mt-12 md:mt-0">
+        {/* Logo and Titles */}
+        <div className="flex flex-col max-w-2xl text-center">
           <img
             src={logo}
-            alt=""
-            className="mb-4 h-32 sm:h-40 w-auto object-contain drop-shadow-2xl"
-            width={320}
-            height={160}
+            alt="Mini Coxinhas Logo"
+            className="mb-8 h-28 sm:h-36 w-auto object-contain drop-shadow-xl mx-auto"
+            width={280}
+            height={140}
           />
-          <h1 className="font-display text-5xl sm:text-6xl text-white drop-shadow-lg">
-            MINI <span className="text-highlight">COXINHAS</span>
+          
+          <h1 className="text-5xl sm:text-7xl font-black tracking-widest text-foreground uppercase drop-shadow-md mt-4">
+            MINI COXINHAS
           </h1>
-          <p className="mt-3 text-white/90 text-base sm:text-lg">
-            Crocantes por fora, cremosas por dentro 🤤
+          
+          <p className="mt-4 max-w-lg mx-auto text-lg sm:text-xl text-foreground/90 font-medium">
+            Crocantes por fora, cremosas por dentro 😋
           </p>
-          {/* Address hidden by request */}
 
-
-          <button
-            onClick={onOrder}
-            className="mt-7 inline-flex items-center gap-2 rounded-full bg-highlight px-8 py-4 text-base font-bold text-highlight-foreground shadow-xl hover:scale-[1.02] active:scale-[0.98] transition"
-          >
-            FAZER PEDIDO 🍗
-          </button>
-
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-            {!status.loading && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-black/40 backdrop-blur px-3 py-1.5 text-xs text-white border border-white/15">
-                <span className={`h-2 w-2 rounded-full ${status.isOpen ? "bg-green-500 animate-pulse" : "bg-red-500"}`} />
-                {status.label}
-              </span>
-            )}
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/40 backdrop-blur px-3 py-1.5 text-xs text-white border border-white/15">
-              <CreditCard className="h-3.5 w-3.5" />
-              <PixIcon className="h-3.5 w-3.5" />
-              Pix, Cartão, Dinheiro
-            </span>
+          {/* Action Buttons */}
+          <div className="mt-8 flex flex-col items-center gap-4">
+            <button
+              onClick={onOrder}
+              className="inline-flex h-14 w-full sm:w-auto min-w-[300px] items-center justify-center rounded-full bg-[#d97706] px-8 text-lg font-bold text-white shadow-lg hover:bg-[#b45309] hover:scale-[1.02] active:scale-[0.98] transition-all uppercase tracking-wide"
+            >
+              FAZER PEDIDO 🍗
+            </button>
+            
+            <div className="flex flex-col gap-3 mt-4 w-full sm:w-auto min-w-[280px]">
+              <div className="flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-black/60 px-5 py-2.5 text-sm font-medium text-white shadow-sm backdrop-blur-md">
+                <span className="h-2.5 w-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]"></span>
+                <span>Fechado · abre hoje 14:00</span>
+              </div>
+              <div className="flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-black/60 px-5 py-2.5 text-sm font-medium text-white shadow-sm backdrop-blur-md">
+                <span className="text-sm">💳 💠</span>
+                <span>Pix, Cartão, Dinheiro</span>
+              </div>
+            </div>
           </div>
         </div>
-
-        {/* Mobile mascot peeking from bottom */}
-        <img
-          src={mascot}
-          alt=""
-          aria-hidden
-          className="pointer-events-none absolute -bottom-4 right-2 z-10 h-40 w-auto object-contain drop-shadow-2xl animate-mascot-float md:hidden"
-        />
       </div>
+
     </section>
   );
 }

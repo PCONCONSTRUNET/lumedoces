@@ -38,6 +38,7 @@
   --font-display: "Caveat Brush", system-ui, sans-serif;
   --font-handwritten: "Patrick Hand", system-ui, sans-serif;
   --font-body: "Quicksand", system-ui, sans-serif;
+  --font-serif: "Playfair Display", serif;
 }
 
 :root {
@@ -116,6 +117,7 @@
   }
   h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: 0.02em; }
   .font-hand { font-family: var(--font-handwritten); }
+  .font-serif { font-family: var(--font-serif); }
 }
 
 @layer utilities {
