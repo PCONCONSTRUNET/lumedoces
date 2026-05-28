@@ -18,6 +18,14 @@ export function ProductModal({
   useEffect(() => {
     setSelected(new Set());
     setNotes("");
+    
+    // Lock body scroll when modal is open
+    if (product) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "unset";
+      };
+    }
   }, [product?.id]);
 
   const addonTotal = useMemo(() => {
@@ -55,9 +63,9 @@ export function ProductModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4 animate-in fade-in">
-      <div className="relative flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl sm:rounded-3xl bg-background shadow-2xl animate-in slide-in-from-bottom">
-        <div className="relative aspect-square max-h-[70vh] w-full shrink-0 overflow-hidden bg-muted">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 sm:p-6 animate-in fade-in duration-200">
+      <div className="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-3xl bg-background shadow-2xl animate-in zoom-in-95 duration-200">
+        <div className="relative aspect-square max-h-[50vh] sm:max-h-[60vh] w-full shrink-0 overflow-hidden bg-muted">
           <img
             src={product.image}
             alt=""

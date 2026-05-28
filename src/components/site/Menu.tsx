@@ -86,7 +86,7 @@ function CategoryRow({ category, products, onSelect }: { category: CategoryRow, 
       <div 
         ref={rowRef}
         onScroll={handleScroll}
-        className="no-scrollbar flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 -mx-4 px-4 sm:mx-0 sm:px-0"
+        className="no-scrollbar flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-px-6 sm:scroll-px-0 pb-4 -mx-4 px-6 sm:mx-0 sm:px-0 after:content-[''] after:w-2 after:shrink-0 sm:after:hidden"
       >
         {products.map((p) => (
           <div key={p.id} className="snap-start shrink-0 w-[70vw] sm:w-[280px]">

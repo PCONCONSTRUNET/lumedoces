@@ -28,9 +28,9 @@ export function ProductCard({ product, onClick }: { product: Product; onClick: (
 
       <div className="flex flex-1 flex-col justify-end p-2 z-10">
         {/* Bloco Branco Inferior */}
-        <div className="flex w-full items-center justify-between rounded-2xl bg-white p-4 shadow-sm dark:bg-card">
+        <div className="flex w-full items-center justify-between rounded-2xl bg-white p-3 shadow-sm dark:bg-card">
           <div className="flex flex-col">
-            <h3 className="font-serif text-lg sm:text-xl font-bold leading-tight text-foreground">{product.name}</h3>
+            <h3 className="font-serif text-base sm:text-lg font-bold leading-tight text-foreground">{product.name}</h3>
             {product.description && (
               <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{product.description}</p>
             )}

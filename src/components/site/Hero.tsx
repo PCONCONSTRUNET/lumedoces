@@ -38,21 +38,21 @@ export function Hero({ onOrder }: { onOrder: () => void }) {
           </p>
 
           {/* Action Buttons */}
-          <div className="mt-8 flex flex-col items-center gap-4">
+          <div className="mt-8 flex flex-col items-center gap-3 sm:gap-4 w-full">
             <button
               onClick={onOrder}
-              className="inline-flex h-14 w-full sm:w-auto min-w-[300px] items-center justify-center rounded-full bg-[#d97706] px-8 text-lg font-bold text-white shadow-lg hover:bg-[#b45309] hover:scale-[1.02] active:scale-[0.98] transition-all uppercase tracking-wide"
+              className="inline-flex h-12 sm:h-14 w-[75%] max-w-[260px] sm:w-auto sm:max-w-none sm:min-w-[300px] items-center justify-center rounded-full bg-[#d97706] px-6 sm:px-8 text-base sm:text-lg font-bold text-white shadow-lg hover:bg-[#b45309] hover:scale-[1.02] active:scale-[0.98] transition-all uppercase tracking-wide"
             >
               FAZER PEDIDO 🍗
             </button>
             
-            <div className="flex flex-col gap-3 mt-4 w-full sm:w-auto min-w-[280px]">
-              <div className="flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-black/60 px-5 py-2.5 text-sm font-medium text-white shadow-sm backdrop-blur-md">
-                <span className="h-2.5 w-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]"></span>
+            <div className="flex flex-col items-center gap-2 sm:gap-3 mt-2 sm:mt-4 w-[75%] max-w-[260px] sm:w-auto sm:max-w-none sm:min-w-[280px]">
+              <div className="flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-black/60 px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white shadow-sm backdrop-blur-md">
+                <span className="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]"></span>
                 <span>Fechado · abre hoje 14:00</span>
               </div>
-              <div className="flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-black/60 px-5 py-2.5 text-sm font-medium text-white shadow-sm backdrop-blur-md">
-                <span className="text-sm">💳 💠</span>
+              <div className="flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-black/60 px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white shadow-sm backdrop-blur-md">
+                <span className="text-xs sm:text-sm">💳 💠</span>
                 <span>Pix, Cartão, Dinheiro</span>
               </div>
             </div>
