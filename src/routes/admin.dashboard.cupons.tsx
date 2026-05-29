@@ -37,6 +37,7 @@ function formatCouponValue(coupon: Coupon) {
 }
 
 function CuponsPage() {
+  const supabaseUntyped = supabase as any;
   const [rows, setRows] = useState<Coupon[] | null>(null);
   const [saving, setSaving] = useState(false);
   const [code, setCode] = useState("");
@@ -48,7 +49,7 @@ function CuponsPage() {
   const [expiresAt, setExpiresAt] = useState("");
 
   const load = async () => {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseUntyped
       .from("coupons")
       .select("*")
       .order("created_at", { ascending: false });
@@ -58,7 +59,7 @@ function CuponsPage() {
       return;
     }
 
-    setRows((data as Coupon[]) ?? []);
+    setRows(((data ?? []) as unknown as Coupon[]) ?? []);
   };
 
   useEffect(() => {
@@ -95,7 +96,7 @@ function CuponsPage() {
 
     setSaving(true);
     try {
-      const { error } = await (supabase.from("coupons") as never).insert({
+      const { error } = await supabaseUntyped.from("coupons").insert({
         code: normalizedCode,
         description: description.trim() || null,
         discount_type: discountType,
@@ -120,10 +121,7 @@ function CuponsPage() {
   };
 
   const toggleCoupon = async (coupon: Coupon) => {
-    const { error } = await (supabase
-      .from("coupons") as never)
-      .update({ is_active: !coupon.is_active })
-      .eq("id", coupon.id);
+    const { error } = await supabaseUntyped.from("coupons").update({ is_active: !coupon.is_active }).eq("id", coupon.id);
 
     if (error) {
       toast.error("Nao foi possivel atualizar");
@@ -135,7 +133,7 @@ function CuponsPage() {
 
   const deleteCoupon = async (coupon: Coupon) => {
     if (!confirm(`Excluir cupom ${coupon.code}?`)) return;
-    const { error } = await (supabase.from("coupons") as never).delete().eq("id", coupon.id);
+    const { error } = await supabaseUntyped.from("coupons").delete().eq("id", coupon.id);
     if (error) {
       toast.error("Nao foi possivel excluir");
       return;
