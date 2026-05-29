@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Loader2, Plus, TicketPercent, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tables } from "@/integrations/supabase/types";
 import { formatBRL, formatDateBR } from "@/lib/finance-utils";
 import { cn } from "@/lib/utils";
 
@@ -11,7 +10,21 @@ export const Route = createFileRoute("/admin/dashboard/cupons")({
   component: CuponsPage,
 });
 
-type Coupon = Tables<"coupons">;
+type Coupon = {
+  id: string;
+  code: string;
+  description: string | null;
+  discount_type: "fixed" | "percent";
+  discount_value: number;
+  min_order_total: number;
+  max_uses: number | null;
+  used_count: number;
+  starts_at: string | null;
+  expires_at: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
 
 function parseNumber(value: string) {
   const n = Number(value.replace(/\./g, "").replace(",", "."));
@@ -82,7 +95,7 @@ function CuponsPage() {
 
     setSaving(true);
     try {
-      const { error } = await supabase.from("coupons").insert({
+      const { error } = await (supabase.from("coupons") as never).insert({
         code: normalizedCode,
         description: description.trim() || null,
         discount_type: discountType,
@@ -107,8 +120,8 @@ function CuponsPage() {
   };
 
   const toggleCoupon = async (coupon: Coupon) => {
-    const { error } = await supabase
-      .from("coupons")
+    const { error } = await (supabase
+      .from("coupons") as never)
       .update({ is_active: !coupon.is_active })
       .eq("id", coupon.id);
 
@@ -122,7 +135,7 @@ function CuponsPage() {
 
   const deleteCoupon = async (coupon: Coupon) => {
     if (!confirm(`Excluir cupom ${coupon.code}?`)) return;
-    const { error } = await supabase.from("coupons").delete().eq("id", coupon.id);
+    const { error } = await (supabase.from("coupons") as never).delete().eq("id", coupon.id);
     if (error) {
       toast.error("Nao foi possivel excluir");
       return;

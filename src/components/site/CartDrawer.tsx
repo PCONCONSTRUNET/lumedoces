@@ -177,8 +177,8 @@ export function CartDrawer() {
 
     setCouponLoading(true);
     try {
-      const { data, error } = await supabase
-        .from("coupons")
+      const { data, error } = await (supabase
+        .from("coupons") as never)
         .select("*")
         .eq("code", normalized)
         .maybeSingle();
@@ -253,7 +253,7 @@ export function CartDrawer() {
         coupon_code: coupon?.code ?? null,
       };
 
-      const { error: firstOrderError } = await supabase.from("orders").insert(orderPayload);
+      const { error: firstOrderError } = await (supabase.from("orders") as never).insert(orderPayload);
       let orderError = firstOrderError;
 
       if (firstOrderError && isMissingAddressReferenceColumnError(firstOrderError)) {
@@ -292,8 +292,8 @@ export function CartDrawer() {
       if (itemsError) throw itemsError;
 
       if (coupon) {
-        await supabase
-          .from("coupons")
+        await (supabase
+          .from("coupons") as never)
           .update({ used_count: coupon.used_count + 1 })
           .eq("id", coupon.id);
       }

@@ -29,7 +29,11 @@ export const Route = createFileRoute("/admin/dashboard/pedidos")({
 type OrderStatus = Enums<"order_status">;
 type FilterKey = OrderStatus | "all";
 
-type OrderRow = Tables<"orders">;
+type OrderRow = Tables<"orders"> & {
+  address_reference?: string | null;
+  coupon_id?: string | null;
+  coupon_code?: string | null;
+};
 type ItemRow = Tables<"order_items">;
 type PaymentMethodRow = Tables<"payment_methods">;
 
