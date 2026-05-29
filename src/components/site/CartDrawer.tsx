@@ -121,6 +121,7 @@ function validateCoupon(coupon: CouponRow, subtotal: number) {
 }
 
 export function CartDrawer() {
+  const supabaseUntyped = supabase as any;
   const { items, open, setOpen, setQty, remove, total, clear } = useCart();
   const status = useBusinessStatus();
   const [name, setName] = useState("");
@@ -177,7 +178,7 @@ export function CartDrawer() {
 
     setCouponLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseUntyped
         .from("coupons")
         .select("*")
         .eq("code", normalized)
@@ -253,7 +254,7 @@ export function CartDrawer() {
         coupon_code: coupon?.code ?? null,
       };
 
-      const { error: firstOrderError } = await supabase.from("orders").insert(orderPayload);
+      const { error: firstOrderError } = await supabaseUntyped.from("orders").insert(orderPayload);
       let orderError = firstOrderError;
 
       if (firstOrderError && isMissingAddressReferenceColumnError(firstOrderError)) {
@@ -292,10 +293,7 @@ export function CartDrawer() {
       if (itemsError) throw itemsError;
 
       if (coupon) {
-        await supabase
-          .from("coupons")
-          .update({ used_count: coupon.used_count + 1 })
-          .eq("id", coupon.id);
+        await supabaseUntyped.from("coupons").update({ used_count: coupon.used_count + 1 }).eq("id", coupon.id);
       }
 
       setConfirmedTotal(finalTotal);

@@ -20,42 +20,36 @@ export type Database = {
           changed_fields: string[] | null
           created_at: string
           id: string
-          ip_address: string | null
           new_data: Json | null
           old_data: Json | null
           record_id: string | null
           table_name: string
           user_email: string | null
           user_id: string | null
-          user_agent: string | null
         }
         Insert: {
           action: Database["public"]["Enums"]["audit_action"]
           changed_fields?: string[] | null
           created_at?: string
           id?: string
-          ip_address?: string | null
           new_data?: Json | null
           old_data?: Json | null
           record_id?: string | null
           table_name: string
           user_email?: string | null
           user_id?: string | null
-          user_agent?: string | null
         }
         Update: {
           action?: Database["public"]["Enums"]["audit_action"]
           changed_fields?: string[] | null
           created_at?: string
           id?: string
-          ip_address?: string | null
           new_data?: Json | null
           old_data?: Json | null
           record_id?: string | null
           table_name?: string
           user_email?: string | null
           user_id?: string | null
-          user_agent?: string | null
         }
         Relationships: []
       }
@@ -107,54 +101,6 @@ export type Database = {
           is_active?: boolean
           name?: string
           sort_order?: number
-        }
-        Relationships: []
-      }
-      coupons: {
-        Row: {
-          code: string
-          created_at: string
-          description: string | null
-          discount_type: Database["public"]["Enums"]["coupon_discount_type"]
-          discount_value: number
-          expires_at: string | null
-          id: string
-          is_active: boolean
-          max_uses: number | null
-          min_order_total: number
-          starts_at: string | null
-          updated_at: string
-          used_count: number
-        }
-        Insert: {
-          code: string
-          created_at?: string
-          description?: string | null
-          discount_type: Database["public"]["Enums"]["coupon_discount_type"]
-          discount_value: number
-          expires_at?: string | null
-          id?: string
-          is_active?: boolean
-          max_uses?: number | null
-          min_order_total?: number
-          starts_at?: string | null
-          updated_at?: string
-          used_count?: number
-        }
-        Update: {
-          code?: string
-          created_at?: string
-          description?: string | null
-          discount_type?: Database["public"]["Enums"]["coupon_discount_type"]
-          discount_value?: number
-          expires_at?: string | null
-          id?: string
-          is_active?: boolean
-          max_uses?: number | null
-          min_order_total?: number
-          starts_at?: string | null
-          updated_at?: string
-          used_count?: number
         }
         Relationships: []
       }
@@ -309,8 +255,6 @@ export type Database = {
       orders: {
         Row: {
           created_at: string
-          coupon_code: string | null
-          coupon_id: string | null
           customer_address: string | null
           customer_name: string
           customer_phone: string | null
@@ -320,7 +264,6 @@ export type Database = {
           notes: string | null
           paid_at: string | null
           payment_method_id: string | null
-          address_reference: string | null
           status: Database["public"]["Enums"]["order_status"]
           subtotal: number
           total: number
@@ -328,8 +271,6 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          coupon_code?: string | null
-          coupon_id?: string | null
           customer_address?: string | null
           customer_name: string
           customer_phone?: string | null
@@ -339,7 +280,6 @@ export type Database = {
           notes?: string | null
           paid_at?: string | null
           payment_method_id?: string | null
-          address_reference?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           subtotal?: number
           total?: number
@@ -347,8 +287,6 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          coupon_code?: string | null
-          coupon_id?: string | null
           customer_address?: string | null
           customer_name?: string
           customer_phone?: string | null
@@ -358,20 +296,12 @@ export type Database = {
           notes?: string | null
           paid_at?: string | null
           payment_method_id?: string | null
-          address_reference?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           subtotal?: number
           total?: number
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "orders_coupon_id_fkey"
-            columns: ["coupon_id"]
-            isOneToOne: false
-            referencedRelation: "coupons"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "orders_payment_method_id_fkey"
             columns: ["payment_method_id"]
@@ -559,7 +489,6 @@ export type Database = {
     Enums: {
       app_role: "admin" | "user"
       audit_action: "INSERT" | "UPDATE" | "DELETE"
-      coupon_discount_type: "fixed" | "percent"
       finance_dre_group: "revenue" | "cost" | "expense"
       finance_kind: "revenue" | "expense"
       finance_status: "paid" | "pending"
