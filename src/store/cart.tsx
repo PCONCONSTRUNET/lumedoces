@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 export type CartItem = {
   uid: string;
@@ -25,9 +25,30 @@ type CartCtx = {
 
 const Ctx = createContext<CartCtx | null>(null);
 
+const CART_STORAGE_KEY = "minicoxinhas_cart_v1";
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [open, setOpen] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(CART_STORAGE_KEY);
+      if (saved) {
+        setItems(JSON.parse(saved));
+      }
+    } catch (e) {
+      console.error("Failed to load cart", e);
+    }
+    setLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (loaded) {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+    }
+  }, [items, loaded]);
 
   const add: CartCtx["add"] = (item) => {
     setItems((prev) => [...prev, { ...item, uid: crypto.randomUUID() }]);

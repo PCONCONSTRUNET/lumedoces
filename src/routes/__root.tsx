@@ -72,25 +72,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Mini Coxinhas Delivery" },
-      { name: "description", content: "Mini Coxinhas Delivery" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Mini Coxinhas Delivery" },
-      { property: "og:description", content: "Mini Coxinhas Delivery" },
+      { title: "Mini Coxinhas — Peça já a sua!" },
+      { name: "description", content: "As melhores e mais crocantes mini coxinhas da região! Salgados, combos para festas e muito mais. Faça seu pedido online." },
+      { name: "author", content: "Mini Coxinhas" },
+      { property: "og:site_name", content: "Mini Coxinhas" },
+      { property: "og:title", content: "Mini Coxinhas — Peça já a sua!" },
+      { property: "og:description", content: "As melhores e mais crocantes mini coxinhas da região! Salgados e combos para festas com entrega rápida. Peça agora." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Mini Coxinhas Delivery" },
-      { name: "twitter:description", content: "Mini Coxinhas Delivery" },
+      { property: "og:url", content: "https://minicoxinhas.com" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Mini Coxinhas — Peça já a sua!" },
+      { name: "twitter:description", content: "As melhores e mais crocantes mini coxinhas da região! Salgados e combos. Peça agora." },
       {
         property: "og:image",
-        content:
-          "https://storage.googleapis.com/gpt-engineer-file-uploads/lXDtPqq8z6gJkDgJ553CSEpWldA2/social-images/social-1779859686969-ChatGPT_Image_27_05_2026,_01_38_21.webp",
+        content: "https://minicoxinhas.com/open.png",
       },
       {
         name: "twitter:image",
-        content:
-          "https://storage.googleapis.com/gpt-engineer-file-uploads/lXDtPqq8z6gJkDgJ553CSEpWldA2/social-images/social-1779859686969-ChatGPT_Image_27_05_2026,_01_38_21.webp",
+        content: "https://minicoxinhas.com/open.png",
       },
     ],
     links: [
@@ -111,7 +110,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <head>
         <HeadContent />
       </head>
