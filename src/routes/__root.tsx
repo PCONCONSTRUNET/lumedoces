@@ -79,17 +79,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "Mini Coxinhas — Peça já a sua!" },
       { property: "og:description", content: "As melhores e mais crocantes mini coxinhas da região! Salgados e combos para festas com entrega rápida. Peça agora." },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://minicoxinhas.com" },
+      { property: "og:url", content: "https://minicoxinhas.vercel.app" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Mini Coxinhas — Peça já a sua!" },
       { name: "twitter:description", content: "As melhores e mais crocantes mini coxinhas da região! Salgados e combos. Peça agora." },
       {
         property: "og:image",
-        content: "https://minicoxinhas.com/open.png",
+        content: "https://minicoxinhas.vercel.app/open.png",
       },
       {
         name: "twitter:image",
-        content: "https://minicoxinhas.com/open.png",
+        content: "https://minicoxinhas.vercel.app/open.png",
       },
     ],
     links: [
