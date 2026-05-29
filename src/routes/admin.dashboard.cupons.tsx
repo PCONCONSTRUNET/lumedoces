@@ -59,7 +59,7 @@ function CuponsPage() {
       return;
     }
 
-    setRows(((data ?? []) as unknown as Coupon[]) ?? []);
+    setRows((data ?? []) as unknown as Coupon[]);
   };
 
   useEffect(() => {
