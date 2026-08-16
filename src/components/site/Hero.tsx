@@ -1,5 +1,5 @@
 import { ChevronDown } from "lucide-react";
-import hero from "@/assets/hero-bg.jpg";
+import hero from "@/assets/capa-rafa.png";
 import logo from "@/assets/logo.png";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 
@@ -10,7 +10,7 @@ export function Hero({ onOrder }: { onOrder: () => void }) {
       <div className="absolute inset-0 z-0">
         <img
           src={hero}
-          alt="Mini coxinhas crocantes"
+          alt="Rafa Lanches Delivery"
           className="h-full w-full object-cover object-center"
           width={1280}
           height={1600}
@@ -23,18 +23,18 @@ export function Hero({ onOrder }: { onOrder: () => void }) {
         <div className="flex flex-col max-w-2xl text-center">
           <img
             src={logo}
-            alt="Mini Coxinhas Logo"
+            alt="Rafa Lanches Delivery Logo"
             className="mb-8 h-28 sm:h-36 w-auto object-contain drop-shadow-xl mx-auto"
             width={280}
             height={140}
           />
           
-          <h1 className="text-5xl sm:text-7xl font-black tracking-widest text-foreground uppercase drop-shadow-md mt-4">
-            MINI COXINHAS
+          <h1 className="text-5xl sm:text-7xl font-black tracking-widest text-foreground uppercase drop-shadow-md mt-4 text-center">
+            RAFA LANCHES DELIVERY
           </h1>
           
           <p className="mt-4 max-w-lg mx-auto text-lg sm:text-xl text-foreground/90 font-medium">
-            Crocantes por fora, cremosas por dentro 😋
+            Os melhores hambúrgueres artesanais e lanches da região 🍔
           </p>
 
           {/* Action Buttons */}
@@ -43,7 +43,7 @@ export function Hero({ onOrder }: { onOrder: () => void }) {
               onClick={onOrder}
               className="inline-flex h-12 sm:h-14 w-[75%] max-w-[260px] sm:w-auto sm:max-w-none sm:min-w-[300px] items-center justify-center rounded-full bg-[#d97706] px-6 sm:px-8 text-base sm:text-lg font-bold text-white shadow-lg hover:bg-[#b45309] hover:scale-[1.02] active:scale-[0.98] transition-all uppercase tracking-wide"
             >
-              FAZER PEDIDO 🍗
+              FAZER PEDIDO 🍔
             </button>
             
             <div className="flex flex-col items-center gap-2 sm:gap-3 mt-2 sm:mt-4 w-[75%] max-w-[260px] sm:w-auto sm:max-w-none sm:min-w-[280px]">

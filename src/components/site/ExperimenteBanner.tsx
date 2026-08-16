@@ -5,7 +5,7 @@ export function ExperimenteBanner() {
     <section className="w-full flex justify-center py-6 md:py-10">
       <img
         src={banner}
-        alt="Experimente nossas mini coxinhas"
+        alt="Experimente nossos hambúrgueres"
         className="max-h-[70vh] w-auto h-auto rounded-2xl shadow-lg object-contain"
         loading="lazy"
       />

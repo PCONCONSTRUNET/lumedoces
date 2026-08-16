@@ -10,23 +10,24 @@ export const Route = createFileRoute("/contato")({
   component: ContatoPage,
   head: () => ({
     meta: [
-      { title: "Contato — Mini Coxinhas" },
-      { name: "description", content: "Endereço, WhatsApp e Instagram da Mini Coxinhas." },
-      { property: "og:title", content: "Contato — Mini Coxinhas" },
+      { title: "Contato — Rafa Lanches Delivery" },
+      { name: "description", content: "Endereço, WhatsApp e Instagram da Rafa Lanches Delivery." },
+      { property: "og:title", content: "Contato — Rafa Lanches Delivery" },
       { property: "og:description", content: "Fale com a gente pelo WhatsApp, Instagram ou venha nos visitar." },
     ],
   }),
 });
 
-const WPP = "5548933806781";
-const WPP_LABEL = "+55 48 93380-6781";
-const IG = "minicoxinhaslm";
-const ENDERECO = "R. Wâlter Vetterli — Lauro Müller, SC, 88880-000, Brasil";
+const WPP = "554899377695";
+const WPP_LABEL = "48 9937-7695";
+const IG = "rafalanchesdelivery_";
+const ENDERECO = "Borracharia e guincho SOS guincho 24horas, Criciúma, Santa Catarina";
 
 const HORARIOS = [
-  { dia: "Seg. a Sex.", hora: "14:00 – 22:00" },
-  { dia: "Sábado", hora: "14:00 – 19:00" },
-  { dia: "Domingo", hora: "Fechado" },
+  { dia: "Terça a Quinta", hora: "19:00 – 00:00" },
+  { dia: "Sexta e Sábado", hora: "19:00 – 01:15" },
+  { dia: "Domingo", hora: "19:00 – 00:00" },
+  { dia: "Segunda-feira", hora: "Fechado" },
 ];
 
 function ContatoPage() {

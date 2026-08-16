@@ -5,7 +5,7 @@ import { Link } from "@tanstack/react-router";
 import logo from "@/assets/logo.png";
 import { useCart } from "@/store/cart";
 
-const WPP = "5548933806781";
+const WPP = "554899377695";
 
 export function Header() {
   const { count, setOpen } = useCart();
@@ -21,7 +21,7 @@ export function Header() {
       <header className="fixed left-1/2 top-4 z-50 w-[95%] max-w-5xl -translate-x-1/2 rounded-[2rem] bg-white/40 px-4 py-2 shadow-sm backdrop-blur-md border border-white/40 dark:bg-black/30 dark:border-white/10 transition-all duration-300">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <img src={logo} alt="Mini Coxinhas" className="h-10 sm:h-12 w-auto object-contain drop-shadow-sm" width={144} height={48} />
+            <img src={logo} alt="Rafa Lanches Delivery" className="h-10 sm:h-12 w-auto object-contain drop-shadow-sm" width={144} height={48} />
           </Link>
           
           <div className="flex items-center">
@@ -48,7 +48,7 @@ export function Header() {
           <aside className="absolute right-0 top-0 h-full w-[85%] max-w-sm bg-white/30 backdrop-blur-md shadow-2xl flex flex-col dark:bg-black/40">
             
             <div className="flex items-center justify-between px-6 py-8">
-              <img src={logo} alt="Mini Coxinhas" className="h-10 w-auto object-contain drop-shadow-sm" />
+              <img src={logo} alt="Rafa Lanches Delivery" className="h-10 w-auto object-contain drop-shadow-sm" />
               <button
                 onClick={() => setNavOpen(false)}
                 className="grid h-10 w-10 place-items-center rounded-2xl border border-foreground/10 bg-white/20 text-foreground hover:bg-white/40 transition"

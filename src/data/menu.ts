@@ -1,10 +1,7 @@
-import heroCoxinha from "@/assets/hero-coxinha.jpg";
-import coxinhaFrango from "@/assets/coxinha-frango.jpg";
-import coxinhaCatupiry from "@/assets/coxinha-catupiry.jpg";
-import coxinhaCheddar from "@/assets/coxinha-cheddar.jpg";
-import coxinhaCombo from "@/assets/coxinha-combo.jpg";
-
-const comboImage = "/products/combo.png";
+import smashBurger from "@/assets/smash-burger.jpg";
+import xSalada from "@/assets/x-salada.jpg";
+import fries from "@/assets/fries.jpg";
+import soda from "@/assets/soda.jpg";
 
 export type Addon = { name: string; price: number };
 export type Product = {
@@ -29,83 +26,47 @@ const sauces: Addon[] = [
 
 export const products: Product[] = [
   {
-    id: "coxinha-frango-50",
-    name: "Mini Coxinhas Frango (50un)",
-    description: "Cinquenta mini coxinhas de frango desfiado temperado",
-    price: 48,
-    image: coxinhaFrango,
-    category: "salgados",
+    id: "smash-duplo",
+    name: "Smash Duplo c/ Queijo",
+    description: "Dois suculentos hambúrgueres smash, queijo derretido, pão brioche amanteigado",
+    price: 32,
+    image: smashBurger,
+    category: "hamburgueres",
     featured: true,
     addons: sauces,
   },
   {
-    id: "coxinha-catupiry-50",
-    name: "Frango c/ Catupiry (50un)",
-    description: "Mini coxinhas recheadas com frango e catupiry cremoso",
-    price: 55,
-    image: coxinhaCatupiry,
-    category: "salgados",
-    featured: true,
-    addons: sauces,
-  },
-  {
-    id: "coxinha-cheddar-50",
-    name: "Cheddar Bacon (50un)",
-    description: "Mini coxinhas recheadas com cheddar e bacon crocante",
-    price: 58,
-    image: coxinhaCheddar,
-    category: "salgados",
-    addons: sauces,
-  },
-  {
-    id: "combo-festa",
-    name: "Combo Festa (100un)",
-    description: "100 mini coxinhas mistas + 4 molhos da casa",
-    price: 110,
-    image: comboImage,
-    category: "combos",
-    featured: true,
-    addons: sauces,
-  },
-  {
-    id: "combo-trio",
-    name: "Trio Sabores (75un)",
-    description: "25 frango + 25 catupiry + 25 cheddar bacon",
-    price: 89,
-    image: comboImage,
-    category: "combos",
-    addons: sauces,
-  },
-  {
-    id: "coxinha-frango-25",
-    name: "Mini Coxinhas Frango (25un)",
-    description: "Porção menor para matar a vontade",
+    id: "x-salada-artesanal",
+    name: "X-Salada Artesanal",
+    description: "Hambúrguer artesanal clássico, alface, tomate, queijo, pão com gergelim",
     price: 28,
-    image: coxinhaFrango,
-    category: "salgados",
+    image: xSalada,
+    category: "hamburgueres",
+    featured: true,
     addons: sauces,
   },
   {
-    id: "brigadeiro-20",
-    name: "Brigadeiros Gourmet (20un)",
-    description: "Brigadeiros tradicionais com granulado belga",
-    price: 35,
-    image: coxinhaCatupiry,
-    category: "doces",
+    id: "porcao-fritas",
+    name: "Porção de Fritas",
+    description: "Fritas douradas e crocantes, acompanha ketchup",
+    price: 18,
+    image: fries,
+    category: "porcoes",
+    featured: true,
+    addons: sauces,
   },
   {
-    id: "refri-2l",
-    name: "Refrigerante 2L",
-    description: "Coca-Cola, Guaraná ou Fanta — escolha na observação",
-    price: 12,
-    image: coxinhaCombo,
+    id: "refri-lata",
+    name: "Refrigerante Lata",
+    description: "Refrigerante gelado 350ml",
+    price: 6,
+    image: soda,
     category: "bebidas",
   },
 ];
 
 export const categories = [
-  { id: "salgados", label: "Salgados", emoji: "🍗" },
-  { id: "combos", label: "Combos", emoji: "🎉" },
-  { id: "doces", label: "Doces", emoji: "🍫" },
+  { id: "hamburgueres", label: "Hambúrgueres", emoji: "🍔" },
+  { id: "porcoes", label: "Porções", emoji: "🍟" },
   { id: "bebidas", label: "Bebidas", emoji: "🥤" },
 ] as const;

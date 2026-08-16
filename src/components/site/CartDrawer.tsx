@@ -17,7 +17,7 @@ import { useBusinessStatus } from "@/hooks/useBusinessStatus";
 import { supabase } from "@/integrations/supabase/client";
 import { formatOrderCode } from "@/lib/order-utils";
 import { formatBRL, useCart } from "@/store/cart";
-import mascot from "@/assets/mascot.png";
+import mascot from "@/assets/mascote-rafa.png";
 
 type PayMethod = "pix" | "cartao" | "dinheiro";
 type PaymentMethodRow = { id: string; name: string };
@@ -346,7 +346,7 @@ export function CartDrawer() {
                 Seu carrinho tá vazio!
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Escolhe umas coxinhas pra mim preparar
+                Escolhe uns lanches pra mim preparar
               </p>
             </div>
           ) : (

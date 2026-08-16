@@ -1,4 +1,4 @@
-import mascot from "@/assets/mascot.png";
+import mascot from "@/assets/mascote-rafa.png";
 
 export function MascotStrip() {
   return (
@@ -6,19 +6,19 @@ export function MascotStrip() {
       <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 sm:gap-8">
         <img
           src={mascot}
-          alt="Coxinho - mascote Mini Coxinhas"
+          alt="Mascote Rafa Lanches Delivery"
           className="h-32 w-auto shrink-0 object-contain drop-shadow-xl animate-mascot-wave sm:h-44"
         />
         <div className="flex-1">
           <p className="font-hand text-xs uppercase tracking-widest text-brand/80">
-            Oi, eu sou o Coxinho!
+            Oi, eu sou o Rafa Burger!
           </p>
           <h2 className="mt-1 font-display text-3xl text-brand sm:text-4xl">
-            Bem-vindo a <span className="text-highlight">Mini Coxinhas</span>!
+            Bem-vindo ao <span className="text-highlight">Rafa Lanches Delivery</span>!
           </h2>
           <p className="mt-2 max-w-md text-sm text-foreground/80 sm:text-base">
-            Coxinhas crocantes, quentinhas e prontas pra alegrar sua festa. Escolha seu sabor
-            favorito e faca seu pedido online.
+            Hambúrgueres artesanais, suculentos e quentinhos. Escolha o seu lanche 
+            favorito e faça seu pedido online.
           </p>
         </div>
       </div>

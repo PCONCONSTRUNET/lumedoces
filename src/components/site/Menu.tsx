@@ -5,7 +5,7 @@ import { ProductCard } from "./ProductCard";
 import { ProductModal } from "./ProductModal";
 import { formatBRL, useCart } from "@/store/cart";
 import { supabase } from "@/integrations/supabase/client";
-import type { Product, Addon } from "@/data/menu";
+import { type Product, type Addon, products as staticProducts, categories as staticCategories } from "@/data/menu";
 
 type CategoryRow = {
   id: string;
@@ -129,37 +129,8 @@ export function Menu({ menuRef }: { menuRef: React.RefObject<HTMLDivElement | nu
     },
   });
 
-  const dbCategories = useMemo(() => (data?.categories ?? []) as CategoryRow[], [data?.categories]);
-  const comboCategory = useMemo(
-    () => dbCategories.find((c) => c.name.toLowerCase().includes("combo")),
-    [dbCategories],
-  );
-  const comboCategoryId = comboCategory?.id ?? "combos";
-  const categories = useMemo(() => {
-    const baseCategories = dbCategories.length > 0 ? dbCategories : FALLBACK_CATEGORIES;
-    if (baseCategories.some((c) => c.name.toLowerCase().includes("combo"))) return baseCategories;
-    return [...baseCategories, { id: comboCategoryId, name: "Combos", sort_order: 4 }];
-  }, [comboCategoryId, dbCategories]);
-
-  const products: Product[] = useMemo(() => {
-    const dbProducts = ((data?.products ?? []) as ProductRow[]).map((p) => ({
-      id: p.id,
-      name: p.name,
-      description: p.description ?? "",
-      price: Number(p.base_price),
-      image: p.image_url || PLACEHOLDER,
-      category: p.category_id ?? "",
-      addons: sauces,
-    }));
-    const baseProducts = dbProducts.length > 0 ? dbProducts : [];
-    const comboFallback = baseProducts.some(
-      (product) => product.name.toLowerCase() === COMBO_FALLBACK.name.toLowerCase(),
-    )
-      ? []
-      : [{ ...COMBO_FALLBACK, category: comboCategoryId }];
-
-    return [...baseProducts, ...comboFallback];
-  }, [comboCategoryId, data]);
+  const categories = useMemo(() => staticCategories, []);
+  const products = useMemo(() => staticProducts, []);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -173,7 +144,7 @@ export function Menu({ menuRef }: { menuRef: React.RefObject<HTMLDivElement | nu
         <div className="text-center mb-12">
           <h2 className="font-serif text-4xl sm:text-5xl text-foreground font-extrabold tracking-tight">Nosso Cardápio</h2>
           <p className="mx-auto mt-3 max-w-md text-base text-muted-foreground">
-            Explore nossa variedade de mini coxinhas e combos feitos na hora pra você.
+            Explore nossa variedade de hambúrgueres e porções feitos na hora pra você.
           </p>
         </div>
 
