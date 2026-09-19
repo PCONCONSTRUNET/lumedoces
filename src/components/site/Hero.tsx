@@ -6,16 +6,10 @@ import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 export function Hero({ onOrder }: { onOrder: () => void }) {
   return (
     <section id="top" className="relative flex min-h-[90vh] sm:min-h-[85vh] w-full flex-col items-center justify-center overflow-hidden pb-12 pt-28">
-      {/* Background Image & Overlay */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src={hero}
-          alt="Rafa Lanches Delivery"
-          className="h-full w-full object-cover object-center"
-          width={1280}
-          height={1600}
-        />
-        <div className="absolute inset-0 bg-white/40 dark:bg-black/60 backdrop-blur-[2px]" />
+      {/* Background Solid Color */}
+      <div className="absolute inset-0 z-0 bg-[#50C8B5]">
+        {/* Subtle overlay for contrast */}
+        <div className="absolute inset-0 bg-white/20 dark:bg-black/30 backdrop-blur-sm" />
       </div>
 
       <div className="relative z-10 flex w-full max-w-5xl flex-col items-center justify-center px-6 sm:px-12 mt-12 md:mt-0">
@@ -23,14 +17,14 @@ export function Hero({ onOrder }: { onOrder: () => void }) {
         <div className="flex flex-col max-w-2xl text-center">
           <img
             src={logo}
-            alt="Rafa Lanches Delivery Logo"
+            alt="Lume Name Logo"
             className="mb-8 h-28 sm:h-36 w-auto object-contain drop-shadow-xl mx-auto"
             width={280}
             height={140}
           />
           
           <h1 className="text-5xl sm:text-7xl font-black tracking-widest text-foreground uppercase drop-shadow-md mt-4 text-center">
-            RAFA LANCHES DELIVERY
+            LUME NAME
           </h1>
           
           <p className="mt-4 max-w-lg mx-auto text-lg sm:text-xl text-foreground/90 font-medium">

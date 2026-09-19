@@ -1,26 +1,33 @@
-import mascot from "@/assets/mascote-rafa.png";
+import { Heart, Droplet, Box, Wheat, Smile } from "lucide-react";
+import React from "react";
+
+const features = [
+  { text: "ZERO LACTOSE", icon: Droplet },
+  { text: "ZERO ADIÇÃO DE AÇÚCAR", icon: Box },
+  { text: "ZERO GLÚTEN", icon: Wheat },
+  { text: "SABOR INTENSO", icon: Smile },
+  { text: "SAUDÁVEL", icon: Heart },
+];
 
 export function MascotStrip() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-r from-highlight/15 via-highlight/25 to-highlight/15 py-10">
-      <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 sm:gap-8">
-        <img
-          src={mascot}
-          alt="Mascote Rafa Lanches Delivery"
-          className="h-32 w-auto shrink-0 object-contain drop-shadow-xl animate-mascot-wave sm:h-44"
-        />
-        <div className="flex-1">
-          <p className="font-hand text-xs uppercase tracking-widest text-brand/80">
-            Oi, eu sou o Rafa Burger!
-          </p>
-          <h2 className="mt-1 font-display text-3xl text-brand sm:text-4xl">
-            Bem-vindo ao <span className="text-highlight">Rafa Lanches Delivery</span>!
-          </h2>
-          <p className="mt-2 max-w-md text-sm text-foreground/80 sm:text-base">
-            Hambúrgueres artesanais, suculentos e quentinhos. Escolha o seu lanche 
-            favorito e faça seu pedido online.
-          </p>
-        </div>
+    <section className="relative overflow-hidden bg-[#50C8B5] py-3 shadow-sm z-10">
+      <div className="flex w-max animate-marquee">
+        {/* Render repeated blocks for infinite loop */}
+        {[...Array(6)].map((_, arrayIndex) => (
+          <div key={arrayIndex} className="flex min-w-max items-center justify-around px-4">
+            {features.map((item, index) => (
+              <div key={index} className="flex items-center gap-4 px-4 whitespace-nowrap">
+                <span className="text-white font-bold tracking-wider text-sm md:text-base">
+                  {item.text}
+                </span>
+                <div className="flex h-6 w-6 items-center justify-center rounded-full border-[1.5px] border-yellow-400 text-yellow-400">
+                  <item.icon className="h-3.5 w-3.5" strokeWidth={2.5} />
+                </div>
+              </div>
+            ))}
+          </div>
+        ))}
       </div>
     </section>
   );

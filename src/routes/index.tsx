@@ -12,13 +12,13 @@ export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
     meta: [
-      { title: "Rafa Lanches Delivery" },
+      { title: "Lume Name" },
       {
         name: "description",
         content:
           "Peça online as melhores mini coxinhas da região. Frango, catupiry, cheddar bacon e combos para festas com entrega rápida.",
       },
-      { property: "og:title", content: "Rafa Lanches Delivery" },
+      { property: "og:title", content: "Lume Name" },
       {
         property: "og:description",
         content: "Mini coxinhas crocantes, combos e doces. Faça seu pedido!",

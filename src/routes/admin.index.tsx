@@ -86,7 +86,7 @@ function AdminLogin() {
         <div className="text-center">
           <h1 className="font-display text-3xl text-brand">ADMIN</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Acesso restrito — Rafa Lanches Delivery
+            Acesso restrito — Lume Name
           </p>
         </div>
 

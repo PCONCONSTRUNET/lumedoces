@@ -10,9 +10,9 @@ export const Route = createFileRoute("/contato")({
   component: ContatoPage,
   head: () => ({
     meta: [
-      { title: "Contato — Rafa Lanches Delivery" },
-      { name: "description", content: "Endereço, WhatsApp e Instagram da Rafa Lanches Delivery." },
-      { property: "og:title", content: "Contato — Rafa Lanches Delivery" },
+      { title: "Contato — Lume Name" },
+      { name: "description", content: "Endereço, WhatsApp e Instagram da Lume Name." },
+      { property: "og:title", content: "Contato — Lume Name" },
       { property: "og:description", content: "Fale com a gente pelo WhatsApp, Instagram ou venha nos visitar." },
     ],
   }),

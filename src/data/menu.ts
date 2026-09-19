@@ -1,7 +1,7 @@
-import smashBurger from "@/assets/smash-burger.jpg";
-import xSalada from "@/assets/x-salada.jpg";
-import fries from "@/assets/fries.jpg";
-import soda from "@/assets/soda.jpg";
+import trufaVegana from "@/assets/trufa_vegana.jpg";
+import coxinhaVegana from "@/assets/coxinha_vegana.jpg";
+import boloPoteVegano from "@/assets/bolo_pote_vegano.jpg";
+import kombucha from "@/assets/kombucha.jpg";
 
 export type Addon = { name: string; price: number };
 export type Product = {
@@ -15,58 +15,54 @@ export type Product = {
   addons?: Addon[];
 };
 
-const sauces: Addon[] = [
-  { name: "Maionese da Casa", price: 3 },
-  { name: "Molho Cheddar", price: 5 },
-  { name: "Molho Barbecue", price: 4 },
-  { name: "Molho Picante", price: 4 },
-  { name: "Catupiry Extra", price: 5 },
-  { name: "Ketchup", price: 2 },
+const extrasDoces: Addon[] = [
+  { name: "Cobertura Extra de Cacau", price: 3 },
+  { name: "Creme de Avelã Vegano", price: 5 },
+  { name: "Calda de Frutas Vermelhas", price: 4 },
 ];
 
 export const products: Product[] = [
   {
-    id: "smash-duplo",
-    name: "Smash Duplo c/ Queijo",
-    description: "Dois suculentos hambúrgueres smash, queijo derretido, pão brioche amanteigado",
-    price: 32,
-    image: smashBurger,
-    category: "hamburgueres",
+    id: "trufa-vegana",
+    name: "Trufa Vegana de Chocolate",
+    description: "Deliciosa trufa de chocolate vegano, polvilhada com cacau 100%. Sem lactose e sem açúcar.",
+    price: 8,
+    image: trufaVegana,
+    category: "doces",
     featured: true,
-    addons: sauces,
+    addons: extrasDoces,
   },
   {
-    id: "x-salada-artesanal",
-    name: "X-Salada Artesanal",
-    description: "Hambúrguer artesanal clássico, alface, tomate, queijo, pão com gergelim",
-    price: 28,
-    image: xSalada,
-    category: "hamburgueres",
-    featured: true,
-    addons: sauces,
-  },
-  {
-    id: "porcao-fritas",
-    name: "Porção de Fritas",
-    description: "Fritas douradas e crocantes, acompanha ketchup",
+    id: "bolo-pote-vegano",
+    name: "Bolo de Pote Cenoura e Cacau",
+    description: "Bolo de cenoura vegano intercalado com deliciosa calda de cacau. Sem glúten.",
     price: 18,
-    image: fries,
-    category: "porcoes",
+    image: boloPoteVegano,
+    category: "doces",
     featured: true,
-    addons: sauces,
+    addons: extrasDoces,
   },
   {
-    id: "refri-lata",
-    name: "Refrigerante Lata",
-    description: "Refrigerante gelado 350ml",
-    price: 6,
-    image: soda,
+    id: "coxinha-vegana",
+    name: "Mini Coxinhas Veganas",
+    description: "Porção de mini coxinhas crocantes recheadas de forma 100% vegetal e deliciosa.",
+    price: 24,
+    image: coxinhaVegana,
+    category: "salgados",
+    featured: true,
+  },
+  {
+    id: "kombucha-frutas",
+    name: "Kombucha Frutas Vermelhas",
+    description: "Refrescante bebida probiótica gaseificada com mix de frutas vermelhas. 100% natural.",
+    price: 15,
+    image: kombucha,
     category: "bebidas",
   },
 ];
 
 export const categories = [
-  { id: "hamburgueres", label: "Hambúrgueres", emoji: "🍔" },
-  { id: "porcoes", label: "Porções", emoji: "🍟" },
-  { id: "bebidas", label: "Bebidas", emoji: "🥤" },
+  { id: "doces", label: "Doces Saudáveis", emoji: "🧁" },
+  { id: "salgados", label: "Snacks Saudáveis", emoji: "🥨" },
+  { id: "bebidas", label: "Bebidas Naturais", emoji: "🧃" },
 ] as const;
