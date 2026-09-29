@@ -140,6 +140,7 @@ export function CartDrawer() {
   const [pixQrCode, setPixQrCode] = useState<string | null>(null);
   const [pixCopyPaste, setPixCopyPaste] = useState<string | null>(null);
   const [confirmedTotal, setConfirmedTotal] = useState(0);
+  const [orderNumber, setOrderNumber] = useState<number | null>(null);
   const discount = coupon ? getCouponDiscount(coupon, total) : 0;
   const finalTotal = Math.max(0, total - discount);
 
@@ -299,6 +300,16 @@ export function CartDrawer() {
       const { error: itemsError } = await supabase.from("order_items").insert(orderItems);
       if (itemsError) throw itemsError;
 
+      let fetchedOrderNumber: number | null = null;
+      try {
+        const { data: orderData } = await supabase.from("orders").select("order_number").eq("id", nextOrderId).single();
+        if (orderData) {
+          fetchedOrderNumber = orderData.order_number;
+        }
+      } catch(e) {
+        console.error("Failed to fetch order_number", e);
+      }
+
       if (coupon) {
         await supabaseUntyped.from("coupons").update({ used_count: coupon.used_count + 1 }).eq("id", coupon.id);
       }
@@ -319,7 +330,7 @@ export function CartDrawer() {
                 },
                 body: JSON.stringify({
                   transaction_amount: finalTotal,
-                  description: `Pedido ${formatOrderCode(nextOrderId)}`,
+                  description: `Pedido ${formatOrderCode(nextOrderId, fetchedOrderNumber)}`,
                   payment_method_id: "pix",
                   payer: {
                     email: "contato@lumedoces.com.br", // Requisito do MP
@@ -349,6 +360,7 @@ export function CartDrawer() {
       setConfirmedTotal(finalTotal);
       clear();
       setOrderId(nextOrderId);
+      if (fetchedOrderNumber) setOrderNumber(fetchedOrderNumber);
       
       try {
         const existingIds = JSON.parse(localStorage.getItem("customer_order_ids") || "[]");
@@ -390,7 +402,7 @@ export function CartDrawer() {
               </div>
               <p className="mt-4 font-hand text-xl font-bold text-foreground">Pedido recebido!</p>
               <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-                Vamos acompanhar seu pedido por aqui. Codigo {formatOrderCode(orderId)}
+                Vamos acompanhar seu pedido por aqui. Codigo {formatOrderCode(orderId, orderNumber)}
               </p>
               
               {pay === "pix" && pixQrCode ? (

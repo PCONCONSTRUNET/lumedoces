@@ -363,7 +363,7 @@ function PedidosPage() {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(14);
       doc.setTextColor(...BRAND);
-      doc.text(formatOrderCode(order.id), W - 12, 29, { align: "right" });
+      doc.text(formatOrderCode(order.id, order.order_number), W - 12, 29, { align: "right" });
 
       // date smaller below
       doc.setFont("helvetica", "normal");
@@ -522,7 +522,7 @@ function PedidosPage() {
       doc.setTextColor(...GRAY);
       doc.text("Obrigada por fazer parte desse momento!", W / 2, pageH - 5, { align: "center" });
 
-      doc.save(`Pedido_${formatOrderCode(order.id)}.pdf`);
+      doc.save(`Pedido_${formatOrderCode(order.id, order.order_number)}.pdf`);
     } catch (err) {
       console.error(err);
       toast.error("Erro ao gerar o PDF");
@@ -669,7 +669,7 @@ function PedidosPage() {
                       </span>
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {formatOrderCode(order.id)} | {formatDateTimeBR(order.created_at)}
+                      {formatOrderCode(order.id, order.order_number)} | {formatDateTimeBR(order.created_at)}
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-3">

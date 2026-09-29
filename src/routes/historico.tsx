@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Clock, CheckCircle2, ChefHat, Truck, CheckSquare, XCircle, ArrowLeft, PackageOpen, X } from "lucide-react";
 import { formatBRL } from "@/store/cart";
+import { formatOrderCode } from "@/lib/order-utils";
 import type { Database } from "@/integrations/supabase/types";
 import logo from "@/assets/logo_lume.png";
 
@@ -118,7 +119,8 @@ function HistoricoPage() {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-xs font-bold text-gray-400">
-                          #{order.id.slice(0, 8).toUpperCase()}
+                          {formatOrderCode(order.id, order.order_number)}
+
                         </span>
                         <span className="text-xs text-gray-400">•</span>
                         <span className="text-xs text-gray-500">

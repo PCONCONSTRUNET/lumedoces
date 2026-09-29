@@ -1,4 +1,7 @@
-export function formatOrderCode(orderId: string | null | undefined): string {
+export function formatOrderCode(orderId: string | null | undefined, orderNumber?: number | null): string {
+  if (typeof orderNumber === 'number') {
+    return `#${String(orderNumber).padStart(4, "0")}`;
+  }
   if (!orderId) return "#----";
   
   // Mock IDs like "ord_001", "ord_002" → extract the trailing number
