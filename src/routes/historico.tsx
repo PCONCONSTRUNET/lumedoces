@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Clock, CheckCircle2, ChefHat, Truck, CheckSquare, XCircle, ArrowLeft, PackageOpen, X } from "lucide-react";
 import { formatBRL } from "@/store/cart";
 import type { Database } from "@/integrations/supabase/types";
+import logo from "@/assets/logo_lume.png";
 
 export const Route = createFileRoute("/historico")({
   component: HistoricoPage,
@@ -185,7 +186,10 @@ function HistoricoPage() {
                 <X className="h-5 w-5" />
               </button>
 
-              <h2 className="text-2xl font-bold text-gray-800 mb-6">Status do Pedido</h2>
+              <div className="flex flex-col items-center mb-6 mt-2">
+                <img src={logo} alt="Lume Artesanais" className="h-14 w-auto object-contain mb-2 drop-shadow-sm" />
+                <h2 className="text-xl font-bold text-gray-800">Status do Pedido</h2>
+              </div>
               
               {selectedOrder.status === 'cancelled' ? (
                 <div className="text-center py-8">
