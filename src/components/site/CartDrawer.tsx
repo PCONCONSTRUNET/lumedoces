@@ -3,6 +3,7 @@ import {
   Banknote,
   CheckCircle2,
   Clock,
+  Copy,
   CreditCard,
   Loader2,
   Minus,
@@ -10,6 +11,7 @@ import {
   ShoppingBag,
   Trash2,
   X,
+  MapPin,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PixIcon } from "@/components/PaymentLabel";
@@ -17,7 +19,7 @@ import { useBusinessStatus } from "@/hooks/useBusinessStatus";
 import { supabase } from "@/integrations/supabase/client";
 import { formatOrderCode } from "@/lib/order-utils";
 import { formatBRL, useCart } from "@/store/cart";
-import mascot from "@/assets/mascote-rafa.png";
+import brandIcon from "@/assets/icon.png";
 
 type PayMethod = "pix" | "cartao" | "dinheiro";
 type PaymentMethodRow = { id: string; name: string };
@@ -126,9 +128,6 @@ export function CartDrawer() {
   const status = useBusinessStatus();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [street, setStreet] = useState("");
-  const [district, setDistrict] = useState("");
-  const [addressReference, setAddressReference] = useState("");
   const [pay, setPay] = useState<PayMethod>("pix");
   const [obs, setObs] = useState("");
   const [couponCode, setCouponCode] = useState("");
@@ -137,6 +136,8 @@ export function CartDrawer() {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethodRow[]>([]);
   const [saving, setSaving] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [pixQrCode, setPixQrCode] = useState<string | null>(null);
+  const [pixCopyPaste, setPixCopyPaste] = useState<string | null>(null);
   const [confirmedTotal, setConfirmedTotal] = useState(0);
   const discount = coupon ? getCouponDiscount(coupon, total) : 0;
   const finalTotal = Math.max(0, total - discount);
@@ -159,14 +160,13 @@ export function CartDrawer() {
     setOrderId(null);
     setName("");
     setPhone("");
-    setStreet("");
-    setDistrict("");
-    setAddressReference("");
     setObs("");
     setCouponCode("");
     setCoupon(null);
     setPay("pix");
     setConfirmedTotal(0);
+    setPixQrCode(null);
+    setPixCopyPaste(null);
   };
 
   const applyCoupon = async () => {
@@ -243,8 +243,8 @@ export function CartDrawer() {
         id: nextOrderId,
         customer_name: name.trim(),
         customer_phone: formatPhone(phone),
-        customer_address: formatCustomerAddress(street, district),
-        address_reference: addressReference.trim() || null,
+        customer_address: "Retirada no local",
+        address_reference: null,
         notes: obs.trim() || null,
         payment_method_id: paymentMethod?.id ?? null,
         subtotal: total,
@@ -262,8 +262,8 @@ export function CartDrawer() {
           id: nextOrderId,
           customer_name: name.trim(),
           customer_phone: formatPhone(phone),
-          customer_address: formatCustomerAddress(street, district),
-          notes: buildLegacyNotes(obs, addressReference),
+          customer_address: "Retirada no local",
+          notes: obs.trim() || null,
           payment_method_id: paymentMethod?.id ?? null,
           subtotal: total,
           discount,
@@ -282,6 +282,10 @@ export function CartDrawer() {
         unit_price: item.unitPrice,
         total_price: item.unitPrice * item.quantity,
         variations_snapshot: [
+          ...(item.selectedOptions || []).map((opt) => ({
+            name: `${opt.group}: ${opt.name}`,
+            price: opt.price,
+          })),
           ...item.addons.map((addon) => ({
             name: addon.name,
             price: addon.price,
@@ -294,6 +298,49 @@ export function CartDrawer() {
 
       if (coupon) {
         await supabaseUntyped.from("coupons").update({ used_count: coupon.used_count + 1 }).eq("id", coupon.id);
+      }
+
+      // MERCADO PAGO INTEGRATION
+      if (pay === "pix") {
+        try {
+          const savedMp = localStorage.getItem("mp_gateway_config");
+          if (savedMp) {
+            const mpConfig = JSON.parse(savedMp);
+            if (mpConfig.active && mpConfig.accessToken) {
+              const mpRes = await fetch("https://api.mercadopago.com/v1/payments", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${mpConfig.accessToken}`,
+                  "X-Idempotency-Key": nextOrderId
+                },
+                body: JSON.stringify({
+                  transaction_amount: finalTotal,
+                  description: `Pedido ${formatOrderCode(nextOrderId)}`,
+                  payment_method_id: "pix",
+                  payer: {
+                    email: "contato@lumedoces.com.br", // Requisito do MP
+                    first_name: name.trim()
+                  }
+                })
+              });
+              
+              if (mpRes.ok) {
+                const mpData = await mpRes.json();
+                const qrCode = mpData?.point_of_interaction?.transaction_data?.qr_code_base64;
+                const copyPaste = mpData?.point_of_interaction?.transaction_data?.qr_code;
+                
+                if (qrCode) setPixQrCode(`data:image/jpeg;base64,${qrCode}`);
+                if (copyPaste) setPixCopyPaste(copyPaste);
+              } else {
+                console.error("Erro MP:", await mpRes.text());
+                toast.error("Pedido criado, mas erro ao gerar PIX automático.");
+              }
+            }
+          }
+        } catch(e) {
+          console.error("Erro MP proc", e);
+        }
       }
 
       setConfirmedTotal(finalTotal);
@@ -317,10 +364,10 @@ export function CartDrawer() {
           </h2>
           <button
             onClick={handleClose}
-            className="grid h-10 w-10 place-items-center rounded-full bg-muted hover:bg-muted/70"
+            className="grid h-10 w-10 place-items-center rounded-full bg-white text-highlight shadow-sm hover:bg-white/80"
             aria-label="Fechar"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
@@ -334,13 +381,35 @@ export function CartDrawer() {
               <p className="mt-1 max-w-xs text-sm text-muted-foreground">
                 Vamos acompanhar seu pedido por aqui. Codigo {formatOrderCode(orderId)}
               </p>
+              
+              {pay === "pix" && pixQrCode ? (
+                <div className="mt-8 flex flex-col items-center w-full bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                   <p className="font-bold text-gray-900 mb-4 text-lg">Pague via PIX</p>
+                   <img src={pixQrCode} alt="QR Code PIX" className="w-48 h-48 mb-4 border rounded-xl" />
+                   {pixCopyPaste && (
+                     <button 
+                       onClick={() => {
+                         navigator.clipboard.writeText(pixCopyPaste);
+                         toast.success("Código PIX copiado!");
+                       }}
+                       className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-800 font-bold py-3 px-4 rounded-xl hover:bg-gray-200 transition"
+                     >
+                       <Copy className="h-5 w-5" /> Copiar Copia e Cola
+                     </button>
+                   )}
+                </div>
+              ) : pay !== "pix" ? (
+                <div className="mt-8 p-4 bg-amber-50 rounded-xl border border-amber-100 text-amber-800 text-sm font-semibold max-w-xs mx-auto">
+                  O pagamento será realizado no local de retirada do seu pedido.
+                </div>
+              ) : null}
             </div>
           ) : items.length === 0 ? (
             <div className="mt-6 flex flex-col items-center text-center">
               <img
-                src={mascot}
+                src={brandIcon}
                 alt=""
-                className="h-32 w-auto animate-mascot-wave drop-shadow-lg sm:h-40"
+                className="h-24 w-auto drop-shadow-lg sm:h-32 rounded-full"
               />
               <p className="mt-3 font-hand text-lg font-bold text-foreground">
                 Seu carrinho tá vazio!
@@ -362,6 +431,11 @@ export function CartDrawer() {
                     />
                     <div className="min-w-0 flex-1">
                       <h3 className="font-hand text-[15px] font-bold leading-tight">{it.name}</h3>
+                      {it.selectedOptions && it.selectedOptions.length > 0 && (
+                        <p className="mt-0.5 line-clamp-2 text-[11px] text-muted-foreground">
+                          {it.selectedOptions.map((o) => o.name).join(", ")}
+                        </p>
+                      )}
                       {it.addons.length > 0 && (
                         <p className="mt-0.5 line-clamp-2 text-[11px] text-muted-foreground">
                           + {it.addons.map((a) => a.name).join(", ")}
@@ -386,20 +460,20 @@ export function CartDrawer() {
                     <div className="flex items-center gap-1.5">
                       <button
                         onClick={() => setQty(it.uid, it.quantity - 1)}
-                        className="grid h-9 w-9 place-items-center rounded-full bg-muted hover:bg-muted/70 active:scale-95"
+                        className="grid h-9 w-9 place-items-center rounded-full bg-white border border-border text-brand hover:bg-white/80 active:scale-95 shadow-sm"
                         aria-label="Diminuir"
                       >
-                        <Minus className="h-3.5 w-3.5" />
+                        <Minus className="h-4 w-4" />
                       </button>
-                      <span className="w-6 text-center text-sm font-bold tabular-nums">
+                      <span className="w-6 text-center text-sm font-bold tabular-nums text-brand">
                         {it.quantity}
                       </span>
                       <button
                         onClick={() => setQty(it.uid, it.quantity + 1)}
-                        className="grid h-9 w-9 place-items-center rounded-full bg-brand text-brand-foreground hover:opacity-90 active:scale-95"
+                        className="grid h-9 w-9 place-items-center rounded-full bg-highlight text-white hover:opacity-90 active:scale-95 shadow-sm"
                         aria-label="Aumentar"
                       >
-                        <Plus className="h-3.5 w-3.5" />
+                        <Plus className="h-4 w-4" />
                       </button>
                     </div>
                     <span className="font-extrabold text-brand tabular-nums">
@@ -421,7 +495,7 @@ export function CartDrawer() {
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Seu nome *"
                     autoComplete="name"
-                    className="w-full rounded-xl border border-border bg-muted/50 px-3 py-3 text-base placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40 sm:text-sm"
+                    className="w-full rounded-xl border border-border bg-white shadow-sm px-3 py-3 text-base placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40 sm:text-sm"
                   />
                   <input
                     value={phone}
@@ -430,27 +504,28 @@ export function CartDrawer() {
                     inputMode="tel"
                     autoComplete="tel"
                     maxLength={15}
-                    className="w-full rounded-xl border border-border bg-muted/50 px-3 py-3 text-base placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40 sm:text-sm"
+                    className="w-full rounded-xl border border-border bg-white shadow-sm px-3 py-3 text-base placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40 sm:text-sm"
                   />
-                  <input
-                    value={street}
-                    onChange={(e) => setStreet(e.target.value)}
-                    placeholder="Rua"
-                    autoComplete="street-address"
-                    className="w-full rounded-xl border border-border bg-muted/50 px-3 py-3 text-base placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40 sm:text-sm"
-                  />
-                  <input
-                    value={district}
-                    onChange={(e) => setDistrict(e.target.value)}
-                    placeholder="Bairro"
-                    className="w-full rounded-xl border border-border bg-muted/50 px-3 py-3 text-base placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40 sm:text-sm"
-                  />
-                  <input
-                    value={addressReference}
-                    onChange={(e) => setAddressReference(e.target.value)}
-                    placeholder="Referencia"
-                    className="w-full rounded-xl border border-border bg-muted/50 px-3 py-3 text-base placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40 sm:text-sm"
-                  />
+                  <div className="mt-3 flex items-start gap-3 rounded-xl border border-brand/20 bg-brand/5 p-3">
+                    <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand/10 text-brand">
+                      <ShoppingBag className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-brand">Retirada no local</p>
+                      <p className="mt-0.5 text-xs text-foreground/80">
+                        O pedido não será entregue, você deve retirá-lo em nosso endereço: atrás da oficina FUBICA CAR.
+                      </p>
+                      <a
+                        href="https://www.google.com/maps/place/28%C2%B024'22.9%22S+49%C2%B024'25.2%22W/@-28.4063492,-49.407153,20.75z/data=!4m4!3m3!8m2!3d-28.4063606!4d-49.4069977"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-brand/10 px-3 py-1.5 text-xs font-bold text-brand hover:bg-brand/20 transition"
+                      >
+                        <MapPin className="h-3.5 w-3.5" />
+                        Ver rota no Google Maps
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -473,8 +548,8 @@ export function CartDrawer() {
                         onClick={() => setPay(p.id)}
                         className={`flex flex-col items-center gap-1 rounded-xl border px-2 py-2.5 text-xs transition ${
                           active
-                            ? "border-brand bg-brand/10 ring-2 ring-brand/40"
-                            : "border-border bg-card hover:border-brand/50"
+                            ? "border-highlight bg-highlight/10 ring-2 ring-highlight/40 text-highlight"
+                            : "border-border bg-white hover:border-highlight/50 text-foreground/80"
                         }`}
                       >
                         {p.emoji === "pix" ? (
@@ -503,13 +578,13 @@ export function CartDrawer() {
                       setCoupon(null);
                     }}
                     placeholder="Digite o cupom"
-                    className="min-w-0 flex-1 rounded-xl border border-border bg-muted/50 px-3 py-2.5 text-sm uppercase placeholder:normal-case placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40"
+                    className="min-w-0 flex-1 rounded-xl border border-border bg-white shadow-sm px-3 py-2.5 text-sm uppercase placeholder:normal-case placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40"
                   />
                   <button
                     type="button"
                     onClick={applyCoupon}
                     disabled={couponLoading || total <= 0}
-                    className="rounded-full bg-brand px-4 py-2.5 text-sm font-bold text-brand-foreground transition hover:opacity-95 disabled:cursor-wait disabled:opacity-60"
+                    className="rounded-full bg-highlight px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:opacity-95 disabled:cursor-wait disabled:opacity-60"
                   >
                     {couponLoading ? "..." : "Aplicar"}
                   </button>
@@ -527,7 +602,7 @@ export function CartDrawer() {
                 onChange={(e) => setObs(e.target.value)}
                 placeholder="Observações do pedido (opcional)"
                 rows={2}
-                className="mt-3 w-full resize-none rounded-xl border border-border bg-muted/50 px-3 py-2.5 text-base placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40 sm:text-sm"
+                className="mt-3 w-full resize-none rounded-xl border border-border bg-white shadow-sm px-3 py-2.5 text-base placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40 sm:text-sm"
               />
 
               {!status.loading && !status.isOpen && (
@@ -567,7 +642,7 @@ export function CartDrawer() {
             <button
               onClick={handleCheckout}
               disabled={saving || status.loading || !status.isOpen || items.length === 0}
-              className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-full bg-muted py-3.5 text-[15px] font-bold text-muted-foreground transition disabled:opacity-100 enabled:bg-highlight enabled:text-highlight-foreground enabled:hover:opacity-95 enabled:active:scale-[0.99]"
+              className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-full bg-white border-2 border-highlight/20 py-3.5 text-[15px] font-bold text-brand transition disabled:opacity-100 enabled:bg-highlight enabled:text-white enabled:border-highlight enabled:shadow-lg enabled:hover:opacity-95 enabled:active:scale-[0.99]"
             >
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               {saving

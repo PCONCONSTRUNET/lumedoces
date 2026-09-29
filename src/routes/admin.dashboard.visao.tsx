@@ -87,34 +87,25 @@ function DashboardVisaoPage() {
 
   useEffect(() => {
     let cancel = false;
-    (async () => {
-      setLoading(true);
-      const fromISO = `${range.from}T00:00:00`;
-      const toISO = `${range.to}T23:59:59`;
-      const [{ data: ords }, { data: pms }] = await Promise.all([
-        supabase
-          .from("orders")
-          .select("id, customer_name, total, status, payment_method_id, created_at")
-          .gte("created_at", fromISO)
-          .lte("created_at", toISO)
-          .order("created_at", { ascending: false }),
-        supabase.from("payment_methods").select("id, name").order("sort_order"),
-      ]);
-      const ids = (ords ?? []).map((o) => o.id);
-      let its: ItemRow[] = [];
-      if (ids.length) {
-        const { data: rs } = await supabase
-          .from("order_items")
-          .select("order_id, product_id, product_name, quantity, total_price")
-          .in("order_id", ids);
-        its = (rs ?? []) as ItemRow[];
-      }
+    // Supabase desconectado a pedido do usuário
+    setTimeout(() => {
       if (cancel) return;
-      setOrders((ords ?? []) as OrderRow[]);
-      setItems(its);
-      setMethods((pms ?? []) as Array<{ id: string; name: string }>);
+      setOrders([
+        { id: "1", customer_name: "João Silva", total: 45.00, status: "paid", payment_method_id: "pix", created_at: new Date().toISOString() },
+        { id: "2", customer_name: "Maria Santos", total: 120.00, status: "preparing", payment_method_id: "credit", created_at: new Date().toISOString() },
+        { id: "3", customer_name: "Carlos Gomes", total: 32.50, status: "delivered", payment_method_id: "pix", created_at: new Date().toISOString() }
+      ]);
+      setItems([
+        { order_id: "1", product_id: "mock1", product_name: "Trufa Vegana de Chocolate", quantity: 2, total_price: 16.00 },
+        { order_id: "1", product_id: "mock2", product_name: "Mini Coxinhas Veganas", quantity: 1, total_price: 24.00 },
+        { order_id: "2", product_id: "mock3", product_name: "Bolo de Pote Cenoura e Cacau", quantity: 4, total_price: 72.00 }
+      ]);
+      setMethods([
+        { id: "pix", name: "PIX" },
+        { id: "credit", name: "Cartão de Crédito" }
+      ]);
       setLoading(false);
-    })();
+    }, 300);
     return () => {
       cancel = true;
     };
@@ -313,12 +304,23 @@ function DashboardVisaoPage() {
             <Card title="Receita por forma de pagamento">
               <div className="h-72">
                 <ResponsiveContainer>
-                  <BarChart data={byPayment}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                    <XAxis dataKey="name" stroke="var(--muted-foreground)" fontSize={11} />
-                    <YAxis stroke="var(--muted-foreground)" fontSize={11} />
+                  <PieChart>
+                    <Pie
+                      data={byPayment}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={90}
+                      paddingAngle={3}
+                      label={(e: { name: string; value: number }) => `${e.name}: ${formatBRL(e.value)}`}
+                    >
+                      {byPayment.map((d, i) => (
+                        <Cell key={i} fill={["#10b981", "#3b82f6", "#f59e0b", "#a855f7", "#ec4899", "#64748b"][i % 6]} />
+                      ))}
+                    </Pie>
                     <Tooltip
-                      cursor={{ fill: "var(--card)", fillOpacity: 1 }}
                       formatter={(v: number) => formatBRL(v)}
                       contentStyle={{
                         background: "var(--card)",
@@ -326,8 +328,7 @@ function DashboardVisaoPage() {
                         borderRadius: 8,
                       }}
                     />
-                    <Bar dataKey="value" fill="var(--brand)" radius={[6, 6, 0, 0]} />
-                  </BarChart>
+                  </PieChart>
                 </ResponsiveContainer>
               </div>
             </Card>

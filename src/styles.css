@@ -35,49 +35,49 @@
   --color-brand-foreground: var(--brand-foreground);
   --color-highlight: var(--highlight);
   --color-highlight-foreground: var(--highlight-foreground);
-  --font-display: "Caveat Brush", system-ui, sans-serif;
-  --font-handwritten: "Patrick Hand", system-ui, sans-serif;
-  --font-body: "Quicksand", system-ui, sans-serif;
-  --font-serif: "Playfair Display", serif;
+  --font-display: "Fredoka", system-ui, sans-serif;
+  --font-handwritten: "Fredoka", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, sans-serif;
+  --font-serif: "Nunito", sans-serif;
 }
 
 :root {
   --radius: 1rem;
 
-  /* Brand palette — Mini Coxinhas */
-  --brand: oklch(0.55 0.16 50);             /* warm brown */
-  --brand-foreground: oklch(0.99 0 0);
-  --highlight: oklch(0.78 0.18 65);         /* orange */
-  --highlight-foreground: oklch(0.99 0 0);
-  --cream: oklch(0.985 0.012 80);           /* warm cream */
+  /* Brand palette — Nutrindo Momentos */
+  --brand: #6A0D15;             /* dark red */
+  --brand-foreground: #ffffff;
+  --highlight: #DE1B23;         /* bright red */
+  --highlight-foreground: #ffffff;
+  --cream: #FCF4EB;           /* warm cream */
 
-  --background: oklch(0.985 0.012 80);
-  --foreground: oklch(0.32 0.12 50);
+  --background: #FCF4EB;
+  --foreground: #6A0D15;
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.32 0.12 50);
+  --card: #ffffff;
+  --card-foreground: #6A0D15;
 
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.32 0.12 50);
+  --popover: #ffffff;
+  --popover-foreground: #6A0D15;
 
-  --primary: oklch(0.78 0.18 65);
-  --primary-foreground: oklch(0.99 0 0);
+  --primary: #DE1B23;
+  --primary-foreground: #ffffff;
 
-  --secondary: oklch(0.95 0.04 70);
-  --secondary-foreground: oklch(0.42 0.14 50);
+  --secondary: #FDE8D8;
+  --secondary-foreground: #6A0D15;
 
-  --muted: oklch(0.95 0.02 70);
-  --muted-foreground: oklch(0.55 0.06 60);
+  --muted: #FDE8D8;
+  --muted-foreground: #8B2C33;
 
-  --accent: oklch(0.95 0.04 70);
-  --accent-foreground: oklch(0.42 0.14 50);
+  --accent: #FDE8D8;
+  --accent-foreground: #6A0D15;
 
-  --destructive: oklch(0.6 0.22 25);
-  --destructive-foreground: oklch(0.99 0 0);
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
 
-  --border: oklch(0.9 0.03 70);
-  --input: oklch(0.9 0.03 70);
-  --ring: oklch(0.78 0.18 65);
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: #DE1B23;
 }
 
 .dark {
@@ -113,6 +113,8 @@
   html, body { 
     font-family: var(--font-body); 
     scroll-behavior: smooth;
+    scrollbar-color: var(--color-highlight) var(--color-background);
+    scrollbar-width: thin;
   }
   body {
     background-color: var(--color-background);
@@ -121,6 +123,22 @@
   h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: 0.02em; }
   .font-hand { font-family: var(--font-handwritten); }
   .font-serif { font-family: var(--font-serif); }
+
+  /* Custom Webkit Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-background);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-highlight);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-brand);
+  }
 }
 
 @layer utilities {

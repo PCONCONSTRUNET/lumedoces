@@ -31,16 +31,14 @@ function CategoriasPage() {
   const [dragOverId, setDragOverId] = useState<string | null>(null);
 
   const load = async () => {
-    const { data, error } = await supabase
-      .from("categories")
-      .select("id, name, sort_order, is_active")
-      .order("sort_order")
-      .order("name");
-    if (error) {
-      toast.error("Erro ao carregar categorias");
-      return;
-    }
-    setRows((data as Category[]) ?? []);
+    // Supabase desconectado a pedido do usuário
+    setTimeout(() => {
+      setRows([
+        { id: "doces", name: "Doces Saudáveis", sort_order: 1, is_active: true },
+        { id: "salgados", name: "Snacks Saudáveis", sort_order: 2, is_active: true },
+        { id: "bebidas", name: "Bebidas Naturais", sort_order: 3, is_active: true }
+      ]);
+    }, 300);
   };
 
   useEffect(() => {

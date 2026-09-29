@@ -4,6 +4,13 @@ import boloPoteVegano from "@/assets/bolo_pote_vegano.jpg";
 import kombucha from "@/assets/kombucha.jpg";
 
 export type Addon = { name: string; price: number };
+export type OptionItem = { name: string; price: number };
+export type OptionGroup = {
+  name: string;
+  min: number;
+  max: number;
+  items: OptionItem[];
+};
 export type Product = {
   id: string;
   name: string;
@@ -13,6 +20,7 @@ export type Product = {
   category: string;
   featured?: boolean;
   addons?: Addon[];
+  options?: OptionGroup[];
 };
 
 const extrasDoces: Addon[] = [
@@ -41,6 +49,18 @@ export const products: Product[] = [
     category: "doces",
     featured: true,
     addons: extrasDoces,
+    options: [
+      {
+        name: "Escolha a Calda",
+        min: 1,
+        max: 1,
+        items: [
+          { name: "Calda de Cacau 100%", price: 0 },
+          { name: "Calda de Frutas Vermelhas", price: 3 },
+          { name: "Sem Calda", price: 0 }
+        ]
+      }
+    ]
   },
   {
     id: "coxinha-vegana",
@@ -62,7 +82,7 @@ export const products: Product[] = [
 ];
 
 export const categories = [
-  { id: "doces", label: "Doces Saudáveis", emoji: "🧁" },
-  { id: "salgados", label: "Snacks Saudáveis", emoji: "🥨" },
-  { id: "bebidas", label: "Bebidas Naturais", emoji: "🧃" },
+  { id: "doces", name: "Doces Saudáveis", emoji: "🧁" },
+  { id: "salgados", name: "Snacks Saudáveis", emoji: "🥨" },
+  { id: "bebidas", name: "Bebidas Naturais", emoji: "🧃" },
 ] as const;

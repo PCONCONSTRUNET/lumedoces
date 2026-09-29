@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState, useRef, Component, ErrorInfo, ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
 import { ProductCard } from "./ProductCard";
@@ -6,6 +6,16 @@ import { ProductModal } from "./ProductModal";
 import { formatBRL, useCart } from "@/store/cart";
 import { supabase } from "@/integrations/supabase/client";
 import { type Product, type Addon, products as staticProducts, categories as staticCategories } from "@/data/menu";
+
+class ErrorBoundary extends Component<{children: ReactNode, fallback: (err: Error) => ReactNode}, {error: Error | null}> {
+  state = { error: null };
+  static getDerivedStateFromError(error: Error) { return { error }; }
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) { console.error(error, errorInfo); }
+  render() {
+    if (this.state.error) return this.props.fallback(this.state.error);
+    return this.props.children;
+  }
+}
 
 type CategoryRow = {
   id: string;
@@ -71,7 +81,6 @@ function CategoryRow({ category, products, onSelect }: { category: CategoryRow, 
       <div className="mb-6 flex items-end justify-between">
         <div>
           <h3 className="font-serif text-3xl font-extrabold tracking-tight text-foreground">{category.name}</h3>
-          <p className="mt-1 text-sm text-muted-foreground/80">Sabores clássicos e especiais</p>
         </div>
         <div className="hidden sm:flex items-center gap-2">
           <button onClick={() => scroll('left')} className="grid h-10 w-10 place-items-center rounded-full border border-border bg-white text-foreground hover:bg-muted transition" aria-label="Anterior">
@@ -86,24 +95,14 @@ function CategoryRow({ category, products, onSelect }: { category: CategoryRow, 
       <div 
         ref={rowRef}
         onScroll={handleScroll}
-        className="no-scrollbar flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-px-6 sm:scroll-px-0 pb-4 -mx-4 px-6 sm:mx-0 sm:px-0 after:content-[''] after:w-2 after:shrink-0 sm:after:hidden"
+        className="no-scrollbar grid grid-cols-2 gap-3 sm:flex sm:gap-4 sm:overflow-x-auto sm:snap-x sm:snap-mandatory sm:pb-4"
       >
         {products.map((p) => (
-          <div key={p.id} className="snap-start shrink-0 w-[70vw] sm:w-[280px]">
+          <div key={p.id} className="sm:snap-start sm:shrink-0 sm:w-[280px]">
             <ProductCard product={p} onClick={() => onSelect(p)} />
           </div>
         ))}
       </div>
-
-      {/* Indicador de rolagem mobile */}
-      {products.length > 1 && (
-        <div className="mt-2 mx-auto h-1.5 w-16 bg-muted rounded-full overflow-hidden sm:hidden">
-          <div 
-            className="h-full bg-highlight transition-all duration-150 ease-out"
-            style={{ width: `${Math.max(15, scrollProgress)}%` }}
-          />
-        </div>
-      )}
     </div>
   );
 }
@@ -129,7 +128,25 @@ export function Menu({ menuRef }: { menuRef: React.RefObject<HTMLDivElement | nu
     },
   });
 
-  const categories = useMemo(() => staticCategories, []);
+  const categories = useMemo(() => {
+    let sortedCats = [...staticCategories];
+    if (typeof window !== 'undefined') {
+      const savedOrder = localStorage.getItem("categoryOrder");
+      if (savedOrder) {
+        try {
+          const orderArr = JSON.parse(savedOrder);
+          sortedCats.sort((a, b) => {
+            let indexA = orderArr.indexOf(a.id);
+            let indexB = orderArr.indexOf(b.id);
+            if (indexA === -1) indexA = 999;
+            if (indexB === -1) indexB = 999;
+            return indexA - indexB;
+          });
+        } catch (e) {}
+      }
+    }
+    return sortedCats;
+  }, []);
   const products = useMemo(() => staticProducts, []);
 
   const filtered = useMemo(() => {
@@ -158,11 +175,7 @@ export function Menu({ menuRef }: { menuRef: React.RefObject<HTMLDivElement | nu
           />
         </div>
 
-        {isLoading ? (
-          <p className="mt-5 py-10 text-center text-sm text-muted-foreground">
-            Carregando cardápio...
-          </p>
-        ) : filtered.length === 0 ? (
+        {filtered.length === 0 ? (
           <p className="mt-5 py-10 text-center text-sm text-muted-foreground">
             Nenhum produto encontrado.
           </p>
@@ -196,7 +209,16 @@ export function Menu({ menuRef }: { menuRef: React.RefObject<HTMLDivElement | nu
         </div>
       )}
 
-      <ProductModal product={selected} onClose={() => setSelected(null)} />
+      <ErrorBoundary fallback={(err) => (
+        <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white p-10 overflow-auto">
+          <h1 className="text-red-500 font-bold text-2xl">Erro no ProductModal</h1>
+          <p className="mt-4 font-bold">{err.toString()}</p>
+          <pre className="mt-4 text-xs whitespace-pre-wrap">{err.stack}</pre>
+          <button onClick={() => setSelected(null)} className="mt-6 bg-black text-white px-4 py-2 rounded">Fechar</button>
+        </div>
+      )}>
+        <ProductModal product={selected} onClose={() => setSelected(null)} />
+      </ErrorBoundary>
     </section>
   );
 }

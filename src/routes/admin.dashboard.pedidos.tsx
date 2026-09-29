@@ -8,9 +8,11 @@ import {
   ChevronUp,
   CircleDollarSign,
   Clock3,
+  Download,
   Layers3,
   Loader2,
   ShoppingBag,
+  Trash2,
   Truck,
   UtensilsCrossed,
   type LucideIcon,
@@ -21,6 +23,9 @@ import type { Enums, Tables } from "@/integrations/supabase/types";
 import { formatBRL } from "@/lib/finance-utils";
 import { formatOrderCode } from "@/lib/order-utils";
 import { cn } from "@/lib/utils";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import logoImage from "@/assets/logo_vinho.png";
 
 export const Route = createFileRoute("/admin/dashboard/pedidos")({
   component: PedidosPage,
@@ -166,43 +171,132 @@ function PedidosPage() {
       setLoading(true);
       setError(null);
 
-      const [{ data: ordersData, error: ordersError }, { data: methodsData, error: methodsError }] =
-        await Promise.all([
-          supabase.from("orders").select("*").order("created_at", { ascending: false }),
-          supabase.from("payment_methods").select("*").order("sort_order", { ascending: true }),
-        ]);
-
-      if (ordersError || methodsError) {
+      // Usando mock (Timeout) já que o Supabase local não está rodando
+      setTimeout(() => {
         if (cancelled) return;
-        setError("Nao foi possivel carregar os pedidos.");
+        setOrders([
+          {
+            id: "ord_001",
+            status: "pending",
+            customer_name: "Ana Laura",
+            customer_phone: "(11) 99999-1111",
+            customer_address: "Rua das Flores, 123",
+            address_reference: "Perto da padaria",
+            notes: "Sem cebola por favor",
+            payment_method_id: "pix",
+            subtotal: 45.00,
+            delivery_fee: 5.00,
+            discount: 0,
+            total: 50.00,
+            created_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(), // 15 mins ago
+            paid_at: null,
+            business_id: "biz_1"
+          },
+          {
+            id: "ord_002",
+            status: "preparing",
+            customer_name: "Carlos Eduardo",
+            customer_phone: "(11) 98888-2222",
+            customer_address: "Av Paulista, 1000, Apto 45",
+            address_reference: "",
+            notes: "",
+            payment_method_id: "credit",
+            subtotal: 80.00,
+            delivery_fee: 0.00,
+            discount: 10.00,
+            total: 70.00,
+            created_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(), // 45 mins ago
+            paid_at: new Date(Date.now() - 1000 * 60 * 40).toISOString(),
+            business_id: "biz_1"
+          },
+          {
+            id: "ord_003",
+            status: "delivered",
+            customer_name: "Mariana Silva",
+            customer_phone: "(11) 97777-3333",
+            customer_address: "Rua Augusta, 500",
+            address_reference: "Prédio comercial",
+            notes: "Deixar na portaria",
+            payment_method_id: "pix",
+            subtotal: 32.00,
+            delivery_fee: 5.00,
+            discount: 0,
+            total: 37.00,
+            created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
+            paid_at: new Date(Date.now() - 1000 * 60 * 60 * 1.9).toISOString(),
+            business_id: "biz_1"
+          }
+        ] as any[]);
+
+        setItems([
+          {
+            id: "item_1",
+            order_id: "ord_001",
+            product_id: "prod_1",
+            product_name: "Bolo de Pote Cenoura e Cacau",
+            quantity: 2,
+            unit_price: 18.00,
+            total_price: 36.00,
+            variations_snapshot: null
+          },
+          {
+            id: "item_2",
+            order_id: "ord_001",
+            product_id: "prod_2",
+            product_name: "Trufa Vegana de Chocolate",
+            quantity: 1,
+            unit_price: 9.00,
+            total_price: 9.00,
+            variations_snapshot: null
+          },
+          {
+            id: "item_3",
+            order_id: "ord_002",
+            product_id: "prod_3",
+            product_name: "Mini Coxinhas Veganas (Porção)",
+            quantity: 2,
+            unit_price: 24.00,
+            total_price: 48.00,
+            variations_snapshot: null
+          },
+          {
+            id: "item_4",
+            order_id: "ord_002",
+            product_id: "prod_4",
+            product_name: "Kombucha Frutas Vermelhas",
+            quantity: 2,
+            unit_price: 16.00,
+            total_price: 32.00,
+            variations_snapshot: null
+          },
+          {
+            id: "item_5",
+            order_id: "ord_003",
+            product_id: "prod_1",
+            product_name: "Bolo de Pote Cenoura e Cacau",
+            quantity: 1,
+            unit_price: 18.00,
+            total_price: 18.00,
+            variations_snapshot: null
+          },
+          {
+            id: "item_6",
+            order_id: "ord_003",
+            product_id: "prod_5",
+            product_name: "Brownie Vegano",
+            quantity: 1,
+            unit_price: 14.00,
+            total_price: 14.00,
+            variations_snapshot: null
+          }
+        ] as any[]);
+
+        setPaymentMethods([
+          { id: "pix", name: "PIX", type: "pix", is_active: true, business_id: "biz_1", instructions: null, created_at: "" },
+          { id: "credit", name: "Cartão de Crédito", type: "credit_card", is_active: true, business_id: "biz_1", instructions: null, created_at: "" }
+        ] as any[]);
         setLoading(false);
-        return;
-      }
-
-      const orderIds = (ordersData ?? []).map((o) => o.id);
-      let itemsData: ItemRow[] = [];
-
-      if (orderIds.length > 0) {
-        const { data, error: itemsError } = await supabase
-          .from("order_items")
-          .select("*")
-          .in("order_id", orderIds);
-
-        if (itemsError) {
-          if (cancelled) return;
-          setError("Nao foi possivel carregar os itens dos pedidos.");
-          setLoading(false);
-          return;
-        }
-
-        itemsData = (data ?? []) as ItemRow[];
-      }
-
-      if (cancelled) return;
-      setOrders((ordersData ?? []) as OrderRow[]);
-      setItems(itemsData);
-      setPaymentMethods((methodsData ?? []) as PaymentMethodRow[]);
-      setLoading(false);
+      }, 300);
     })();
 
     return () => {
@@ -276,6 +370,232 @@ function PedidosPage() {
     const nextStatus: OrderStatus = order.status === "paid" ? "pending" : "paid";
     void updateOrderStatus(order, nextStatus);
   };
+
+  const deleteOrder = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir este pedido e todos os seus itens?")) return;
+    
+    setUpdatingOrderId(id);
+    try {
+      const { error } = await supabase.from("orders").delete().eq("id", id);
+      if (error) throw error;
+      
+      setOrders((current) => current.filter((o) => o.id !== id));
+      toast.success("Pedido excluido com sucesso");
+    } catch (err) {
+      console.error(err);
+      toast.error("Nao foi possivel excluir o pedido");
+    } finally {
+      setUpdatingOrderId(null);
+    }
+  };
+
+  const generateReceipt = async (order: OrderRow, items: ItemRow[], paymentName: string) => {
+    try {
+      const doc = new jsPDF();
+      const W = 210;
+      const BRAND: [number,number,number]     = [106, 13, 21];
+      const HIGHLIGHT: [number,number,number] = [222, 27, 35];
+      const CREAM: [number,number,number]     = [252, 244, 235];
+      const GRAY: [number,number,number]      = [80, 80, 80];
+      const LGRAY: [number,number,number]     = [160, 160, 160];
+      const WHITE: [number,number,number]     = [255, 255, 255];
+
+      // ── HEADER BAND ─────────────────────────────────────────────────────
+      // Background removed (white)
+
+      // logo — no background needed, just image
+      try {
+        const b64 = await new Promise<string>(async (resolve, reject) => {
+          try {
+            const r = await fetch(logoImage);
+            const blob = await r.blob();
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          } catch (e) { reject(e); }
+        });
+        doc.addImage(b64, "PNG", 12, 8, 55, 18);
+      } catch (_) { /* skip */ }
+
+      // title right
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.setTextColor(...BRAND);
+      doc.text("COMPROVANTE", W - 12, 15, { align: "right" });
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(...GRAY);
+      doc.text("DE PEDIDO", W - 12, 21, { align: "right" });
+
+      // order number — bigger and prominent
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.setTextColor(...BRAND);
+      doc.text(formatOrderCode(order.id), W - 12, 29, { align: "right" });
+
+      // date smaller below
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(...LGRAY);
+      doc.text(formatDateTimeBR(order.created_at), W - 12, 35.5, { align: "right" });
+
+      // ── STATUS BADGE ────────────────────────────────────────────────────
+      const sLabel = STATUS_LABELS[order.status] ?? order.status;
+      const sBg: Record<string,[number,number,number]> = {
+        pending:   [245,158,11],  confirmed: [59,130,246],
+        preparing: [139,92,246],  delivered: [6,182,212],
+        paid:      [16,185,129],  cancelled: [239,68,68],
+      };
+      const bC = sBg[order.status] ?? [100,100,100] as [number,number,number];
+      doc.setFillColor(...bC);
+      doc.roundedRect(12, 44, 38, 7, 2, 2, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.5);
+      doc.setTextColor(...WHITE);
+      doc.text(sLabel.toUpperCase(), 31, 49, { align: "center" });
+
+      // ── INFO CARDS ──────────────────────────────────────────────────────
+      const cTop = 55;
+      const cH = 44;
+
+      // LEFT — Cliente
+      doc.setFillColor(...CREAM);
+      doc.roundedRect(12, cTop, 90, cH, 3, 3, "F");
+      doc.setFillColor(...HIGHLIGHT);
+      doc.rect(12, cTop, 3, cH, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.5);
+      doc.setTextColor(...BRAND);
+      doc.text("CLIENTE", 19, cTop + 7);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setTextColor(...GRAY);
+      doc.text(order.customer_name || "—", 19, cTop + 14);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8.5);
+      doc.text(order.customer_phone || "—", 19, cTop + 21);
+      const aLines = doc.splitTextToSize(order.customer_address || "—", 82);
+      doc.text(aLines, 19, cTop + 28);
+      if (order.address_reference) {
+        doc.setFontSize(7.5);
+        doc.setTextColor(...LGRAY);
+        doc.text(`Ref: ${order.address_reference}`, 19, cTop + 38);
+      }
+
+      // RIGHT — Pagamento
+      doc.setFillColor(...CREAM);
+      doc.roundedRect(108, cTop, 90, cH, 3, 3, "F");
+      doc.setFillColor(...BRAND);
+      doc.rect(108, cTop, 3, cH, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.5);
+      doc.setTextColor(...BRAND);
+      doc.text("PAGAMENTO", 115, cTop + 7);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setTextColor(...GRAY);
+      doc.text(paymentName, 115, cTop + 14);
+
+      const isPaid = order.status === "paid";
+      const pBadgeBg: [number,number,number] = isPaid ? [16,185,129] : [245,158,11];
+      const pBadgeW = isPaid ? 22 : 30;
+      doc.setFillColor(...pBadgeBg);
+      doc.roundedRect(115, cTop + 18, pBadgeW, 7, 2, 2, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.5);
+      doc.setTextColor(...WHITE);
+      doc.text(isPaid ? "PAGO" : "PENDENTE", 115 + pBadgeW / 2, cTop + 23, { align: "center" });
+
+      if (isPaid && order.paid_at) {
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(7.5);
+        doc.setTextColor(...LGRAY);
+        doc.text(`em ${formatDateTimeBR(order.paid_at)}`, 115, cTop + 33);
+      }
+      if (order.notes) {
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(7.5);
+        doc.setTextColor(...LGRAY);
+        const nLines = doc.splitTextToSize(`Obs: ${order.notes}`, 82);
+        doc.text(nLines, 115, cTop + (isPaid ? 39 : 29));
+      }
+
+      // ── ITEMS TABLE ─────────────────────────────────────────────────────
+      autoTable(doc, {
+        startY: cTop + cH + 8,
+        margin: { left: 12, right: 12 },
+        head: [["Produto", "Qtd", "Vlr Unit.", "Total"]],
+        body: items.map(it => [
+          it.product_name,
+          `${it.quantity}×`,
+          formatBRL(it.unit_price),
+          formatBRL(it.total_price),
+        ]),
+        theme: "grid",
+        headStyles: { fillColor: BRAND, textColor: WHITE, fontStyle: "bold", fontSize: 9, cellPadding: 3.5 },
+        alternateRowStyles: { fillColor: [252, 246, 240] },
+        bodyStyles: { textColor: GRAY, fontSize: 9, cellPadding: 3 },
+        columnStyles: {
+          0: { cellWidth: "auto" },
+          1: { cellWidth: 15, halign: "center" },
+          2: { cellWidth: 30, halign: "right" },
+          3: { cellWidth: 30, halign: "right", fontStyle: "bold" },
+        },
+      });
+
+      // ── TOTALS ──────────────────────────────────────────────────────────
+      let ty = (doc as any).lastAutoTable.finalY + 5;
+      const boxH = order.discount > 0 ? 33 : 27;
+      doc.setFillColor(...CREAM);
+      doc.roundedRect(118, ty, 80, boxH, 3, 3, "F");
+      doc.setDrawColor(...HIGHLIGHT);
+      doc.setLineWidth(0.3);
+      doc.roundedRect(118, ty, 80, boxH, 3, 3, "S");
+
+      ty += 7;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(...GRAY);
+      doc.text("Subtotal:", 164, ty, { align: "right" });
+      doc.text(formatBRL(order.subtotal), 194, ty, { align: "right" });
+      ty += 6;
+      doc.text("Entrega:", 164, ty, { align: "right" });
+      doc.text(formatBRL(order.delivery_fee), 194, ty, { align: "right" });
+      ty += 6;
+
+      if (order.discount > 0) {
+        doc.setTextColor(...HIGHLIGHT);
+        doc.text("Desconto:", 164, ty, { align: "right" });
+        doc.text(`-${formatBRL(order.discount)}`, 194, ty, { align: "right" });
+        ty += 6;
+      }
+
+      doc.setFillColor(...BRAND);
+      doc.rect(118, ty - 1, 80, 9, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.setTextColor(...WHITE);
+      doc.text("TOTAL", 164, ty + 5.5, { align: "right" });
+      doc.text(formatBRL(order.total), 194, ty + 5.5, { align: "right" });
+
+      // ── FOOTER (always at page bottom) ──────────────────────────────────
+      const pageH = doc.internal.pageSize.getHeight(); // 297mm for A4
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setTextColor(...BRAND);
+      doc.text("Nutrindo Momentos", W / 2, pageH - 10, { align: "center" });
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(...GRAY);
+      doc.text("Obrigada por fazer parte desse momento!", W / 2, pageH - 5, { align: "center" });
+
+      doc.save(`Pedido_${formatOrderCode(order.id)}.pdf`);
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao gerar o PDF");
+    }
+  };
+
 
   return (
     <div>
@@ -477,7 +797,15 @@ function PedidosPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-end">
+                      <div className="flex flex-col gap-2 items-end">
+                        <button
+                          type="button"
+                          onClick={() => generateReceipt(order, detailsItems, paymentName)}
+                          className="inline-flex min-w-36 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-bold ring-1 transition bg-white text-orange-600 ring-orange-200 hover:bg-orange-50"
+                        >
+                          <Download className="h-4 w-4" />
+                          Gerar PDF
+                        </button>
                         <button
                           type="button"
                           disabled={updatingOrderId === order.id}
@@ -491,6 +819,15 @@ function PedidosPage() {
                         >
                           <CheckCircle2 className="h-4 w-4" />
                           {order.status === "paid" ? "Pago" : "Marcar pago"}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={updatingOrderId === order.id}
+                          onClick={() => deleteOrder(order.id)}
+                          className="inline-flex min-w-36 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-bold ring-1 transition bg-white text-rose-600 ring-rose-200 hover:bg-rose-50 disabled:cursor-wait disabled:opacity-60"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Excluir
                         </button>
                       </div>
                     </div>

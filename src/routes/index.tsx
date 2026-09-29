@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useRef } from "react";
 import { Header } from "@/components/site/Header";
 import { Hero } from "@/components/site/Hero";
-import { MascotStrip } from "@/components/site/MascotStrip";
 import { Menu } from "@/components/site/Menu";
 import { CartDrawer } from "@/components/site/CartDrawer";
 import { CartProvider } from "@/store/cart";
@@ -12,13 +11,13 @@ export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
     meta: [
-      { title: "Lume Name" },
+      { title: "Nutrindo Momentos" },
       {
         name: "description",
         content:
           "Peça online as melhores mini coxinhas da região. Frango, catupiry, cheddar bacon e combos para festas com entrega rápida.",
       },
-      { property: "og:title", content: "Lume Name" },
+      { property: "og:title", content: "Nutrindo Momentos" },
       {
         property: "og:description",
         content: "Mini coxinhas crocantes, combos e doces. Faça seu pedido!",
@@ -38,7 +37,6 @@ function Index() {
         <Header />
         <main>
           <Hero onOrder={scrollToMenu} />
-          <MascotStrip />
           <Menu menuRef={menuRef} />
         </main>
         <CartDrawer />

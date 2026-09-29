@@ -5,9 +5,10 @@ export type CartItem = {
   productId: string;
   name: string;
   image: string;
-  unitPrice: number; // including addons
+  unitPrice: number; // including addons and options
   quantity: number;
   addons: { name: string; price: number }[];
+  selectedOptions?: { group: string; name: string; price: number }[];
   notes?: string;
 };
 

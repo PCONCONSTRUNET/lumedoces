@@ -56,16 +56,15 @@ function ProdutosPage() {
   const [open, setOpen] = useState(false);
 
   const load = async () => {
-    const { data, error } = await supabase
-      .from("products")
-      .select("id, name, base_price, is_active, category_id, categories(name)")
-      .order("sort_order")
-      .order("name");
-    if (error) {
-      toast.error("Erro ao carregar produtos");
-      return;
-    }
-    setRows((data as unknown as Product[]) ?? []);
+    // Supabase desconectado. Usando mock.
+    setTimeout(() => {
+      setRows([
+        { id: "trufa-vegana", name: "Trufa Vegana de Chocolate", base_price: 8.00, is_active: true, category_id: "doces", categories: { name: "Doces Saudáveis" }, image_url: "/src/assets/trufa_vegana.jpg" } as unknown as Product,
+        { id: "bolo-pote-vegano", name: "Bolo de Pote Cenoura e Cacau", base_price: 18.00, is_active: true, category_id: "doces", categories: { name: "Doces Saudáveis" }, image_url: "/src/assets/bolo_pote_vegano.jpg" } as unknown as Product,
+        { id: "coxinha-vegana", name: "Mini Coxinhas Veganas", base_price: 24.00, is_active: true, category_id: "salgados", categories: { name: "Snacks Saudáveis" }, image_url: "/src/assets/coxinha_vegana.jpg" } as unknown as Product,
+        { id: "kombucha-frutas", name: "Kombucha Frutas Vermelhas", base_price: 15.00, is_active: true, category_id: "bebidas", categories: { name: "Bebidas Naturais" }, image_url: "/src/assets/kombucha.jpg" } as unknown as Product
+      ]);
+    }, 300);
   };
 
   useEffect(() => {
@@ -73,19 +72,16 @@ function ProdutosPage() {
   }, []);
 
   const onToggle = async (p: Product) => {
-    await supabase.from("products").update({ is_active: !p.is_active }).eq("id", p.id);
+    // await supabase.from("products").update({ is_active: !p.is_active }).eq("id", p.id);
+    toast.success("Status atualizado (Mock)");
     load();
   };
 
   const onDelete = async (p: Product) => {
     if (!confirm(`Excluir "${p.name}"?`)) return;
-    const { error } = await supabase.from("products").delete().eq("id", p.id);
-    if (error) {
-      toast.error("Não foi possível excluir");
-      return;
-    }
-    toast.success("Produto excluído");
-    load();
+    // const { error } = await supabase.from("products").delete().eq("id", p.id);
+    toast.success("Produto excluído (Mock)");
+    setRows(prev => prev ? prev.filter(prod => prod.id !== p.id) : null);
   };
 
   return (
@@ -117,30 +113,50 @@ function ProdutosPage() {
           </p>
         ) : (
           <ul className="divide-y divide-border/60">
-            {rows.map((p) => (
-              <li key={p.id} className="flex items-center gap-3 py-3">
+            {rows.map((p: any) => (
+              <li key={p.id} className="flex items-center gap-4 py-4 px-2 hover:bg-gray-50 transition group rounded-lg">
+                <div className="w-16 h-16 rounded-lg bg-gray-200 overflow-hidden shrink-0 border border-gray-200">
+                  {p.image_url ? (
+                    <img src={p.image_url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400"><ImagePlus className="w-6 h-6"/></div>
+                  )}
+                </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-foreground truncate">{p.name}</div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-xs text-muted-foreground mt-1">
                     {p.categories?.name ?? "Sem categoria"} · {formatBRL(Number(p.base_price))}
                   </div>
                 </div>
-                <label className="flex items-center gap-2 text-xs font-medium cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={p.is_active}
-                    onChange={() => onToggle(p)}
-                    className="h-4 w-4 accent-brand"
-                  />
-                  Ativo
-                </label>
-                <button
-                  onClick={() => onDelete(p)}
-                  className="grid h-8 w-8 place-items-center rounded-lg text-red-600 hover:bg-red-50"
-                  aria-label="Excluir"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
+                
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center gap-2 text-xs font-medium cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={p.is_active}
+                      onChange={() => onToggle(p)}
+                      className="h-4 w-4 accent-brand"
+                    />
+                    Ativo
+                  </label>
+                  
+                  <button
+                    onClick={() => {
+                      toast("Abrindo edição (Mock)");
+                    }}
+                    className="flex items-center gap-1 h-8 px-3 rounded-md text-sm font-semibold text-gray-600 border border-gray-300 hover:bg-gray-100 transition opacity-0 group-hover:opacity-100"
+                  >
+                    Editar
+                  </button>
+
+                  <button
+                    onClick={() => onDelete(p)}
+                    className="grid h-8 w-8 place-items-center rounded-lg text-red-600 hover:bg-red-50"
+                    aria-label="Excluir"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

@@ -10,18 +10,18 @@ export const Route = createFileRoute("/contato")({
   component: ContatoPage,
   head: () => ({
     meta: [
-      { title: "Contato — Lume Name" },
-      { name: "description", content: "Endereço, WhatsApp e Instagram da Lume Name." },
-      { property: "og:title", content: "Contato — Lume Name" },
+      { title: "Contato — Nutrindo Momentos" },
+      { name: "description", content: "Endereço, WhatsApp e Instagram da Nutrindo Momentos." },
+      { property: "og:title", content: "Contato — Nutrindo Momentos" },
       { property: "og:description", content: "Fale com a gente pelo WhatsApp, Instagram ou venha nos visitar." },
     ],
   }),
 });
 
-const WPP = "554899377695";
-const WPP_LABEL = "48 9937-7695";
-const IG = "rafalanchesdelivery_";
-const ENDERECO = "Borracharia e guincho SOS guincho 24horas, Criciúma, Santa Catarina";
+const WPP = "5548996915303";
+const WPP_LABEL = "48 99691-5303";
+const IG = "nutrindomomentosc";
+const ENDERECO = "Lauro Müller, Santa Catarina (atrás da oficina FUBICA CAR)";
 
 const HORARIOS = [
   { dia: "Terça a Quinta", hora: "19:00 – 00:00" },
@@ -77,7 +77,7 @@ function ContatoPage() {
             </a>
 
             <a
-              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ENDERECO)}`}
+              href="https://www.google.com/maps/place/28%C2%B024'22.9%22S+49%C2%B024'25.2%22W/@-28.4063492,-49.407153,20.75z/data=!4m4!3m3!8m2!3d-28.4063606!4d-49.4069977"
               target="_blank"
               rel="noreferrer"
               className="sm:col-span-2 group rounded-2xl border border-border bg-white p-6 shadow-sm hover:shadow-md transition"

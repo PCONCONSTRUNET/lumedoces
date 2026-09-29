@@ -6,6 +6,7 @@ export type BusinessHour = {
   open_time: string; // "HH:MM:SS"
   close_time: string;
   is_closed: boolean;
+  is_24h?: boolean;
 };
 
 export type BusinessStatus = {
@@ -27,6 +28,14 @@ function compute(hours: BusinessHour[]): Omit<BusinessStatus, "loading"> {
   const todayHour = hours.find((h) => h.day_of_week === today) ?? null;
 
   if (todayHour && !todayHour.is_closed) {
+    if (todayHour.is_24h) {
+      return {
+        isOpen: true,
+        todayHour,
+        label: "Aberto 24 horas",
+      };
+    }
+
     const [oH, oM] = todayHour.open_time.split(":").map(Number);
     const [cH, cM] = todayHour.close_time.split(":").map(Number);
     const cur = now.getHours() * 60 + now.getMinutes();
@@ -55,7 +64,7 @@ function compute(hours: BusinessHour[]): Omit<BusinessStatus, "loading"> {
         return {
           isOpen: false,
           todayHour,
-          label: `Fechado · abre hoje ${hhmm(h.open_time)}`,
+          label: h.is_24h ? `Fechado · abre hoje 24h` : `Fechado · abre hoje ${hhmm(h.open_time)}`,
         };
       }
       continue;
@@ -63,7 +72,7 @@ function compute(hours: BusinessHour[]): Omit<BusinessStatus, "loading"> {
     return {
       isOpen: false,
       todayHour,
-      label: `Fechado · abre ${DAY_LABEL[d]} ${hhmm(h.open_time)}`,
+      label: h.is_24h ? `Fechado · abre ${DAY_LABEL[d]} 24h` : `Fechado · abre ${DAY_LABEL[d]} ${hhmm(h.open_time)}`,
     };
   }
 

@@ -11,7 +11,7 @@ const features = [
 
 export function MascotStrip() {
   return (
-    <section className="relative overflow-hidden bg-[#50C8B5] py-3 shadow-sm z-10">
+    <section className="relative overflow-hidden bg-brand py-3 shadow-sm z-10">
       <div className="flex w-max animate-marquee">
         {/* Render repeated blocks for infinite loop */}
         {[...Array(6)].map((_, arrayIndex) => (

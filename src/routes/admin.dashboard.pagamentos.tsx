@@ -11,6 +11,7 @@ import {
   Loader2,
   ReceiptText,
   RotateCcw,
+  Trash2,
   type LucideIcon,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,6 +42,7 @@ type PaymentRow = {
 type PeriodFilter = "all" | "today" | "week" | "month";
 type StatusFilter = "all" | PaymentStatus;
 type PaymentStatus = "paid" | "pending" | "cancelled" | "refunded";
+type FinanceTransactionStatus = "paid" | "pending";
 
 const PERIOD_FILTERS: Array<{ key: PeriodFilter; label: string }> = [
   { key: "all", label: "Todos" },
@@ -140,39 +142,74 @@ function PagamentosPage() {
   useEffect(() => {
     let cancelled = false;
 
-    (async () => {
-      setLoading(true);
-      setError(null);
-
-      const [txResult, ordersResult, methodsResult] = await Promise.all([
-        supabase
-          .from("finance_transactions")
-          .select("*")
-          .eq("kind", "revenue")
-          .not("order_id", "is", null)
-          .order("created_at", { ascending: false }),
-        supabase.from("orders").select("*").order("created_at", { ascending: false }),
-        supabase.from("payment_methods").select("*").order("sort_order", { ascending: true }),
-      ]);
-
+    // Mock data — Supabase offline
+    setTimeout(() => {
       if (cancelled) return;
 
-      if (txResult.error || ordersResult.error || methodsResult.error) {
-        setError("Nao foi possivel carregar os pagamentos.");
-        setLoading(false);
-        return;
-      }
+      setTransactions([
+        {
+          id: "tx_001",
+          order_id: "ord_001",
+          kind: "revenue",
+          amount: 50.00,
+          status: "pending",
+          description: "Pedido Ana Laura",
+          payment_method_id: "pix",
+          occurred_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+          created_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+          business_id: "biz_1",
+          category: null,
+          notes: null,
+        },
+        {
+          id: "tx_002",
+          order_id: "ord_002",
+          kind: "revenue",
+          amount: 70.00,
+          status: "paid",
+          description: "Pedido Carlos Eduardo",
+          payment_method_id: "credit",
+          occurred_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+          created_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+          business_id: "biz_1",
+          category: null,
+          notes: null,
+        },
+        {
+          id: "tx_003",
+          order_id: "ord_003",
+          kind: "revenue",
+          amount: 37.00,
+          status: "paid",
+          description: "Pedido Mariana Silva",
+          payment_method_id: "pix",
+          occurred_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+          created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+          business_id: "biz_1",
+          category: null,
+          notes: null,
+        },
+      ] as any[]);
 
-      setTransactions((txResult.data ?? []) as FinanceTransaction[]);
-      setOrders((ordersResult.data ?? []) as OrderRow[]);
-      setPaymentMethods((methodsResult.data ?? []) as PaymentMethodRow[]);
+      setOrders([
+        { id: "ord_001", status: "pending",   customer_name: "Ana Laura",       customer_phone: "(11) 99999-1111", customer_address: "Rua das Flores, 123", subtotal: 45, delivery_fee: 5, discount: 0, total: 50, payment_method_id: "pix",    created_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(), paid_at: null, business_id: "biz_1", notes: null },
+        { id: "ord_002", status: "preparing", customer_name: "Carlos Eduardo",  customer_phone: "(11) 98888-2222", customer_address: "Av Paulista, 1000", subtotal: 80, delivery_fee: 0, discount: 10, total: 70, payment_method_id: "credit", created_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(), paid_at: new Date(Date.now() - 1000 * 60 * 40).toISOString(), business_id: "biz_1", notes: null },
+        { id: "ord_003", status: "delivered", customer_name: "Mariana Silva",   customer_phone: "(11) 97777-3333", customer_address: "Rua Augusta, 500", subtotal: 32, delivery_fee: 5, discount: 0, total: 37, payment_method_id: "pix",    created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), paid_at: new Date(Date.now() - 1000 * 60 * 60 * 1.9).toISOString(), business_id: "biz_1", notes: null },
+      ] as any[]);
+
+      setPaymentMethods([
+        { id: "pix",    name: "PIX",               type: "pix",         is_active: true, business_id: "biz_1", instructions: null, created_at: "" },
+        { id: "credit", name: "Cartão de Crédito",  type: "credit_card", is_active: true, business_id: "biz_1", instructions: null, created_at: "" },
+      ] as any[]);
+
       setLoading(false);
-    })();
+    }, 300);
 
     return () => {
       cancelled = true;
     };
   }, []);
+
 
   const paymentMethodNameById = useMemo(
     () => new Map(paymentMethods.map((method) => [method.id, method.name])),
@@ -264,6 +301,19 @@ function PagamentosPage() {
     }),
     [periodPayments],
   );
+
+  const updatePaymentStatus = (id: string, newStatus: PaymentStatus) => {
+    // Para modo offline mock
+    setTransactions((prev) =>
+      prev.map((tx) => (tx.id === id ? { ...tx, status: newStatus as any } : tx))
+    );
+  };
+
+  const deletePayment = (id: string) => {
+    if (confirm("Tem certeza que deseja excluir este pagamento?")) {
+      setTransactions((prev) => prev.filter((tx) => tx.id !== id));
+    }
+  };
 
   return (
     <div>
@@ -381,6 +431,8 @@ function PagamentosPage() {
               onToggle={() =>
                 setExpandedPaymentId(expandedPaymentId === payment.id ? null : payment.id)
               }
+              onStatusChange={(status) => updatePaymentStatus(payment.id, status)}
+              onDelete={() => deletePayment(payment.id)}
             />
           ))}
         </div>
@@ -393,10 +445,14 @@ function PaymentCard({
   payment,
   expanded,
   onToggle,
+  onStatusChange,
+  onDelete,
 }: {
   payment: PaymentRow;
   expanded: boolean;
   onToggle: () => void;
+  onStatusChange: (status: PaymentStatus) => void;
+  onDelete: () => void;
 }) {
   const StatusIcon = statusIcon(payment.status);
 
@@ -451,27 +507,64 @@ function PaymentCard({
       </button>
 
       {expanded && (
-        <div className="mt-3 grid gap-2 rounded-xl border border-orange-100 bg-white/90 p-3 text-sm shadow-inner shadow-brand/5 sm:grid-cols-2">
-          <p>
-            <span className="font-semibold">Status:</span> {statusLabel(payment.status)}
-          </p>
-          <p>
-            <span className="font-semibold">Valor:</span> {formatBRL(payment.amount)}
-          </p>
-          <p>
-            <span className="font-semibold">Data e horario:</span>{" "}
-            {formatDateTimeBR(payment.occurredAt)}
-          </p>
-          <p>
-            <span className="font-semibold">Metodo:</span> {payment.paymentMethod}
-          </p>
-          <p>
-            <span className="font-semibold">Pedido:</span> {formatOrderCode(payment.orderId)}
-          </p>
-          <p>
-            <span className="font-semibold">Origem:</span>{" "}
-            {payment.source === "finance" ? "Financeiro" : "Pedido"}
-          </p>
+        <div className="mt-3 flex flex-col gap-4 rounded-xl border border-orange-100 bg-white/90 p-4 shadow-inner shadow-brand/5">
+          <div className="grid gap-2 text-sm sm:grid-cols-2">
+            <p>
+              <span className="font-semibold">Status:</span> {statusLabel(payment.status)}
+            </p>
+            <p>
+              <span className="font-semibold">Valor:</span> {formatBRL(payment.amount)}
+            </p>
+            <p>
+              <span className="font-semibold">Data e horario:</span>{" "}
+              {formatDateTimeBR(payment.occurredAt)}
+            </p>
+            <p>
+              <span className="font-semibold">Metodo:</span> {payment.paymentMethod}
+            </p>
+            <p>
+              <span className="font-semibold">Pedido:</span> {formatOrderCode(payment.orderId)}
+            </p>
+            <p>
+              <span className="font-semibold">Origem:</span>{" "}
+              {payment.source === "finance" ? "Financeiro" : "Pedido"}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 border-t border-border/50 pt-4">
+            <span className="text-sm font-semibold text-muted-foreground">Alterar para:</span>
+            {STATUS_FILTERS.filter(f => f.key !== "all").map((f) => {
+              const Icon = f.icon;
+              const isActive = payment.status === f.key;
+              if (isActive) return null;
+              
+              return (
+                <button
+                  key={f.key}
+                  onClick={() => onStatusChange(f.key as PaymentStatus)}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold shadow-sm ring-1 transition hover:bg-black/5",
+                    f.key === "paid" && "ring-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100",
+                    f.key === "pending" && "ring-amber-200 text-amber-700 bg-amber-50 hover:bg-amber-100",
+                    f.key === "cancelled" && "ring-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100",
+                    f.key === "refunded" && "ring-sky-200 text-sky-700 bg-sky-50 hover:bg-sky-100",
+                  )}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {f.label}
+                </button>
+              );
+            })}
+            
+            {/* Delete button pushed to the right */}
+            <button
+              onClick={onDelete}
+              className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-rose-100 px-3 py-1.5 text-xs font-bold text-rose-700 shadow-sm ring-1 ring-rose-200 transition hover:bg-rose-200"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Excluir
+            </button>
+          </div>
         </div>
       )}
     </div>

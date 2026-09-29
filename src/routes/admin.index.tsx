@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Lock, Mail, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import adminBg from "@/assets/admin-bg.png";
+import banner from "@/assets/banner.png";
 import { toast, Toaster } from "sonner";
 
 export const Route = createFileRoute("/admin/")({
@@ -32,14 +32,19 @@ function AdminLogin() {
     e.preventDefault();
     setLoading(true);
     try {
+
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
+
       if (error || !data.user) {
         toast.error("Credenciais inválidas");
+        setLoading(false);
         return;
       }
+
 
       const { data: isAdmin, error: roleErr } = await supabase.rpc("has_role", {
         _user_id: data.user.id,
@@ -70,29 +75,26 @@ function AdminLogin() {
 
 
   return (
-    <div
-      className="min-h-screen grid place-items-center px-4"
-      style={{
-        backgroundColor: "#ff8a1f",
-        backgroundImage: `url(${adminBg})`,
-        backgroundRepeat: "repeat",
-        backgroundSize: "520px 520px",
+    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
+      {/* Background with banner */}
+      <div className="absolute inset-0 z-0">
+        <img src={banner} className="w-full h-full object-cover opacity-30" alt="" />
+        <div className="absolute inset-0 bg-cream/80 backdrop-blur-[2px]" />
+      </div>
 
-      }}
-    >
       <Toaster position="top-center" richColors />
-      <div className="w-full max-w-sm rounded-3xl bg-card/95 backdrop-blur p-8 shadow-2xl ring-1 ring-white/40">
+      <div className="w-full max-w-sm rounded-3xl bg-white p-8 shadow-2xl ring-1 ring-border relative z-10 flex flex-col justify-center">
 
         <div className="text-center">
-          <h1 className="font-display text-3xl text-brand">ADMIN</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Acesso restrito — Lume Name
+          <h1 className="font-display text-4xl text-brand">ADMIN</h1>
+          <p className="mt-2 text-sm text-foreground/70">
+            Acesso restrito — Nutrindo Momentos
           </p>
         </div>
 
-        <form onSubmit={onSubmit} className="mt-6 space-y-3">
+        <form onSubmit={onSubmit} className="mt-8 space-y-4">
           <label className="block">
-            <span className="mb-1 block text-xs font-semibold text-foreground/80">
+            <span className="mb-1 block text-xs font-bold text-foreground/80">
               E-mail
             </span>
             <div className="relative">
@@ -103,14 +105,14 @@ function AdminLogin() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-full border border-border bg-background py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40"
+                className="w-full rounded-full border border-border bg-white shadow-sm py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-highlight/40"
                 placeholder="voce@email.com"
               />
             </div>
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-xs font-semibold text-foreground/80">
+            <span className="mb-1 block text-xs font-bold text-foreground/80">
               Senha
             </span>
             <div className="relative">
@@ -121,7 +123,7 @@ function AdminLogin() {
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-full border border-border bg-background py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40"
+                className="w-full rounded-full border border-border bg-white shadow-sm py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-highlight/40"
                 placeholder="••••••••"
               />
             </div>
@@ -130,7 +132,7 @@ function AdminLogin() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-bold text-brand-foreground shadow-md hover:opacity-95 disabled:opacity-60 transition"
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-highlight px-6 py-3.5 text-sm font-bold text-white shadow-md hover:opacity-95 disabled:opacity-60 transition tracking-wide"
           >
             {loading ? (
               <>

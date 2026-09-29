@@ -17,6 +17,7 @@ import {
   Wallet,
   ScrollText,
   TicketPercent,
+  Users,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -27,12 +28,15 @@ export const Route = createFileRoute("/admin/dashboard")({
 
 const navItems = [
   { to: "/admin/dashboard/visao", label: "Dashboard", icon: BarChart3 },
+  { to: "/admin/dashboard/cardapio", label: "Cardápio", icon: Package },
   { to: "/admin/dashboard/pedidos", label: "Pedidos", icon: ShoppingBag },
   { to: "/admin/dashboard/pagamentos", label: "Pagamentos", icon: CreditCard },
+  { to: "/admin/dashboard/clientes", label: "Clientes", icon: Users },
   { to: "/admin/dashboard/cupons", label: "Cupom", icon: TicketPercent },
   { to: "/admin/dashboard/financeiro", label: "Financeiro", icon: Wallet },
+  { to: "/admin/dashboard/gateways", label: "Gateways", icon: CreditCard },
   { to: "/admin/dashboard/categorias", label: "Categorias", icon: Tags },
-  { to: "/admin/dashboard/produtos", label: "Produtos", icon: Package },
+  { to: "/admin/dashboard/produtos", label: "Produtos (Antigo)", icon: Package },
   { to: "/admin/dashboard/horarios", label: "Horários", icon: Clock },
   { to: "/admin/dashboard/auditoria", label: "Auditoria", icon: ScrollText },
 ] as const;
@@ -53,6 +57,7 @@ function AdminDashboardLayout() {
 
   useEffect(() => {
     (async () => {
+
       const { data, error } = await supabase.auth.getUser();
       if (error || !data.user) {
         navigate({ to: "/admin", replace: true });
@@ -70,8 +75,6 @@ function AdminDashboardLayout() {
       setEmail(data.user.email ?? null);
       setChecking(false);
 
-      // se entrou em /admin/dashboard sem aba, vai pra Pedidos
-      // se entrou em /admin/dashboard sem aba, vai pra Dashboard
       if (pathname === "/admin/dashboard" || pathname === "/admin/dashboard/") {
         navigate({ to: "/admin/dashboard/visao", replace: true });
       }
