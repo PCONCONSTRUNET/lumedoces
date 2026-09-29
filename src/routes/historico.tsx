@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Clock, CheckCircle2, ChefHat, Truck, CheckSquare, XCircle, ArrowLeft, PackageOpen } from "lucide-react";
+import { Clock, CheckCircle2, ChefHat, Truck, CheckSquare, XCircle, ArrowLeft, PackageOpen, X } from "lucide-react";
 import { formatBRL } from "@/store/cart";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -22,9 +22,28 @@ const STATUS_CONFIG: Record<OrderStatus, { label: string; icon: any; color: stri
   cancelled: { label: "Cancelado", icon: XCircle, color: "text-rose-600", bgColor: "bg-rose-100" },
 };
 
+const TIMELINE_STEPS = [
+  { id: 'pending', label: 'Pedido Recebido' },
+  { id: 'confirmed', label: 'Confirmado' },
+  { id: 'preparing', label: 'Em Preparo' },
+  { id: 'dispatch', label: 'Saiu para Entrega / Retirada' },
+  { id: 'delivered', label: 'Finalizado' },
+];
+
+const getStatusIndex = (status: string) => {
+  if (status === 'cancelled') return -1;
+  if (status === 'pending' || status === 'paid') return 0;
+  if (status === 'confirmed') return 1;
+  if (status === 'preparing') return 2;
+  if (status === 'out_for_delivery' || status === 'ready_for_pickup') return 3;
+  if (status === 'delivered') return 4;
+  return 0;
+};
+
 function HistoricoPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
 
   useEffect(() => {
     async function loadOrders() {
@@ -93,7 +112,7 @@ function HistoricoPage() {
               const isPendingPayment = isPix && order.status === "pending";
 
               return (
-                <div key={order.id} className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                <div key={order.id} className="bg-white rounded-3xl shadow-md border-2 border-brand/20 overflow-hidden">
                   <div className="border-b border-gray-50 bg-gray-50/50 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
@@ -129,9 +148,18 @@ function HistoricoPage() {
                       ))}
                     </ul>
 
-                    <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-                      <span className="text-gray-500 font-medium">Total do Pedido</span>
-                      <span className="text-xl font-bold text-highlight">{formatBRL(order.total || 0)}</span>
+                    <div className="flex flex-col sm:flex-row justify-between sm:items-center pt-4 border-t border-gray-100 gap-4">
+                      <div className="flex flex-col">
+                        <span className="text-gray-500 font-medium">Total do Pedido</span>
+                        <span className="text-xl font-bold text-highlight">{formatBRL(order.total || 0)}</span>
+                      </div>
+                      
+                      <button 
+                        onClick={() => setSelectedOrder(order)}
+                        className="w-full sm:w-auto px-6 py-3 bg-brand/10 text-brand font-bold rounded-xl hover:bg-brand/20 transition-colors flex justify-center items-center gap-2"
+                      >
+                        Acompanhar Pedido
+                      </button>
                     </div>
                     
                     {isPendingPayment && (
@@ -144,6 +172,55 @@ function HistoricoPage() {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {selectedOrder && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 animate-in fade-in">
+            <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl relative">
+              <button 
+                onClick={() => setSelectedOrder(null)}
+                className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+
+              <h2 className="text-2xl font-bold text-gray-800 mb-6">Status do Pedido</h2>
+              
+              {selectedOrder.status === 'cancelled' ? (
+                <div className="text-center py-8">
+                  <div className="mx-auto w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mb-4">
+                    <XCircle className="h-8 w-8 text-rose-600" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-800">Pedido Cancelado</h3>
+                  <p className="text-gray-500 mt-2">Infelizmente este pedido foi cancelado.</p>
+                </div>
+              ) : (
+                <div className="relative pl-6 border-l-2 border-gray-100 space-y-8 mt-4 ml-4 pb-4">
+                  {TIMELINE_STEPS.map((step, index) => {
+                    const currentIndex = getStatusIndex(selectedOrder.status);
+                    const isCompleted = index < currentIndex;
+                    const isCurrent = index === currentIndex;
+                    
+                    return (
+                      <div key={step.id} className="relative flex items-center gap-4">
+                        <div className={`absolute -left-[42px] flex items-center justify-center w-10 h-10 rounded-full border-4 border-white shadow-sm shrink-0 z-10 transition-colors duration-500
+                          ${isCompleted ? 'bg-brand' : 
+                            isCurrent ? 'bg-brand' : 
+                            'bg-gray-200'}`}>
+                          {isCompleted ? <CheckCircle2 className="w-5 h-5 text-white" /> : 
+                           isCurrent ? <Clock className="w-5 h-5 text-white animate-pulse" /> : 
+                           null}
+                        </div>
+                        <div className={`font-bold transition-all duration-500 ${isCurrent ? 'text-brand text-lg translate-x-1' : isCompleted ? 'text-gray-800' : 'text-gray-400'}`}>
+                          {step.label}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
