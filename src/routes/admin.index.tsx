@@ -88,7 +88,7 @@ function AdminLogin() {
         <div className="text-center">
           <h1 className="font-display text-4xl text-brand">ADMIN</h1>
           <p className="mt-2 text-sm text-foreground/70">
-            Acesso restrito — Nutrindo Momentos
+            Acesso restrito — Lume Artesanais
           </p>
         </div>
 

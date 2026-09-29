@@ -31,6 +31,7 @@ import {
   toISODate,
   type PeriodPreset,
 } from "@/lib/finance-utils";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/dashboard/visao")({
   component: DashboardVisaoPage,
@@ -87,25 +88,33 @@ function DashboardVisaoPage() {
 
   useEffect(() => {
     let cancel = false;
-    // Supabase desconectado a pedido do usuário
-    setTimeout(() => {
-      if (cancel) return;
-      setOrders([
-        { id: "1", customer_name: "João Silva", total: 45.00, status: "paid", payment_method_id: "pix", created_at: new Date().toISOString() },
-        { id: "2", customer_name: "Maria Santos", total: 120.00, status: "preparing", payment_method_id: "credit", created_at: new Date().toISOString() },
-        { id: "3", customer_name: "Carlos Gomes", total: 32.50, status: "delivered", payment_method_id: "pix", created_at: new Date().toISOString() }
-      ]);
-      setItems([
-        { order_id: "1", product_id: "mock1", product_name: "Trufa Vegana de Chocolate", quantity: 2, total_price: 16.00 },
-        { order_id: "1", product_id: "mock2", product_name: "Mini Coxinhas Veganas", quantity: 1, total_price: 24.00 },
-        { order_id: "2", product_id: "mock3", product_name: "Bolo de Pote Cenoura e Cacau", quantity: 4, total_price: 72.00 }
-      ]);
-      setMethods([
-        { id: "pix", name: "PIX" },
-        { id: "credit", name: "Cartão de Crédito" }
-      ]);
-      setLoading(false);
-    }, 300);
+    (async () => {
+      setLoading(true);
+      try {
+        const isoFrom = range.from + "T00:00:00.000Z";
+        const isoTo = range.to + "T23:59:59.999Z";
+
+        const [ordersRes, itemsRes, pmRes] = await Promise.all([
+          supabase
+            .from("orders")
+            .select("id, customer_name, total, status, payment_method_id, created_at")
+            .gte("created_at", isoFrom)
+            .lte("created_at", isoTo),
+          supabase.from("order_items").select("order_id, product_id, product_name, quantity, total_price"),
+          supabase.from("payment_methods").select("id, name"),
+        ]);
+
+        if (cancel) return;
+
+        if (ordersRes.data) setOrders(ordersRes.data as any[]);
+        if (itemsRes.data) setItems(itemsRes.data as any[]);
+        if (pmRes.data) setMethods(pmRes.data);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        if (!cancel) setLoading(false);
+      }
+    })();
     return () => {
       cancel = true;
     };
@@ -233,179 +242,114 @@ function DashboardVisaoPage() {
             />
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-4">
-            <Card title="Pedidos & receita por dia">
-              <div className="h-72">
-                <ResponsiveContainer>
-                  <LineChart data={byDay}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                    <XAxis dataKey="day" stroke="var(--muted-foreground)" fontSize={11} />
-                    <YAxis stroke="var(--muted-foreground)" fontSize={11} />
-                    <Tooltip
-                      cursor={{ stroke: "var(--border)", strokeWidth: 1 }}
-                      contentStyle={{
-                        background: "var(--card)",
-                        border: "1px solid var(--border)",
-                        borderRadius: 8,
-                        color: "var(--foreground)",
-                      }}
-                      formatter={(v: number, name: string) =>
-                        name === "receita" ? formatBRL(v) : v
-                      }
-                    />
-                    <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="pedidos"
-                      stroke="var(--brand)"
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="receita"
-                      stroke="#10b981"
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+          <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {/* Sales Chart (takes 2 columns on large screens) */}
+            <div className="xl:col-span-2 space-y-6">
+              <Card title="Faturamento por dia" className="border-none shadow-xl shadow-brand/5 bg-white/70 backdrop-blur-sm">
+                <div className="h-72">
+                  <ResponsiveContainer>
+                    <BarChart data={byDay} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.5} />
+                      <XAxis dataKey="day" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
+                      <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `R$${v}`} />
+                      <Tooltip
+                        cursor={{ fill: "var(--muted)", opacity: 0.4 }}
+                        contentStyle={{
+                          background: "#fff",
+                          border: "none",
+                          borderRadius: "12px",
+                          boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
+                          color: "var(--foreground)",
+                          fontWeight: 500,
+                        }}
+                        formatter={(v: number, name: string) => [formatBRL(v), "Receita"]}
+                        labelStyle={{ color: "var(--muted-foreground)", marginBottom: "4px" }}
+                      />
+                      <Bar dataKey="receita" fill="#10b981" radius={[4, 4, 0, 0]} barSize={32} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </Card>
+
+              {/* Status and Payment split into two simple cards side by side */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <Card title="Formas de Pagamento" className="border-none shadow-xl shadow-brand/5 bg-white/70 backdrop-blur-sm">
+                  <div className="space-y-4 pt-2">
+                    {byPayment.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Sem dados</p>}
+                    {byPayment.map(p => {
+                      const totalRevenue = byPayment.reduce((acc, curr) => acc + curr.value, 0);
+                      const pct = totalRevenue > 0 ? (p.value / totalRevenue) * 100 : 0;
+                      return (
+                        <div key={p.name} className="space-y-1.5">
+                          <div className="flex justify-between text-sm font-medium">
+                            <span className="text-foreground/80">{p.name}</span>
+                            <span className="font-bold">{formatBRL(p.value)}</span>
+                          </div>
+                          <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                            <div className="h-full bg-brand rounded-full" style={{ width: `${pct}%` }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </Card>
+
+                <Card title="Status dos Pedidos" className="border-none shadow-xl shadow-brand/5 bg-white/70 backdrop-blur-sm">
+                  <div className="space-y-4 pt-2">
+                    {byStatus.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Sem dados</p>}
+                    {byStatus.map(s => {
+                      const totalOrders = byStatus.reduce((acc, curr) => acc + curr.value, 0);
+                      const pct = totalOrders > 0 ? (s.value / totalOrders) * 100 : 0;
+                      return (
+                        <div key={s.name} className="space-y-1.5">
+                          <div className="flex justify-between text-sm font-medium">
+                            <span className="text-foreground/80">{s.name}</span>
+                            <span className="font-bold text-muted-foreground">{s.value} ped.</span>
+                          </div>
+                          <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                            <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: s.color }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </Card>
               </div>
-            </Card>
+            </div>
 
-            <Card title="Status dos pedidos">
-              <div className="h-72">
-                <ResponsiveContainer>
-                  <PieChart>
-                    <Pie
-                      data={byStatus}
-                      dataKey="value"
-                      nameKey="name"
-                      outerRadius={90}
-                      label={(e: { name: string; value: number }) => `${e.name}: ${e.value}`}
-                    >
-                      {byStatus.map((d, i) => (
-                        <Cell key={i} fill={d.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      cursor={{ fill: "var(--card)", fillOpacity: 1 }}
-                      contentStyle={{
-                        background: "var(--card)",
-                        border: "1px solid var(--border)",
-                        borderRadius: 8,
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
-
-            <Card title="Receita por forma de pagamento">
-              <div className="h-72">
-                <ResponsiveContainer>
-                  <PieChart>
-                    <Pie
-                      data={byPayment}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={90}
-                      paddingAngle={3}
-                      label={(e: { name: string; value: number }) => `${e.name}: ${formatBRL(e.value)}`}
-                    >
-                      {byPayment.map((d, i) => (
-                        <Cell key={i} fill={["#10b981", "#3b82f6", "#f59e0b", "#a855f7", "#ec4899", "#64748b"][i % 6]} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={(v: number) => formatBRL(v)}
-                      contentStyle={{
-                        background: "var(--card)",
-                        border: "1px solid var(--border)",
-                        borderRadius: 8,
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
-
-            <Card title="Top 10 produtos">
-              {topProducts.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-10 text-center">
-                  Nenhuma venda no período.
-                </p>
-              ) : (
-                <ol className="space-y-2">
-                  {topProducts.map((p, i) => (
-                    <li
-                      key={p.name}
-                      className="flex items-center justify-between gap-3 text-sm"
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="grid h-6 w-6 place-items-center rounded-full bg-brand/10 text-brand text-xs font-bold shrink-0">
-                          {i + 1}
-                        </span>
-                        <span className="truncate">{p.name}</span>
-                      </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <span className="text-xs text-muted-foreground">
-                          {p.qty}x
-                        </span>
-                        <span className="font-bold">{formatBRL(p.total)}</span>
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </Card>
-          </div>
-
-          <Card title="Últimos pedidos">
-            {recent.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-6 text-center">
-                Sem pedidos no período.
-              </p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="text-xs uppercase text-muted-foreground border-b border-border/60">
-                    <tr>
-                      <th className="text-left py-2">Data</th>
-                      <th className="text-left">Cliente</th>
-                      <th className="text-left">Status</th>
-                      <th className="text-right">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recent.map((o) => (
-                      <tr key={o.id} className="border-b border-border/40">
-                        <td className="py-2">{formatDateBR(o.created_at)}</td>
-                        <td>{o.customer_name}</td>
-                        <td>
-                          <span
-                            className="inline-block rounded-full px-2 py-0.5 text-xs font-semibold"
-                            style={{
-                              background: `${STATUS_COLORS[o.status]}20`,
-                              color: STATUS_COLORS[o.status],
-                            }}
-                          >
-                            {STATUS_LABELS[o.status] ?? o.status}
+            {/* Top Products (takes 1 column) */}
+            <div className="xl:col-span-1 space-y-6">
+              <Card title="Mais Vendidos" className="border-none shadow-xl shadow-brand/5 bg-gradient-to-br from-brand/5 to-transparent h-full">
+                {topProducts.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-10 text-center">Nenhuma venda no período.</p>
+                ) : (
+                  <ol className="space-y-3 pt-2">
+                    {topProducts.map((p, i) => (
+                      <li key={p.name} className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-white/60 hover:bg-white transition-colors shadow-sm ring-1 ring-white/60">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className={cn(
+                            "grid h-8 w-8 place-items-center rounded-xl text-xs font-black shrink-0 shadow-sm",
+                            i === 0 ? "bg-amber-400 text-amber-950" :
+                            i === 1 ? "bg-slate-300 text-slate-800" :
+                            i === 2 ? "bg-amber-700/40 text-amber-950" : "bg-muted text-muted-foreground"
+                          )}>
+                            {i + 1}
                           </span>
-                        </td>
-                        <td className="text-right font-semibold">
-                          {formatBRL(o.total)}
-                        </td>
-                      </tr>
+                          <div className="flex flex-col truncate">
+                            <span className="truncate font-semibold text-foreground/90 text-sm">{p.name}</span>
+                            <span className="text-xs text-muted-foreground">{p.qty} unidades</span>
+                          </div>
+                        </div>
+                        <div className="shrink-0 font-bold text-sm text-emerald-600">
+                          {formatBRL(p.total)}
+                        </div>
+                      </li>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </Card>
+                  </ol>
+                )}
+              </Card>
+            </div>
+          </div>
         </>
       )}
     </div>
@@ -488,33 +432,32 @@ function StatCard({
 }) {
   const accentClass =
     accent === "emerald"
-      ? "bg-emerald-500/10 text-emerald-600"
+      ? "bg-gradient-to-br from-emerald-400 to-emerald-500 text-white shadow-emerald-200"
       : accent === "brand"
-        ? "bg-brand/10 text-brand"
-        : "bg-muted text-foreground/70";
+        ? "bg-gradient-to-br from-brand to-brand-foreground text-white shadow-brand/20"
+        : "bg-white text-brand shadow-orange-100 ring-1 ring-border/50";
   return (
-    <div className="rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border/60">
-      <div className="flex items-center gap-2">
-        <span className={`grid h-8 w-8 place-items-center rounded-full ${accentClass}`}>
-          {icon}
-        </span>
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+    <div className="relative overflow-hidden rounded-3xl bg-white p-5 shadow-xl shadow-brand/5 border border-border/40 transition hover:shadow-2xl hover:-translate-y-1">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
           {label}
         </p>
+        <span className={cn("grid h-10 w-10 place-items-center rounded-2xl shadow-lg", accentClass)}>
+          {icon}
+        </span>
       </div>
-      <p className="mt-2 text-2xl font-bold text-foreground">{value}</p>
-      {sub && <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>}
+      <div className="mt-4">
+        <p className="text-3xl font-black text-foreground tracking-tight">{value}</p>
+        {sub && <p className="text-xs font-semibold text-muted-foreground mt-1">{sub}</p>}
+      </div>
     </div>
   );
 }
 
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
+function Card({ title, children, className }: { title: string; children: React.ReactNode; className?: string }) {
   return (
-    <div className="rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border/60">
-      <div className="flex items-center gap-2 mb-3">
-        <Trophy className="h-3.5 w-3.5 text-brand opacity-0" />
-        <h3 className="text-sm font-bold text-foreground">{title}</h3>
-      </div>
+    <div className={cn("rounded-3xl bg-white p-6 shadow-sm border border-border/40", className)}>
+      <h3 className="text-lg font-black text-foreground mb-4">{title}</h3>
       {children}
     </div>
   );

@@ -264,6 +264,7 @@ export type Database = {
           notes: string | null
           paid_at: string | null
           payment_method_id: string | null
+          payment_status: Database["public"]["Enums"]["finance_status"] | null
           status: Database["public"]["Enums"]["order_status"]
           subtotal: number
           total: number
@@ -280,6 +281,7 @@ export type Database = {
           notes?: string | null
           paid_at?: string | null
           payment_method_id?: string | null
+          payment_status?: Database["public"]["Enums"]["finance_status"] | null
           status?: Database["public"]["Enums"]["order_status"]
           subtotal?: number
           total?: number
@@ -296,6 +298,7 @@ export type Database = {
           notes?: string | null
           paid_at?: string | null
           payment_method_id?: string | null
+          payment_status?: Database["public"]["Enums"]["finance_status"] | null
           status?: Database["public"]["Enums"]["order_status"]
           subtotal?: number
           total?: number
@@ -491,11 +494,13 @@ export type Database = {
       audit_action: "INSERT" | "UPDATE" | "DELETE"
       finance_dre_group: "revenue" | "cost" | "expense"
       finance_kind: "revenue" | "expense"
-      finance_status: "paid" | "pending"
+      finance_status: "paid" | "pending" | "refunded" | "failed"
       order_status:
         | "pending"
         | "confirmed"
         | "preparing"
+        | "ready_for_pickup"
+        | "out_for_delivery"
         | "delivered"
         | "paid"
         | "cancelled"
@@ -630,11 +635,13 @@ export const Constants = {
       audit_action: ["INSERT", "UPDATE", "DELETE"],
       finance_dre_group: ["revenue", "cost", "expense"],
       finance_kind: ["revenue", "expense"],
-      finance_status: ["paid", "pending"],
+      finance_status: ["paid", "pending", "refunded", "failed"],
       order_status: [
         "pending",
         "confirmed",
         "preparing",
+        "ready_for_pickup",
+        "out_for_delivery",
         "delivered",
         "paid",
         "cancelled",

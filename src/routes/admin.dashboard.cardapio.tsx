@@ -22,37 +22,23 @@ function CardapioPage() {
 
   const loadData = async () => {
     setLoading(true);
-    // Supabase desconectado a pedido do usuário. Usando apenas dados ilustrativos locais.
-    setTimeout(() => {
-      const defaultCats = [
-        { id: "doces", name: "Doces Saudáveis", sort_order: 1 },
-        { id: "salgados", name: "Snacks Saudáveis", sort_order: 2 },
-        { id: "bebidas", name: "Bebidas Naturais", sort_order: 3 }
-      ];
-      
-      const savedOrder = localStorage.getItem("categoryOrder");
-      if (savedOrder) {
-        try {
-          const orderArr = JSON.parse(savedOrder);
-          defaultCats.sort((a, b) => {
-            let indexA = orderArr.indexOf(a.id);
-            let indexB = orderArr.indexOf(b.id);
-            if (indexA === -1) indexA = 999;
-            if (indexB === -1) indexB = 999;
-            return indexA - indexB;
-          });
-        } catch (e) {}
-      }
-
-      setCategories(defaultCats);
-      setProducts([
-        { id: "trufa-vegana", name: "Trufa Vegana de Chocolate", description: "Deliciosa trufa de chocolate vegano, polvilhada com cacau 100%. Sem lactose e sem açúcar.", base_price: 8.00, category_id: "doces", image_url: "/src/assets/trufa_vegana.jpg" },
-        { id: "bolo-pote-vegano", name: "Bolo de Pote Cenoura e Cacau", description: "Bolo de cenoura vegano intercalado com deliciosa calda de cacau. Sem glúten.", base_price: 18.00, category_id: "doces", image_url: "/src/assets/bolo_pote_vegano.jpg" },
-        { id: "coxinha-vegana", name: "Mini Coxinhas Veganas", description: "Porção de mini coxinhas crocantes recheadas de forma 100% vegetal e deliciosa.", base_price: 24.00, category_id: "salgados", image_url: "/src/assets/coxinha_vegana.jpg" },
-        { id: "kombucha-frutas", name: "Kombucha Frutas Vermelhas", description: "Refrescante bebida probiótica gaseificada com mix de frutas vermelhas. 100% natural.", base_price: 15.00, category_id: "bebidas", image_url: "/src/assets/kombucha.jpg" }
+    try {
+      const [{ data: cats, error: errCats }, { data: prods, error: errProds }] = await Promise.all([
+        supabase.from("categories").select("*").order("sort_order", { ascending: true }),
+        supabase.from("products").select("*").order("name", { ascending: true })
       ]);
+
+      if (errCats) throw errCats;
+      if (errProds) throw errProds;
+
+      setCategories(cats || []);
+      setProducts(prods || []);
+    } catch (e: any) {
+      console.error(e);
+      toast.error("Erro ao carregar dados do Supabase");
+    } finally {
       setLoading(false);
-    }, 300); // pequeno delay para simular carregamento suave
+    }
   };
 
   const moveCategory = (index: number, direction: 'up' | 'down') => {
@@ -210,30 +196,19 @@ function CardapioPage() {
           }}
           categoryId={selectedCategoryId}
           allProducts={products}
-          onSelect={async (productId) => {
-            // Update product's category
-            setProducts(prev => prev.map(p => p.id === productId ? { ...p, category_id: selectedCategoryId } : p));
-            toast.success("Produto adicionado à categoria com sucesso! (Mock)");
-            setAddExistingProductModalOpen(false);
-            setSelectedCategoryId(null);
-          }}
-        />
-      )}
-
-      {addExistingProductModalOpen && selectedCategoryId && (
-        <AddExistingProductModal
-          onClose={() => {
-            setAddExistingProductModalOpen(false);
-            setSelectedCategoryId(null);
-          }}
-          categoryId={selectedCategoryId}
-          allProducts={products}
           onSelect={async (productId: string) => {
-            // Update product's category (mock)
-            setProducts((prev: any[]) => prev.map((p: any) => p.id === productId ? { ...p, category_id: selectedCategoryId } : p));
-            toast.success("Produto adicionado à categoria com sucesso! (Mock)");
-            setAddExistingProductModalOpen(false);
-            setSelectedCategoryId(null);
+            try {
+              const { error } = await supabase.from("products").update({ category_id: selectedCategoryId }).eq("id", productId);
+              if (error) throw error;
+              setProducts((prev: any[]) => prev.map((p: any) => p.id === productId ? { ...p, category_id: selectedCategoryId } : p));
+              toast.success("Produto vinculado à categoria!");
+            } catch (err: any) {
+              console.error(err);
+              toast.error("Erro ao vincular produto");
+            } finally {
+              setAddExistingProductModalOpen(false);
+              setSelectedCategoryId(null);
+            }
           }}
         />
       )}
@@ -1188,5 +1163,61 @@ function ComboWizard({ onClose, onSuccess, products }: any) {
         )}
       </div>
     </div>
+  );
+}
+
+function AddExistingProductModal({ onClose, categoryId, allProducts, onSelect }: any) {
+  const [search, setSearch] = useState("");
+  // filter products not already in this category
+  const available = allProducts.filter((p: any) => p.category_id !== categoryId);
+  const filtered = available.filter((p: any) => p.name.toLowerCase().includes(search.toLowerCase()));
+
+  return (
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Adicionar produto existente</DialogTitle>
+        </DialogHeader>
+        <div className="py-4">
+          <input
+            type="text"
+            placeholder="Buscar produto..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm mb-4 outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+          />
+          <div className="max-h-[300px] overflow-y-auto space-y-2 pr-2">
+            {filtered.length === 0 ? (
+              <p className="text-sm text-gray-500 text-center py-4">Nenhum produto encontrado.</p>
+            ) : (
+              filtered.map((p: any) => (
+                <button
+                  key={p.id}
+                  onClick={() => onSelect(p.id)}
+                  className="w-full flex items-center gap-3 p-2 hover:bg-gray-50 rounded-md border border-transparent hover:border-gray-200 transition text-left"
+                >
+                  {p.image_url ? (
+                    <img src={p.image_url} alt={p.name} className="w-10 h-10 rounded-md object-cover shrink-0" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center text-gray-400 shrink-0">
+                      <ImagePlus className="w-4 h-4" />
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm text-gray-900 truncate">{p.name}</p>
+                    <p className="text-xs text-gray-500">{p.base_price ? `R$ ${Number(p.base_price).toFixed(2).replace('.', ',')}` : 'Sem preço'}</p>
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+        <DialogFooter>
+          <button onClick={onClose} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md text-sm font-semibold hover:bg-gray-200 transition">
+            Cancelar
+          </button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

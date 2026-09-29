@@ -9,11 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermosRouteImport } from './routes/termos'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as HistoricoRouteImport } from './routes/historico'
+import { Route as FuncionamentoRouteImport } from './routes/funcionamento'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as AdminDashboardWhatsappRouteImport } from './routes/admin.dashboard.whatsapp'
 import { Route as AdminDashboardVisaoRouteImport } from './routes/admin.dashboard.visao'
 import { Route as AdminDashboardProdutosRouteImport } from './routes/admin.dashboard.produtos'
 import { Route as AdminDashboardPedidosRouteImport } from './routes/admin.dashboard.pedidos'
@@ -28,6 +33,26 @@ import { Route as AdminDashboardCardapioRouteImport } from './routes/admin.dashb
 import { Route as AdminDashboardAuditoriaRouteImport } from './routes/admin.dashboard.auditoria'
 import { Route as AdminDashboardFinanceiroDreRouteImport } from './routes/admin.dashboard.financeiro.dre'
 
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoricoRoute = HistoricoRouteImport.update({
+  id: '/historico',
+  path: '/historico',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FuncionamentoRoute = FuncionamentoRouteImport.update({
+  id: '/funcionamento',
+  path: '/funcionamento',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContatoRoute = ContatoRouteImport.update({
   id: '/contato',
   path: '/contato',
@@ -52,6 +77,11 @@ const AdminDashboardRoute = AdminDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AdminRoute,
+} as any)
+const AdminDashboardWhatsappRoute = AdminDashboardWhatsappRouteImport.update({
+  id: '/whatsapp',
+  path: '/whatsapp',
+  getParentRoute: () => AdminDashboardRoute,
 } as any)
 const AdminDashboardVisaoRoute = AdminDashboardVisaoRouteImport.update({
   id: '/visao',
@@ -127,6 +157,10 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/contato': typeof ContatoRoute
+  '/funcionamento': typeof FuncionamentoRoute
+  '/historico': typeof HistoricoRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/termos': typeof TermosRoute
   '/admin/dashboard': typeof AdminDashboardRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/admin/dashboard/auditoria': typeof AdminDashboardAuditoriaRoute
@@ -141,11 +175,16 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard/pedidos': typeof AdminDashboardPedidosRoute
   '/admin/dashboard/produtos': typeof AdminDashboardProdutosRoute
   '/admin/dashboard/visao': typeof AdminDashboardVisaoRoute
+  '/admin/dashboard/whatsapp': typeof AdminDashboardWhatsappRoute
   '/admin/dashboard/financeiro/dre': typeof AdminDashboardFinanceiroDreRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/contato': typeof ContatoRoute
+  '/funcionamento': typeof FuncionamentoRoute
+  '/historico': typeof HistoricoRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/termos': typeof TermosRoute
   '/admin/dashboard': typeof AdminDashboardRouteWithChildren
   '/admin': typeof AdminIndexRoute
   '/admin/dashboard/auditoria': typeof AdminDashboardAuditoriaRoute
@@ -160,6 +199,7 @@ export interface FileRoutesByTo {
   '/admin/dashboard/pedidos': typeof AdminDashboardPedidosRoute
   '/admin/dashboard/produtos': typeof AdminDashboardProdutosRoute
   '/admin/dashboard/visao': typeof AdminDashboardVisaoRoute
+  '/admin/dashboard/whatsapp': typeof AdminDashboardWhatsappRoute
   '/admin/dashboard/financeiro/dre': typeof AdminDashboardFinanceiroDreRoute
 }
 export interface FileRoutesById {
@@ -167,6 +207,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/contato': typeof ContatoRoute
+  '/funcionamento': typeof FuncionamentoRoute
+  '/historico': typeof HistoricoRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/termos': typeof TermosRoute
   '/admin/dashboard': typeof AdminDashboardRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/admin/dashboard/auditoria': typeof AdminDashboardAuditoriaRoute
@@ -181,6 +225,7 @@ export interface FileRoutesById {
   '/admin/dashboard/pedidos': typeof AdminDashboardPedidosRoute
   '/admin/dashboard/produtos': typeof AdminDashboardProdutosRoute
   '/admin/dashboard/visao': typeof AdminDashboardVisaoRoute
+  '/admin/dashboard/whatsapp': typeof AdminDashboardWhatsappRoute
   '/admin/dashboard/financeiro/dre': typeof AdminDashboardFinanceiroDreRoute
 }
 export interface FileRouteTypes {
@@ -189,6 +234,10 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/contato'
+    | '/funcionamento'
+    | '/historico'
+    | '/privacidade'
+    | '/termos'
     | '/admin/dashboard'
     | '/admin/'
     | '/admin/dashboard/auditoria'
@@ -203,11 +252,16 @@ export interface FileRouteTypes {
     | '/admin/dashboard/pedidos'
     | '/admin/dashboard/produtos'
     | '/admin/dashboard/visao'
+    | '/admin/dashboard/whatsapp'
     | '/admin/dashboard/financeiro/dre'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/contato'
+    | '/funcionamento'
+    | '/historico'
+    | '/privacidade'
+    | '/termos'
     | '/admin/dashboard'
     | '/admin'
     | '/admin/dashboard/auditoria'
@@ -222,12 +276,17 @@ export interface FileRouteTypes {
     | '/admin/dashboard/pedidos'
     | '/admin/dashboard/produtos'
     | '/admin/dashboard/visao'
+    | '/admin/dashboard/whatsapp'
     | '/admin/dashboard/financeiro/dre'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/contato'
+    | '/funcionamento'
+    | '/historico'
+    | '/privacidade'
+    | '/termos'
     | '/admin/dashboard'
     | '/admin/'
     | '/admin/dashboard/auditoria'
@@ -242,6 +301,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard/pedidos'
     | '/admin/dashboard/produtos'
     | '/admin/dashboard/visao'
+    | '/admin/dashboard/whatsapp'
     | '/admin/dashboard/financeiro/dre'
   fileRoutesById: FileRoutesById
 }
@@ -249,10 +309,42 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   ContatoRoute: typeof ContatoRoute
+  FuncionamentoRoute: typeof FuncionamentoRoute
+  HistoricoRoute: typeof HistoricoRoute
+  PrivacidadeRoute: typeof PrivacidadeRoute
+  TermosRoute: typeof TermosRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/historico': {
+      id: '/historico'
+      path: '/historico'
+      fullPath: '/historico'
+      preLoaderRoute: typeof HistoricoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/funcionamento': {
+      id: '/funcionamento'
+      path: '/funcionamento'
+      fullPath: '/funcionamento'
+      preLoaderRoute: typeof FuncionamentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contato': {
       id: '/contato'
       path: '/contato'
@@ -287,6 +379,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/dashboard'
       preLoaderRoute: typeof AdminDashboardRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/admin/dashboard/whatsapp': {
+      id: '/admin/dashboard/whatsapp'
+      path: '/whatsapp'
+      fullPath: '/admin/dashboard/whatsapp'
+      preLoaderRoute: typeof AdminDashboardWhatsappRouteImport
+      parentRoute: typeof AdminDashboardRoute
     }
     '/admin/dashboard/visao': {
       id: '/admin/dashboard/visao'
@@ -409,6 +508,7 @@ interface AdminDashboardRouteChildren {
   AdminDashboardPedidosRoute: typeof AdminDashboardPedidosRoute
   AdminDashboardProdutosRoute: typeof AdminDashboardProdutosRoute
   AdminDashboardVisaoRoute: typeof AdminDashboardVisaoRoute
+  AdminDashboardWhatsappRoute: typeof AdminDashboardWhatsappRoute
 }
 
 const AdminDashboardRouteChildren: AdminDashboardRouteChildren = {
@@ -424,6 +524,7 @@ const AdminDashboardRouteChildren: AdminDashboardRouteChildren = {
   AdminDashboardPedidosRoute: AdminDashboardPedidosRoute,
   AdminDashboardProdutosRoute: AdminDashboardProdutosRoute,
   AdminDashboardVisaoRoute: AdminDashboardVisaoRoute,
+  AdminDashboardWhatsappRoute: AdminDashboardWhatsappRoute,
 }
 
 const AdminDashboardRouteWithChildren = AdminDashboardRoute._addFileChildren(
@@ -446,6 +547,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   ContatoRoute: ContatoRoute,
+  FuncionamentoRoute: FuncionamentoRoute,
+  HistoricoRoute: HistoricoRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
+  TermosRoute: TermosRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

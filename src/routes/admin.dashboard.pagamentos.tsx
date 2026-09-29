@@ -142,68 +142,28 @@ function PagamentosPage() {
   useEffect(() => {
     let cancelled = false;
 
-    // Mock data — Supabase offline
-    setTimeout(() => {
-      if (cancelled) return;
+    (async () => {
+      setLoading(true);
+      try {
+        const [ordersRes, pmRes] = await Promise.all([
+          supabase.from("orders").select("*"),
+          supabase.from("payment_methods").select("*"),
+        ]);
+        
+        if (ordersRes.error) throw ordersRes.error;
+        if (pmRes.error) throw pmRes.error;
 
-      setTransactions([
-        {
-          id: "tx_001",
-          order_id: "ord_001",
-          kind: "revenue",
-          amount: 50.00,
-          status: "pending",
-          description: "Pedido Ana Laura",
-          payment_method_id: "pix",
-          occurred_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-          created_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-          business_id: "biz_1",
-          category: null,
-          notes: null,
-        },
-        {
-          id: "tx_002",
-          order_id: "ord_002",
-          kind: "revenue",
-          amount: 70.00,
-          status: "paid",
-          description: "Pedido Carlos Eduardo",
-          payment_method_id: "credit",
-          occurred_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-          created_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-          business_id: "biz_1",
-          category: null,
-          notes: null,
-        },
-        {
-          id: "tx_003",
-          order_id: "ord_003",
-          kind: "revenue",
-          amount: 37.00,
-          status: "paid",
-          description: "Pedido Mariana Silva",
-          payment_method_id: "pix",
-          occurred_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-          created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-          business_id: "biz_1",
-          category: null,
-          notes: null,
-        },
-      ] as any[]);
-
-      setOrders([
-        { id: "ord_001", status: "pending",   customer_name: "Ana Laura",       customer_phone: "(11) 99999-1111", customer_address: "Rua das Flores, 123", subtotal: 45, delivery_fee: 5, discount: 0, total: 50, payment_method_id: "pix",    created_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(), paid_at: null, business_id: "biz_1", notes: null },
-        { id: "ord_002", status: "preparing", customer_name: "Carlos Eduardo",  customer_phone: "(11) 98888-2222", customer_address: "Av Paulista, 1000", subtotal: 80, delivery_fee: 0, discount: 10, total: 70, payment_method_id: "credit", created_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(), paid_at: new Date(Date.now() - 1000 * 60 * 40).toISOString(), business_id: "biz_1", notes: null },
-        { id: "ord_003", status: "delivered", customer_name: "Mariana Silva",   customer_phone: "(11) 97777-3333", customer_address: "Rua Augusta, 500", subtotal: 32, delivery_fee: 5, discount: 0, total: 37, payment_method_id: "pix",    created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), paid_at: new Date(Date.now() - 1000 * 60 * 60 * 1.9).toISOString(), business_id: "biz_1", notes: null },
-      ] as any[]);
-
-      setPaymentMethods([
-        { id: "pix",    name: "PIX",               type: "pix",         is_active: true, business_id: "biz_1", instructions: null, created_at: "" },
-        { id: "credit", name: "Cartão de Crédito",  type: "credit_card", is_active: true, business_id: "biz_1", instructions: null, created_at: "" },
-      ] as any[]);
-
-      setLoading(false);
-    }, 300);
+        if (cancelled) return;
+        setTransactions([]);
+        setOrders(ordersRes.data as any[]);
+        setPaymentMethods(pmRes.data as any[]);
+      } catch (err: any) {
+        console.error("Fetch falhou:", err);
+        setError(err.message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
 
     return () => {
       cancelled = true;

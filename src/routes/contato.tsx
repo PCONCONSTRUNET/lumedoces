@@ -10,9 +10,9 @@ export const Route = createFileRoute("/contato")({
   component: ContatoPage,
   head: () => ({
     meta: [
-      { title: "Contato — Nutrindo Momentos" },
-      { name: "description", content: "Endereço, WhatsApp e Instagram da Nutrindo Momentos." },
-      { property: "og:title", content: "Contato — Nutrindo Momentos" },
+      { title: "Contato — Lume Artesanais" },
+      { name: "description", content: "Endereço, WhatsApp e Instagram da Lume Artesanais." },
+      { property: "og:title", content: "Contato — Lume Artesanais" },
       { property: "og:description", content: "Fale com a gente pelo WhatsApp, Instagram ou venha nos visitar." },
     ],
   }),

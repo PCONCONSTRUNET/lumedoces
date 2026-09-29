@@ -46,6 +46,8 @@ const STATUS_OPTIONS: OrderStatus[] = [
   "pending",
   "confirmed",
   "preparing",
+  "ready_for_pickup",
+  "out_for_delivery",
   "delivered",
   "paid",
   "cancelled",
@@ -55,15 +57,19 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
   pending: "Pendente",
   confirmed: "Confirmado",
   preparing: "Preparando",
-  delivered: "Entregue",
-  paid: "Pago",
+  ready_for_pickup: "Aguardando Retirada",
+  out_for_delivery: "Saiu para Entrega",
+  delivered: "Finalizado",
   cancelled: "Cancelado",
+  paid: "Pago",
 };
 
 const STATUS_BADGE_CLASSES: Record<OrderStatus, string> = {
   pending: "bg-amber-500/15 text-amber-700 ring-amber-500/25",
   confirmed: "bg-blue-500/15 text-blue-700 ring-blue-500/25",
   preparing: "bg-violet-500/15 text-violet-700 ring-violet-500/25",
+  ready_for_pickup: "bg-fuchsia-500/15 text-fuchsia-700 ring-fuchsia-500/25",
+  out_for_delivery: "bg-sky-500/15 text-sky-700 ring-sky-500/25",
   delivered: "bg-cyan-500/15 text-cyan-700 ring-cyan-500/25",
   paid: "bg-emerald-500/15 text-emerald-700 ring-emerald-500/25",
   cancelled: "bg-rose-500/15 text-rose-700 ring-rose-500/25",
@@ -73,7 +79,9 @@ const STATUS_ACTIONS: Array<{ status: OrderStatus; label: string }> = [
   { status: "pending", label: "Pendente" },
   { status: "confirmed", label: "Confirmar" },
   { status: "preparing", label: "Preparar" },
-  { status: "delivered", label: "Entregar" },
+  { status: "ready_for_pickup", label: "Aguardar Retirada" },
+  { status: "out_for_delivery", label: "Saiu p/ Entrega" },
+  { status: "delivered", label: "Finalizar" },
   { status: "cancelled", label: "Cancelar" },
 ];
 
@@ -126,7 +134,7 @@ const FILTER_CARDS: Array<{
     line: "bg-cyan-500",
   },
   {
-    key: "paid",
+    key: "payment_paid" as any,
     label: "Pagos",
     icon: CircleDollarSign,
     tone: "bg-card ring-border/60 text-foreground",
@@ -171,132 +179,25 @@ function PedidosPage() {
       setLoading(true);
       setError(null);
 
-      // Usando mock (Timeout) já que o Supabase local não está rodando
-      setTimeout(() => {
+      try {
+        const [ordersRes, itemsRes, pmRes] = await Promise.all([
+          supabase.from("orders").select("*").order("created_at", { ascending: false }),
+          supabase.from("order_items").select("*"),
+          supabase.from("payment_methods").select("*"),
+        ]);
+        if (ordersRes.error) throw ordersRes.error;
+        if (itemsRes.error) throw itemsRes.error;
+        if (pmRes.error) throw pmRes.error;
         if (cancelled) return;
-        setOrders([
-          {
-            id: "ord_001",
-            status: "pending",
-            customer_name: "Ana Laura",
-            customer_phone: "(11) 99999-1111",
-            customer_address: "Rua das Flores, 123",
-            address_reference: "Perto da padaria",
-            notes: "Sem cebola por favor",
-            payment_method_id: "pix",
-            subtotal: 45.00,
-            delivery_fee: 5.00,
-            discount: 0,
-            total: 50.00,
-            created_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(), // 15 mins ago
-            paid_at: null,
-            business_id: "biz_1"
-          },
-          {
-            id: "ord_002",
-            status: "preparing",
-            customer_name: "Carlos Eduardo",
-            customer_phone: "(11) 98888-2222",
-            customer_address: "Av Paulista, 1000, Apto 45",
-            address_reference: "",
-            notes: "",
-            payment_method_id: "credit",
-            subtotal: 80.00,
-            delivery_fee: 0.00,
-            discount: 10.00,
-            total: 70.00,
-            created_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(), // 45 mins ago
-            paid_at: new Date(Date.now() - 1000 * 60 * 40).toISOString(),
-            business_id: "biz_1"
-          },
-          {
-            id: "ord_003",
-            status: "delivered",
-            customer_name: "Mariana Silva",
-            customer_phone: "(11) 97777-3333",
-            customer_address: "Rua Augusta, 500",
-            address_reference: "Prédio comercial",
-            notes: "Deixar na portaria",
-            payment_method_id: "pix",
-            subtotal: 32.00,
-            delivery_fee: 5.00,
-            discount: 0,
-            total: 37.00,
-            created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
-            paid_at: new Date(Date.now() - 1000 * 60 * 60 * 1.9).toISOString(),
-            business_id: "biz_1"
-          }
-        ] as any[]);
-
-        setItems([
-          {
-            id: "item_1",
-            order_id: "ord_001",
-            product_id: "prod_1",
-            product_name: "Bolo de Pote Cenoura e Cacau",
-            quantity: 2,
-            unit_price: 18.00,
-            total_price: 36.00,
-            variations_snapshot: null
-          },
-          {
-            id: "item_2",
-            order_id: "ord_001",
-            product_id: "prod_2",
-            product_name: "Trufa Vegana de Chocolate",
-            quantity: 1,
-            unit_price: 9.00,
-            total_price: 9.00,
-            variations_snapshot: null
-          },
-          {
-            id: "item_3",
-            order_id: "ord_002",
-            product_id: "prod_3",
-            product_name: "Mini Coxinhas Veganas (Porção)",
-            quantity: 2,
-            unit_price: 24.00,
-            total_price: 48.00,
-            variations_snapshot: null
-          },
-          {
-            id: "item_4",
-            order_id: "ord_002",
-            product_id: "prod_4",
-            product_name: "Kombucha Frutas Vermelhas",
-            quantity: 2,
-            unit_price: 16.00,
-            total_price: 32.00,
-            variations_snapshot: null
-          },
-          {
-            id: "item_5",
-            order_id: "ord_003",
-            product_id: "prod_1",
-            product_name: "Bolo de Pote Cenoura e Cacau",
-            quantity: 1,
-            unit_price: 18.00,
-            total_price: 18.00,
-            variations_snapshot: null
-          },
-          {
-            id: "item_6",
-            order_id: "ord_003",
-            product_id: "prod_5",
-            product_name: "Brownie Vegano",
-            quantity: 1,
-            unit_price: 14.00,
-            total_price: 14.00,
-            variations_snapshot: null
-          }
-        ] as any[]);
-
-        setPaymentMethods([
-          { id: "pix", name: "PIX", type: "pix", is_active: true, business_id: "biz_1", instructions: null, created_at: "" },
-          { id: "credit", name: "Cartão de Crédito", type: "credit_card", is_active: true, business_id: "biz_1", instructions: null, created_at: "" }
-        ] as any[]);
-        setLoading(false);
-      }, 300);
+        setOrders(ordersRes.data as any[]);
+        setItems(itemsRes.data as any[]);
+        setPaymentMethods(pmRes.data as any[]);
+      } catch (err: any) {
+        console.error("Fetch falhou:", err);
+        setError(err.message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     })();
 
     return () => {
@@ -321,13 +222,15 @@ function PedidosPage() {
 
   const filteredOrders = useMemo(() => {
     if (statusFilter === "all") return orders;
+    if (statusFilter === ("payment_paid" as any)) return orders.filter((o) => o.payment_status === "paid" || o.status === "paid");
     return orders.filter((order) => order.status === statusFilter);
   }, [orders, statusFilter]);
 
   const countByStatus = useMemo(() => {
-    const counts = new Map<OrderStatus, number>();
+    const counts = new Map<string, number>();
     for (const option of STATUS_OPTIONS) counts.set(option, 0);
     orders.forEach((order) => counts.set(order.status, (counts.get(order.status) ?? 0) + 1));
+    counts.set("payment_paid", orders.filter(o => o.payment_status === "paid" || o.status === "paid").length);
     return counts;
   }, [orders]);
 
@@ -366,9 +269,38 @@ function PedidosPage() {
     }
   };
 
-  const toggleOrderPaid = (order: OrderRow) => {
-    const nextStatus: OrderStatus = order.status === "paid" ? "pending" : "paid";
-    void updateOrderStatus(order, nextStatus);
+  const toggleOrderPaid = async (order: OrderRow) => {
+    if (updatingOrderId) return;
+    const isCurrentlyPaid = order.payment_status === "paid" || order.status === "paid";
+    const nextStatus = isCurrentlyPaid ? "pending" : "paid";
+    const nextPaidAt = !isCurrentlyPaid ? new Date().toISOString() : null;
+
+    setUpdatingOrderId(order.id);
+    try {
+      const { data, error } = await supabase
+        .from("orders")
+        .update({
+          payment_status: nextStatus,
+          paid_at: nextPaidAt,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", order.id)
+        .select("*")
+        .single();
+
+      if (error) throw error;
+      setOrders((current) =>
+        current.map((currentOrder) =>
+          currentOrder.id === order.id ? (data as OrderRow) : currentOrder,
+        ),
+      );
+      toast.success("Pagamento atualizado");
+    } catch (err) {
+      console.error(err);
+      toast.error("Nao foi possivel atualizar o pagamento");
+    } finally {
+      setUpdatingOrderId(null);
+    }
   };
 
   const deleteOrder = async (id: string) => {
@@ -443,7 +375,8 @@ function PedidosPage() {
       const sLabel = STATUS_LABELS[order.status] ?? order.status;
       const sBg: Record<string,[number,number,number]> = {
         pending:   [245,158,11],  confirmed: [59,130,246],
-        preparing: [139,92,246],  delivered: [6,182,212],
+        preparing: [139,92,246],  ready_for_pickup: [217,70,239],
+        out_for_delivery: [14,165,233], delivered: [6,182,212],
         paid:      [16,185,129],  cancelled: [239,68,68],
       };
       const bC = sBg[order.status] ?? [100,100,100] as [number,number,number];
@@ -496,7 +429,7 @@ function PedidosPage() {
       doc.setTextColor(...GRAY);
       doc.text(paymentName, 115, cTop + 14);
 
-      const isPaid = order.status === "paid";
+      const isPaid = order.payment_status === "paid" || order.status === "paid";
       const pBadgeBg: [number,number,number] = isPaid ? [16,185,129] : [245,158,11];
       const pBadgeW = isPaid ? 22 : 30;
       doc.setFillColor(...pBadgeBg);
@@ -583,7 +516,7 @@ function PedidosPage() {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(9);
       doc.setTextColor(...BRAND);
-      doc.text("Nutrindo Momentos", W / 2, pageH - 10, { align: "center" });
+      doc.text("Lume Artesanais", W / 2, pageH - 10, { align: "center" });
       doc.setFont("helvetica", "normal");
       doc.setFontSize(7.5);
       doc.setTextColor(...GRAY);
@@ -699,6 +632,8 @@ function PedidosPage() {
                     order.status === "pending" && "bg-amber-400",
                     order.status === "confirmed" && "bg-blue-400",
                     order.status === "preparing" && "bg-indigo-400",
+                    order.status === "ready_for_pickup" && "bg-fuchsia-400",
+                    order.status === "out_for_delivery" && "bg-sky-400",
                     order.status === "delivered" && "bg-cyan-400",
                     order.status === "paid" && "bg-emerald-400",
                     order.status === "cancelled" && "bg-rose-400",
@@ -717,10 +652,20 @@ function PedidosPage() {
                       <span
                         className={
                           "inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ring-1 " +
-                          STATUS_BADGE_CLASSES[order.status]
+                          (order.status !== "paid" ? STATUS_BADGE_CLASSES[order.status] : STATUS_BADGE_CLASSES["confirmed"])
                         }
                       >
-                        {STATUS_LABELS[order.status]}
+                        {order.status !== "paid" ? STATUS_LABELS[order.status] : STATUS_LABELS["confirmed"]}
+                      </span>
+                      <span
+                        className={
+                          "inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ring-1 " +
+                          (order.payment_status === "paid" || order.status === "paid" 
+                            ? "bg-emerald-500/15 text-emerald-700 ring-emerald-500/25" 
+                            : "bg-amber-500/15 text-amber-700 ring-amber-500/25")
+                        }
+                      >
+                        {order.payment_status === "paid" || order.status === "paid" ? "Pago" : "Pagamento Pendente"}
                       </span>
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">
@@ -751,7 +696,7 @@ function PedidosPage() {
                       </p>
                       <p className="sm:col-span-2">
                         <span className="font-semibold">Situacao do pagamento:</span>{" "}
-                        {order.status === "paid"
+                        {order.payment_status === "paid" || order.status === "paid"
                           ? `Pago em ${formatDateTimeBR(order.paid_at)}`
                           : "Nao pago"}
                       </p>
@@ -812,13 +757,13 @@ function PedidosPage() {
                           onClick={() => toggleOrderPaid(order)}
                           className={cn(
                             "inline-flex min-w-36 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-bold ring-1 transition disabled:cursor-wait disabled:opacity-60",
-                            order.status === "paid"
+                            order.payment_status === "paid" || order.status === "paid"
                               ? "bg-emerald-600 text-white ring-emerald-600 hover:bg-emerald-700"
                               : "bg-white text-emerald-700 ring-emerald-200 hover:bg-emerald-50",
                           )}
                         >
                           <CheckCircle2 className="h-4 w-4" />
-                          {order.status === "paid" ? "Pago" : "Marcar pago"}
+                          {order.payment_status === "paid" || order.status === "paid" ? "Pago" : "Marcar pago"}
                         </button>
                         <button
                           type="button"

@@ -18,6 +18,7 @@ import {
   ScrollText,
   TicketPercent,
   Users,
+  MessageCircle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -35,6 +36,7 @@ const navItems = [
   { to: "/admin/dashboard/cupons", label: "Cupom", icon: TicketPercent },
   { to: "/admin/dashboard/financeiro", label: "Financeiro", icon: Wallet },
   { to: "/admin/dashboard/gateways", label: "Gateways", icon: CreditCard },
+  { to: "/admin/dashboard/whatsapp", label: "WhatsApp", icon: MessageCircle },
   { to: "/admin/dashboard/categorias", label: "Categorias", icon: Tags },
   { to: "/admin/dashboard/produtos", label: "Produtos (Antigo)", icon: Package },
   { to: "/admin/dashboard/horarios", label: "Horários", icon: Clock },

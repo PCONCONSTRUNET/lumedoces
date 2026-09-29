@@ -1,24 +1,17 @@
 import { useState, useEffect } from "react";
-import { ChevronDown } from "lucide-react";
-import bannerDesktop from "@/assets/banner.png";
-import bannerDesktop02 from "@/assets/banner_pc_0004.png";
-import bannerDesktop03 from "@/assets/banner_pc_2030.png";
-import bannerMobile from "@/assets/mobile_nova.png";
-import bannerMobile02 from "@/assets/banner_mobile_02.png";
-import bannerMobile03 from "@/assets/banner_mobile_2030.png";
-import logo from "@/assets/logo.png";
-import { WhatsAppIcon } from "@/components/WhatsAppIcon";
+import bannerMobile01 from "@/assets/banner_mobile_01.png";
+import bannerMobile02 from "@/assets/banner_mobile_02_fds.png";
+import bannerPc01 from "@/assets/banner_pc_01.png";
+import bannerPc02 from "@/assets/banner_pc_02.png";
 
-export function Hero({ onOrder }: { onOrder: () => void }) {
+export function Hero({ onOrder }: { onOrder?: () => void }) {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const mobileBanners = [bannerMobile, bannerMobile02, bannerMobile03];
-  const desktopBanners = [bannerDesktop, bannerDesktop02, bannerDesktop03];
+  const mobileBanners = [bannerMobile01, bannerMobile02];
+  const desktopBanners = [bannerPc01, bannerPc02];
 
   useEffect(() => {
     const interval = setInterval(() => {
-      // Use Math.max to cycle through the longest array, so the slide index works for both
-      const totalSlides = Math.max(mobileBanners.length, desktopBanners.length);
-      setCurrentSlide((prev) => (prev + 1) % totalSlides);
+      setCurrentSlide((prev) => prev + 1);
     }, 4000);
     return () => clearInterval(interval);
   }, []);
@@ -31,9 +24,9 @@ export function Hero({ onOrder }: { onOrder: () => void }) {
           <img 
             key={src}
             src={src} 
-            alt={`Banner de fundo (Desktop) ${index + 1}`} 
+            alt={`Banner PC ${index + 1}`} 
             className={`col-start-1 row-start-1 w-full h-auto object-contain transition-opacity duration-1000 ${
-              index === currentSlide % desktopBanners.length ? "opacity-100" : "opacity-0"
+              index === currentSlide % desktopBanners.length ? "opacity-100 relative z-10" : "opacity-0 absolute z-0"
             }`}
           />
         ))}
@@ -45,16 +38,16 @@ export function Hero({ onOrder }: { onOrder: () => void }) {
           <img 
             key={src}
             src={src} 
-            alt={`Banner de fundo (Mobile) ${index + 1}`} 
+            alt={`Banner mobile ${index + 1}`} 
             className={`col-start-1 row-start-1 w-full h-auto object-contain transition-opacity duration-1000 ${
-              index === currentSlide % mobileBanners.length ? "opacity-100" : "opacity-0"
+              index === currentSlide % mobileBanners.length ? "opacity-100 relative z-10" : "opacity-0 absolute z-0"
             }`}
           />
         ))}
       </div>
 
-      <div className="absolute top-0 left-0 w-full h-full z-10 pointer-events-none flex flex-col items-center justify-center">
-        <h1 className="sr-only">Nutrindo Momentos</h1>
+      <div className="absolute top-0 left-0 w-full h-full z-20 pointer-events-none flex flex-col items-center justify-center">
+        <h1 className="sr-only">Lume Artesanais</h1>
       </div>
     </section>
   );

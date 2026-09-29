@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Moon, ShoppingCart, Sun, Menu as MenuIcon, X, ArrowRight, MessageCircle } from "lucide-react";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { Link } from "@tanstack/react-router";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo_lume.png";
 import { useCart } from "@/store/cart";
 
 const WPP = "5548996915303";
@@ -21,7 +21,7 @@ export function Header() {
       <header className={`sticky top-0 z-50 w-full bg-white/80 px-4 sm:px-8 py-2 shadow-sm backdrop-blur-md border-b border-gray-200 transition-all duration-300`}>
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <Link to="/" className="flex items-center gap-2">
-            <img src={logo} alt="Nutrindo Momentos" className="h-10 sm:h-12 w-auto object-contain drop-shadow-sm" width={144} height={48} />
+            <img src={logo} alt="Lume Artesanais" className="h-10 sm:h-12 w-auto object-contain drop-shadow-sm" width={144} height={48} />
           </Link>
           
           <div className="flex items-center">
@@ -61,6 +61,14 @@ export function Header() {
               className="flex items-center justify-between py-2 text-foreground/90 font-bold hover:text-foreground transition"
             >
               <span>Contato</span>
+              <ArrowRight className="h-4 w-4 opacity-50" />
+            </Link>
+            <Link
+              to="/historico"
+              onClick={() => setNavOpen(false)}
+              className="flex items-center justify-between py-2 text-brand font-bold hover:text-brand/80 transition bg-brand/5 px-3 rounded-lg"
+            >
+              <span>Meus Pedidos</span>
               <ArrowRight className="h-4 w-4 opacity-50" />
             </Link>
             

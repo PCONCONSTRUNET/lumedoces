@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import {
   Banknote,
   CheckCircle2,
@@ -252,6 +253,7 @@ export function CartDrawer() {
         total: finalTotal,
         coupon_id: coupon?.id ?? null,
         coupon_code: coupon?.code ?? null,
+        status: pay === "pix" ? "pending" : "confirmed",
       };
 
       const { error: firstOrderError } = await supabaseUntyped.from("orders").insert(orderPayload);
@@ -268,6 +270,7 @@ export function CartDrawer() {
           subtotal: total,
           discount,
           total: finalTotal,
+          status: pay === "pix" ? "pending" : "confirmed",
         });
         orderError = fallbackOrderError;
       }
@@ -346,6 +349,14 @@ export function CartDrawer() {
       setConfirmedTotal(finalTotal);
       clear();
       setOrderId(nextOrderId);
+      
+      try {
+        const existingIds = JSON.parse(localStorage.getItem("customer_order_ids") || "[]");
+        localStorage.setItem("customer_order_ids", JSON.stringify([nextOrderId, ...existingIds]));
+      } catch (e) {
+        // ignore
+      }
+
       toast.success("Pedido recebido pelo site!");
     } catch (err) {
       console.error(err);
@@ -399,10 +410,20 @@ export function CartDrawer() {
                    )}
                 </div>
               ) : pay !== "pix" ? (
-                <div className="mt-8 p-4 bg-amber-50 rounded-xl border border-amber-100 text-amber-800 text-sm font-semibold max-w-xs mx-auto">
+                <div className="mt-8 p-4 bg-amber-50 rounded-xl border border-amber-100 text-amber-800 text-sm font-semibold max-w-xs mx-auto text-center">
                   O pagamento será realizado no local de retirada do seu pedido.
                 </div>
               ) : null}
+              
+              <div className="mt-8 max-w-xs mx-auto">
+                <Link
+                  to="/historico"
+                  onClick={handleClose}
+                  className="w-full flex items-center justify-center bg-brand text-white font-bold py-3.5 px-4 rounded-xl hover:bg-brand/90 transition shadow-md"
+                >
+                  Acompanhar meu pedido
+                </Link>
+              </div>
             </div>
           ) : items.length === 0 ? (
             <div className="mt-6 flex flex-col items-center text-center">
