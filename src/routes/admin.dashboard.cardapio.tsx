@@ -160,7 +160,7 @@ function CardapioPage() {
             try {
               const { error } = await supabase.from("products").update({ category_id: selectedCategoryId }).eq("id", productId);
               if (error) throw error;
-              setProducts((prev: any[]) => prev.map((p: any) => p.id === productId ? { ...p, category_id: selectedCategoryId } : p));
+              queryClient.setQueryData(['products'], (prev: any[]) => prev.map((p: any) => p.id === productId ? { ...p, category_id: selectedCategoryId } : p));
               toast.success("Produto vinculado à categoria!");
             } catch (err: any) {
               console.error(err);
@@ -250,7 +250,7 @@ function CardapioTab({ categories, products, onOpenWizard, onAddExistingProduct,
   const reorderCategories = useMutation({
     mutationFn: async (newOrder: any[]) => {
       const updates = newOrder.map((c, idx) => ({ id: c.id, sort_order: idx }));
-      const { error } = await supabase.from('categories').upsert(updates);
+      const { error } = await supabase.from('categories').upsert(updates as any);
       if (error) throw error;
     },
     onMutate: async (newOrder) => {
@@ -334,12 +334,12 @@ function ProductListItem({ p, onEdit }: any) {
     mutationFn: async (newStock: number) => {
       const { error } = await supabase
         .from('products')
-        .update({ stock: newStock })
+        .update({ stock: newStock } as any)
         .eq('id', p.id);
       if (error) throw error;
 
       // Audit log: record who changed what and when
-      await supabase.from('product_audit_log').insert({
+      await supabase.from('product_audit_log' as any).insert({
         product_id: p.id,
         product_name: p.name,
         field_changed: 'stock',
