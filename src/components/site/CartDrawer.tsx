@@ -21,6 +21,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatOrderCode } from "@/lib/order-utils";
 import { formatBRL, useCart } from "@/store/cart";
 import brandIcon from "@/assets/icon.png";
+import logoLume from "@/assets/logo_lume.png";
+import { PixPaymentScreen } from "@/components/site/PixPaymentScreen";
 
 type PayMethod = "pix" | "cartao" | "dinheiro";
 type PaymentMethodRow = { id: string; name: string };
@@ -54,6 +56,28 @@ function matchesPaymentMethod(name: string, pay: PayMethod) {
 
 function onlyPhoneDigits(value: string) {
   return value.replace(/\D/g, "").slice(0, 11);
+}
+
+function onlyCpfCnpjDigits(value: string) {
+  return value.replace(/\D/g, "").slice(0, 14);
+}
+
+function formatCpfCnpj(value: string) {
+  const digits = onlyCpfCnpjDigits(value);
+  // CNPJ: 14 digits → XX.XXX.XXX/XXXX-XX
+  if (digits.length > 11) {
+    const d = digits.slice(0, 14);
+    if (d.length <= 2) return d;
+    if (d.length <= 5) return `${d.slice(0, 2)}.${d.slice(2)}`;
+    if (d.length <= 8) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5)}`;
+    if (d.length <= 12) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8)}`;
+    return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12)}`;
+  }
+  // CPF: 11 digits → XXX.XXX.XXX-XX
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9, 11)}`;
 }
 
 function formatPhone(value: string) {
@@ -129,6 +153,7 @@ export function CartDrawer() {
   const status = useBusinessStatus();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [cpf, setCpf] = useState("");
   const [pay, setPay] = useState<PayMethod>("pix");
   const [obs, setObs] = useState("");
   const [couponCode, setCouponCode] = useState("");
@@ -162,6 +187,7 @@ export function CartDrawer() {
     setOrderId(null);
     setName("");
     setPhone("");
+    setCpf("");
     setObs("");
     setCouponCode("");
     setCoupon(null);
@@ -317,43 +343,26 @@ export function CartDrawer() {
       // MERCADO PAGO INTEGRATION
       if (pay === "pix") {
         try {
-          const savedMp = localStorage.getItem("mp_gateway_config");
-          if (savedMp) {
-            const mpConfig = JSON.parse(savedMp);
-            if (mpConfig.active && mpConfig.accessToken) {
-              const mpRes = await fetch("https://api.mercadopago.com/v1/payments", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "Authorization": `Bearer ${mpConfig.accessToken}`,
-                  "X-Idempotency-Key": nextOrderId
-                },
-                body: JSON.stringify({
-                  transaction_amount: finalTotal,
-                  description: `Pedido ${formatOrderCode(nextOrderId, fetchedOrderNumber)}`,
-                  payment_method_id: "pix",
-                  payer: {
-                    email: "contato@lumedoces.com.br", // Requisito do MP
-                    first_name: name.trim()
-                  }
-                })
-              });
-              
-              if (mpRes.ok) {
-                const mpData = await mpRes.json();
-                const qrCode = mpData?.point_of_interaction?.transaction_data?.qr_code_base64;
-                const copyPaste = mpData?.point_of_interaction?.transaction_data?.qr_code;
-                
-                if (qrCode) setPixQrCode(`data:image/jpeg;base64,${qrCode}`);
-                if (copyPaste) setPixCopyPaste(copyPaste);
-              } else {
-                console.error("Erro MP:", await mpRes.text());
-                toast.error("Pedido criado, mas erro ao gerar PIX automático.");
-              }
+          const { data: pixData, error: pixError } = await supabase.rpc("create_pix_payment", {
+            payload: {
+              amount: finalTotal,
+              description: `Pedido ${formatOrderCode(nextOrderId, fetchedOrderNumber)}`,
+              payerName: name.trim(),
+              payerEmail: "lumeartesanaisc@gmail.com",
+              payerCpf: cpf,
+              externalReference: nextOrderId
             }
-          }
-        } catch(e) {
+          });
+
+          if (pixError) throw pixError;
+          if (pixData?.error) throw new Error(pixData.error);
+
+          if (pixData?.qrCodeBase64) setPixQrCode(`data:image/jpeg;base64,${pixData.qrCodeBase64}`);
+          if (pixData?.qrCode) setPixCopyPaste(pixData.qrCode);
+          
+        } catch(e: any) {
           console.error("Erro MP proc", e);
+          toast.error(`Erro MP: ${e.message}`);
         }
       }
 
@@ -367,6 +376,37 @@ export function CartDrawer() {
         localStorage.setItem("customer_order_ids", JSON.stringify([nextOrderId, ...existingIds]));
       } catch (e) {
         // ignore
+      }
+
+      // ===== AUTO-CRIAR CONTA DO CLIENTE =====
+      const cpfDigits = cpf.replace(/\D/g, "");
+      if (cpfDigits.length === 11 || cpfDigits.length === 14) {
+        try {
+          const clientEmail = `${cpfDigits}@cliente.lumedoces.com`;
+          // Tenta criar conta (se já existir, o signUp retorna erro e ignoramos)
+          const { error: signUpError } = await supabase.auth.signUp({
+            email: clientEmail,
+            password: cpfDigits,
+            options: {
+              data: {
+                full_name: name.trim(),
+                phone: formatPhone(phone),
+                cpf: cpf,
+                document_type: cpfDigits.length === 14 ? "cnpj" : "cpf",
+              },
+            },
+          });
+          if (signUpError && !signUpError.message.includes("already registered")) {
+            console.warn("Auto-signup warning:", signUpError.message);
+          }
+          // Salva credenciais no localStorage para o cliente logar depois
+          localStorage.setItem("customer_auto_credentials", JSON.stringify({
+            email: clientEmail,
+            hint: cpfDigits.length === 14 ? "CNPJ" : "CPF",
+          }));
+        } catch (e) {
+          console.warn("Auto-signup silenced:", e);
+        }
       }
 
       toast.success("Pedido recebido pelo site!");
@@ -396,38 +436,41 @@ export function CartDrawer() {
 
         <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-3">
           {orderId ? (
-            <div className="mt-10 flex flex-col items-center text-center">
-              <div className="grid h-16 w-16 place-items-center rounded-full bg-emerald-100 text-emerald-700">
-                <CheckCircle2 className="h-9 w-9" />
-              </div>
+            pay === "pix" && (pixQrCode || pixCopyPaste) ? (
+              // ===== MODAL PIX =====
+              <PixPaymentScreen
+                logo={logoLume}
+                orderId={orderId}
+                orderNumber={orderNumber}
+                pixQrCode={pixQrCode}
+                pixCopyPaste={pixCopyPaste}
+                confirmedTotal={confirmedTotal}
+                onPaid={handleClose}
+              />
+            ) : (
+              // ===== SUCESSO NORMAL (dinheiro/cartao ou pix sem QR) =====
+              <div className="mt-10 flex flex-col items-center text-center">
+                <div className="grid h-16 w-16 place-items-center rounded-full bg-emerald-100 text-emerald-700">
+                  <CheckCircle2 className="h-9 w-9" />
+                </div>
               <p className="mt-4 font-hand text-xl font-bold text-foreground">Pedido recebido!</p>
               <p className="mt-1 max-w-xs text-sm text-muted-foreground">
                 Vamos acompanhar seu pedido por aqui. Codigo {formatOrderCode(orderId, orderNumber)}
               </p>
               
-              {pay === "pix" && pixQrCode ? (
-                <div className="mt-8 flex flex-col items-center w-full bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                   <p className="font-bold text-gray-900 mb-4 text-lg">Pague via PIX</p>
-                   <img src={pixQrCode} alt="QR Code PIX" className="w-48 h-48 mb-4 border rounded-xl" />
-                   {pixCopyPaste && (
-                     <button 
-                       onClick={() => {
-                         navigator.clipboard.writeText(pixCopyPaste);
-                         toast.success("Código PIX copiado!");
-                       }}
-                       className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-800 font-bold py-3 px-4 rounded-xl hover:bg-gray-200 transition"
-                     >
-                       <Copy className="h-5 w-5" /> Copiar Copia e Cola
-                     </button>
-                   )}
+              {pay === "pix" && !pixQrCode && (
+                <div className="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-100 text-amber-800 text-sm font-semibold max-w-xs mx-auto text-center">
+                  Pague via PIX no app do seu banco. Total: {formatBRL(confirmedTotal)}
                 </div>
-              ) : pay !== "pix" ? (
+              )}
+
+              {pay !== "pix" && (
                 <div className="mt-8 p-4 bg-amber-50 rounded-xl border border-amber-100 text-amber-800 text-sm font-semibold max-w-xs mx-auto text-center">
                   O pagamento será realizado no local de retirada do seu pedido.
                 </div>
-              ) : null}
+              )}
               
-              <div className="mt-8 max-w-xs mx-auto">
+              <div className="mt-8 max-w-xs mx-auto w-full">
                 <Link
                   to="/historico"
                   onClick={handleClose}
@@ -437,6 +480,7 @@ export function CartDrawer() {
                 </Link>
               </div>
             </div>
+            )
           ) : items.length === 0 ? (
             <div className="mt-6 flex flex-col items-center text-center">
               <img
@@ -539,6 +583,15 @@ export function CartDrawer() {
                     maxLength={15}
                     className="w-full rounded-xl border border-border bg-white shadow-sm px-3 py-3 text-base placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40 sm:text-sm"
                   />
+                  <input
+                    value={cpf}
+                    onChange={(e) => setCpf(formatCpfCnpj(e.target.value))}
+                    placeholder="CPF ou CNPJ (opcional, para recibo PIX)"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    maxLength={18}
+                    className="w-full rounded-xl border border-border bg-white shadow-sm px-3 py-3 text-base placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40 sm:text-sm"
+                  />
                   <div className="mt-3 flex items-start gap-3 rounded-xl border border-brand/20 bg-brand/5 p-3">
                     <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand/10 text-brand">
                       <ShoppingBag className="h-4 w-4" />
@@ -546,7 +599,7 @@ export function CartDrawer() {
                     <div className="flex-1">
                       <p className="text-sm font-bold text-brand">Retirada no local</p>
                       <p className="mt-0.5 text-xs text-foreground/80">
-                        O pedido não será entregue, você deve retirá-lo em nosso endereço: atrás da oficina FUBICA CAR.
+                        O pedido não será entregue, você deve retirá-lo em nosso endereço: KM1 ATRAS DO FUBICA CAR.
                       </p>
                       <a
                         href="https://www.google.com/maps/place/28%C2%B024'22.9%22S+49%C2%B024'25.2%22W/@-28.4063492,-49.407153,20.75z/data=!4m4!3m3!8m2!3d-28.4063606!4d-49.4069977"

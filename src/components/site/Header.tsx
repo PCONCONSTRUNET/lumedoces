@@ -64,6 +64,14 @@ export function Header() {
               <ArrowRight className="h-4 w-4 opacity-50" />
             </Link>
             <Link
+              to="/rastreio"
+              onClick={() => setNavOpen(false)}
+              className="flex items-center justify-between py-2 text-highlight font-bold hover:text-highlight/80 transition bg-highlight/5 px-3 rounded-lg"
+            >
+              <span>Rastrear Pedido</span>
+              <ArrowRight className="h-4 w-4 opacity-50" />
+            </Link>
+            <Link
               to="/historico"
               onClick={() => setNavOpen(false)}
               className="flex items-center justify-between py-2 text-brand font-bold hover:text-brand/80 transition bg-brand/5 px-3 rounded-lg"

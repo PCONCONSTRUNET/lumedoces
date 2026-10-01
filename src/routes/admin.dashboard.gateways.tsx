@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { CheckCircle2, Copy, Save, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin/dashboard/gateways")({
   component: GatewaysPage,
@@ -18,25 +19,44 @@ function GatewaysPage() {
   const [mpClientSecret, setMpClientSecret] = useState("BI42nLRuxYddLfjVI9RxiEoGpO3kgT8V");
 
   useEffect(() => {
-    // Na vida real isso viria do Supabase. Aqui simulamos com localStorage
-    const saved = localStorage.getItem("mp_gateway_config");
-    if (saved) {
+    const load = async () => {
+      // Tenta carregar do banco primeiro
       try {
-        const config = JSON.parse(saved);
-        setMpActive(config.active || false);
-        if (config.publicKey) setMpPublicKey(config.publicKey);
-        if (config.accessToken) setMpAccessToken(config.accessToken);
-        if (config.clientId) setMpClientId(config.clientId);
-        if (config.clientSecret) setMpClientSecret(config.clientSecret);
+        const { data } = await (supabase as any)
+          .from("app_config")
+          .select("value")
+          .eq("key", "mp_gateway_config")
+          .maybeSingle();
+        if (data?.value) {
+          const config = data.value;
+          setMpActive(config.active || false);
+          if (config.publicKey) setMpPublicKey(config.publicKey);
+          if (config.accessToken) setMpAccessToken(config.accessToken);
+          if (config.clientId) setMpClientId(config.clientId);
+          if (config.clientSecret) setMpClientSecret(config.clientSecret);
+          // Sincroniza localStorage
+          localStorage.setItem("mp_gateway_config", JSON.stringify(config));
+          return;
+        }
       } catch(e) {}
-    }
+      // Fallback: localStorage
+      const saved = localStorage.getItem("mp_gateway_config");
+      if (saved) {
+        try {
+          const config = JSON.parse(saved);
+          setMpActive(config.active || false);
+          if (config.publicKey) setMpPublicKey(config.publicKey);
+          if (config.accessToken) setMpAccessToken(config.accessToken);
+          if (config.clientId) setMpClientId(config.clientId);
+          if (config.clientSecret) setMpClientSecret(config.clientSecret);
+        } catch(e) {}
+      }
+    };
+    load();
   }, []);
 
   const handleSave = async () => {
     setLoading(true);
-    // Simula salvamento no banco
-    await new Promise(r => setTimeout(r, 800));
-    
     const config = {
       active: mpActive,
       publicKey: mpPublicKey,
@@ -44,11 +64,21 @@ function GatewaysPage() {
       clientId: mpClientId,
       clientSecret: mpClientSecret
     };
-    
-    localStorage.setItem("mp_gateway_config", JSON.stringify(config));
-    
-    setLoading(false);
-    toast.success("Configurações do Mercado Pago salvas com sucesso!");
+    try {
+      // Salva no banco
+      await (supabase as any)
+        .from("app_config")
+        .upsert({ key: "mp_gateway_config", value: config, updated_at: new Date().toISOString() });
+      // Salva no localStorage para acesso rápido no frontend
+      localStorage.setItem("mp_gateway_config", JSON.stringify(config));
+      toast.success("Configurações do Mercado Pago salvas com sucesso!");
+    } catch(e) {
+      // Fallback só localStorage
+      localStorage.setItem("mp_gateway_config", JSON.stringify(config));
+      toast.success("Configurações salvas localmente!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

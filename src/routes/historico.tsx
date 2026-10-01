@@ -6,6 +6,7 @@ import { formatBRL } from "@/store/cart";
 import { formatOrderCode } from "@/lib/order-utils";
 import type { Database } from "@/integrations/supabase/types";
 import logo from "@/assets/logo_lume.png";
+import { products } from "@/data/menu";
 
 export const Route = createFileRoute("/historico")({
   component: HistoricoPage,
@@ -46,6 +47,27 @@ function HistoricoPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+  const [cancelling, setCancelling] = useState<string | null>(null);
+  const [confirmCancel, setConfirmCancel] = useState<any | null>(null);
+
+  const handleCancel = async (order: any) => {
+    if (cancelling) return;
+    setCancelling(order.id);
+    try {
+      const { error } = await supabase
+        .from("orders")
+        .update({ status: "cancelled", updated_at: new Date().toISOString() })
+        .eq("id", order.id);
+      if (error) throw error;
+      setOrders(prev => prev.map(o => o.id === order.id ? { ...o, status: "cancelled" } : o));
+      setSelectedOrder((prev: any) => prev?.id === order.id ? { ...prev, status: "cancelled" } : prev);
+      setConfirmCancel(null);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setCancelling(null);
+    }
+  };
 
   useEffect(() => {
     async function loadOrders() {
@@ -139,16 +161,30 @@ function HistoricoPage() {
                   </div>
 
                   <div className="p-4 sm:p-5">
-                    <ul className="space-y-3 mb-6">
-                      {order.order_items?.map((item: any) => (
-                        <li key={item.id} className="flex justify-between items-start">
-                          <div className="flex gap-3">
-                            <span className="font-bold text-gray-700">{item.quantity}x</span>
-                            <span className="text-gray-600">{item.product_name}</span>
-                          </div>
-                          <span className="font-medium text-gray-800">{formatBRL(item.total_price || 0)}</span>
-                        </li>
-                      ))}
+                    <ul className="space-y-4 mb-6">
+                      {order.order_items?.map((item: any) => {
+                        const product = products.find(p => p.name === item.product_name);
+                        return (
+                          <li key={item.id} className="flex justify-between items-center bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+                            <div className="flex items-center gap-4">
+                              {product?.image && (
+                                <img src={product.image} alt={item.product_name} className="w-14 h-14 object-cover rounded-lg" />
+                              )}
+                              <div className="flex flex-col">
+                                <span className="font-bold text-gray-800">{item.quantity}x {item.product_name}</span>
+                                {item.variations_snapshot && item.variations_snapshot.length > 0 && (
+                                  <div className="text-xs text-gray-500 mt-0.5">
+                                    {item.variations_snapshot.map((v: any, i: number) => (
+                                      <span key={i} className="block">• {v.name} (+{formatBRL(v.price)})</span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <span className="font-bold text-gray-800 shrink-0">{formatBRL(item.total_price || 0)}</span>
+                          </li>
+                        );
+                      })}
                     </ul>
 
                     <div className="flex flex-col sm:flex-row justify-between sm:items-center pt-4 border-t border-gray-100 gap-4">
@@ -157,12 +193,23 @@ function HistoricoPage() {
                         <span className="text-xl font-bold text-highlight">{formatBRL(order.total || 0)}</span>
                       </div>
                       
-                      <button 
-                        onClick={() => setSelectedOrder(order)}
-                        className="w-full sm:w-auto px-6 py-3 bg-brand/10 text-brand font-bold rounded-xl hover:bg-brand/20 transition-colors flex justify-center items-center gap-2"
-                      >
-                        Acompanhar Pedido
-                      </button>
+                      <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                        {(order.status === "pending" || order.status === "confirmed") && (
+                          <button
+                            onClick={() => setConfirmCancel(order)}
+                            disabled={cancelling === order.id}
+                            className="w-full sm:w-auto px-4 py-3 border border-rose-200 text-rose-600 font-bold rounded-xl hover:bg-rose-50 transition-colors flex justify-center items-center gap-2 text-sm"
+                          >
+                            <X className="h-4 w-4" /> Cancelar
+                          </button>
+                        )}
+                        <button 
+                          onClick={() => setSelectedOrder(order)}
+                          className="w-full sm:w-auto px-6 py-3 bg-brand/10 text-brand font-bold rounded-xl hover:bg-brand/20 transition-colors flex justify-center items-center gap-2"
+                        >
+                          Acompanhar Pedido
+                        </button>
+                      </div>
                     </div>
                     
                     {isPendingPayment && (
@@ -175,6 +222,38 @@ function HistoricoPage() {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Modal de Confirmação de Cancelamento */}
+        {confirmCancel && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 animate-in fade-in">
+            <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mb-4">
+                  <XCircle className="h-8 w-8 text-rose-600" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-800">Cancelar pedido?</h2>
+                <p className="text-gray-500 mt-2 text-sm">
+                  Tem certeza que deseja cancelar o pedido <strong>{formatOrderCode(confirmCancel.id, confirmCancel.order_number)}</strong>? Esta ação não pode ser desfeita.
+                </p>
+              </div>
+              <div className="mt-6 flex flex-col gap-3">
+                <button
+                  onClick={() => handleCancel(confirmCancel)}
+                  disabled={cancelling === confirmCancel.id}
+                  className="w-full py-3 bg-rose-600 text-white font-bold rounded-xl hover:bg-rose-700 transition disabled:opacity-50"
+                >
+                  {cancelling === confirmCancel.id ? "Cancelando..." : "Sim, cancelar pedido"}
+                </button>
+                <button
+                  onClick={() => setConfirmCancel(null)}
+                  className="w-full py-3 border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 transition"
+                >
+                  Voltar
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

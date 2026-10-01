@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermosRouteImport } from './routes/termos'
+import { Route as RastreioRouteImport } from './routes/rastreio'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as HistoricoRouteImport } from './routes/historico'
 import { Route as FuncionamentoRouteImport } from './routes/funcionamento'
@@ -36,6 +37,11 @@ import { Route as AdminDashboardFinanceiroDreRouteImport } from './routes/admin.
 const TermosRoute = TermosRouteImport.update({
   id: '/termos',
   path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RastreioRoute = RastreioRouteImport.update({
+  id: '/rastreio',
+  path: '/rastreio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
@@ -160,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/funcionamento': typeof FuncionamentoRoute
   '/historico': typeof HistoricoRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/rastreio': typeof RastreioRoute
   '/termos': typeof TermosRoute
   '/admin/dashboard': typeof AdminDashboardRouteWithChildren
   '/admin/': typeof AdminIndexRoute
@@ -184,6 +191,7 @@ export interface FileRoutesByTo {
   '/funcionamento': typeof FuncionamentoRoute
   '/historico': typeof HistoricoRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/rastreio': typeof RastreioRoute
   '/termos': typeof TermosRoute
   '/admin/dashboard': typeof AdminDashboardRouteWithChildren
   '/admin': typeof AdminIndexRoute
@@ -210,6 +218,7 @@ export interface FileRoutesById {
   '/funcionamento': typeof FuncionamentoRoute
   '/historico': typeof HistoricoRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/rastreio': typeof RastreioRoute
   '/termos': typeof TermosRoute
   '/admin/dashboard': typeof AdminDashboardRouteWithChildren
   '/admin/': typeof AdminIndexRoute
@@ -237,6 +246,7 @@ export interface FileRouteTypes {
     | '/funcionamento'
     | '/historico'
     | '/privacidade'
+    | '/rastreio'
     | '/termos'
     | '/admin/dashboard'
     | '/admin/'
@@ -261,6 +271,7 @@ export interface FileRouteTypes {
     | '/funcionamento'
     | '/historico'
     | '/privacidade'
+    | '/rastreio'
     | '/termos'
     | '/admin/dashboard'
     | '/admin'
@@ -286,6 +297,7 @@ export interface FileRouteTypes {
     | '/funcionamento'
     | '/historico'
     | '/privacidade'
+    | '/rastreio'
     | '/termos'
     | '/admin/dashboard'
     | '/admin/'
@@ -312,6 +324,7 @@ export interface RootRouteChildren {
   FuncionamentoRoute: typeof FuncionamentoRoute
   HistoricoRoute: typeof HistoricoRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
+  RastreioRoute: typeof RastreioRoute
   TermosRoute: typeof TermosRoute
 }
 
@@ -322,6 +335,13 @@ declare module '@tanstack/react-router' {
       path: '/termos'
       fullPath: '/termos'
       preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rastreio': {
+      id: '/rastreio'
+      path: '/rastreio'
+      fullPath: '/rastreio'
+      preLoaderRoute: typeof RastreioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacidade': {
@@ -550,6 +570,7 @@ const rootRouteChildren: RootRouteChildren = {
   FuncionamentoRoute: FuncionamentoRoute,
   HistoricoRoute: HistoricoRoute,
   PrivacidadeRoute: PrivacidadeRoute,
+  RastreioRoute: RastreioRoute,
   TermosRoute: TermosRoute,
 }
 export const routeTree = rootRouteImport

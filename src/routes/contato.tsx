@@ -21,7 +21,7 @@ export const Route = createFileRoute("/contato")({
 const WPP = "5548996915303";
 const WPP_LABEL = "48 99691-5303";
 const IG = "nutrindomomentosc";
-const ENDERECO = "Lauro Müller, Santa Catarina (atrás da oficina FUBICA CAR)";
+const ENDERECO = "Lauro Müller, Santa Catarina (KM1 ATRAS DO FUBICA CAR)";
 
 const HORARIOS = [
   { dia: "Terça a Quinta", hora: "19:00 – 00:00" },
