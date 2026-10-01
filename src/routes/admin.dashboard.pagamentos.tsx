@@ -8,6 +8,7 @@ import {
   ChevronUp,
   Clock3,
   CreditCard,
+  Download,
   Loader2,
   ReceiptText,
   RotateCcw,
@@ -19,6 +20,9 @@ import type { Tables } from "@/integrations/supabase/types";
 import { formatBRL, formatDateBR } from "@/lib/finance-utils";
 import { formatOrderCode } from "@/lib/order-utils";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import jsPDF from "jspdf";
+import logoImage from "@/assets/logo_lume.png";
 
 export const Route = createFileRoute("/admin/dashboard/pagamentos")({
   component: PagamentosPage,
@@ -32,6 +36,7 @@ type PaymentRow = {
   id: string;
   orderId: string;
   customerName: string;
+  customerPhone?: string | null;
   amount: number;
   status: PaymentStatus;
   occurredAt: string;
@@ -185,8 +190,9 @@ function PagamentosPage() {
         id: transaction.id,
         orderId: transaction.order_id ?? "",
         customerName: order?.customer_name ?? transaction.description,
+        customerPhone: order?.customer_phone,
         amount: transaction.amount,
-        status: paymentStatusFromOrder(order, transaction.status),
+        status: paymentStatusFromOrder(order, transaction.status as "paid" | "pending") as "paid" | "pending",
         occurredAt: transaction.occurred_at,
         paymentMethod: transaction.payment_method_id
           ? (paymentMethodNameById.get(transaction.payment_method_id) ?? "Nao informado")
@@ -208,6 +214,7 @@ function PagamentosPage() {
         id: `order-${order.id}`,
         orderId: order.id,
         customerName: order.customer_name,
+        customerPhone: order.customer_phone,
         amount: order.total,
         status: paymentStatusFromOrder(order, order.status === "paid" ? "paid" : "pending"),
         occurredAt: order.paid_at ?? order.created_at,
@@ -416,6 +423,151 @@ function PaymentCard({
 }) {
   const StatusIcon = statusIcon(payment.status);
 
+  const generateReceipt = async () => {
+    try {
+      const doc = new jsPDF();
+      const W = 210;
+      const BRAND: [number,number,number]     = [106, 13, 21];
+      const HIGHLIGHT: [number,number,number] = [222, 27, 35];
+      const CREAM: [number,number,number]     = [252, 244, 235];
+      const GRAY: [number,number,number]      = [80, 80, 80];
+      const LGRAY: [number,number,number]     = [160, 160, 160];
+      const WHITE: [number,number,number]     = [255, 255, 255];
+
+      try {
+        const b64 = await new Promise<string>(async (resolve, reject) => {
+          try {
+            const r = await fetch(logoImage);
+            const blob = await r.blob();
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          } catch (e) { reject(e); }
+        });
+        doc.addImage(b64, "PNG", 12, 8, 55, 18);
+      } catch (_) { /* skip */ }
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.setTextColor(...BRAND);
+      doc.text("COMPROVANTE", W - 12, 15, { align: "right" });
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(...GRAY);
+      doc.text("DE PAGAMENTO", W - 12, 21, { align: "right" });
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.setTextColor(...BRAND);
+      const titleText = payment.orderId 
+        ? `Pagamento de Pedido ${formatOrderCode(payment.orderId)}` 
+        : `Pagamento #${payment.id.slice(0, 8)}`;
+      doc.text(titleText, W - 12, 29, { align: "right" });
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(...LGRAY);
+      doc.text(formatDateTimeBR(payment.occurredAt), W - 12, 35.5, { align: "right" });
+
+      const sLabel = statusLabel(payment.status);
+      const sBg: Record<string,[number,number,number]> = {
+        pending:   [245,158,11],
+        paid:      [16,185,129],
+        cancelled: [239,68,68],
+        refunded:  [14,165,233],
+      };
+      const bC = sBg[payment.status] ?? [100,100,100] as [number,number,number];
+      doc.setFillColor(...bC);
+      doc.roundedRect(12, 44, 38, 7, 2, 2, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.5);
+      doc.setTextColor(...WHITE);
+      doc.text(sLabel.toUpperCase(), 31, 49, { align: "center" });
+
+      const cTop = 55;
+      const cH = 44;
+
+      doc.setFillColor(...CREAM);
+      doc.roundedRect(12, cTop, 90, cH, 3, 3, "F");
+      doc.setFillColor(...HIGHLIGHT);
+      doc.rect(12, cTop, 3, cH, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.5);
+      doc.setTextColor(...BRAND);
+      doc.text("CLIENTE", 19, cTop + 7);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setTextColor(...GRAY);
+      doc.text(payment.customerName || "—", 19, cTop + 14);
+      
+      if (payment.customerPhone) {
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.text(payment.customerPhone, 19, cTop + 18);
+        doc.setFontSize(7.5);
+        doc.setTextColor(...LGRAY);
+        doc.text(`Pedido Vinculado: ${formatOrderCode(payment.orderId)}`, 19, cTop + 26);
+      } else {
+        doc.setFontSize(7.5);
+        doc.setTextColor(...LGRAY);
+        doc.text(`Pedido Vinculado: ${formatOrderCode(payment.orderId)}`, 19, cTop + 24);
+      }
+
+      doc.setFillColor(...CREAM);
+      doc.roundedRect(108, cTop, 90, cH, 3, 3, "F");
+      doc.setFillColor(...BRAND);
+      doc.rect(108, cTop, 3, cH, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.5);
+      doc.setTextColor(...BRAND);
+      doc.text("PAGAMENTO", 115, cTop + 7);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setTextColor(...GRAY);
+      doc.text(payment.paymentMethod || "—", 115, cTop + 14);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7);
+      doc.setTextColor(...LGRAY);
+      const idLines = doc.splitTextToSize(`ID Transação: ${payment.id}`, 82);
+      doc.text(idLines, 115, cTop + 33);
+
+      const pBadgeBg: [number,number,number] = payment.status === "paid" ? [16,185,129] : [245,158,11];
+      const pBadgeW = payment.status === "paid" ? 22 : 30;
+      doc.setFillColor(...pBadgeBg);
+      doc.roundedRect(115, cTop + 18, pBadgeW, 7, 2, 2, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.5);
+      doc.setTextColor(...WHITE);
+      doc.text(payment.status === "paid" ? "PAGO" : "PENDENTE", 115 + pBadgeW / 2, cTop + 23, { align: "center" });
+      
+      let ty = cTop + cH + 15;
+      doc.setFillColor(...BRAND);
+      doc.rect(118, ty - 1, 80, 9, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.setTextColor(...WHITE);
+      doc.text("TOTAL PAGO", 164, ty + 5.5, { align: "right" });
+      doc.text(formatBRL(payment.amount), 194, ty + 5.5, { align: "right" });
+
+      const pageH = doc.internal.pageSize.getHeight();
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setTextColor(...BRAND);
+      doc.text("Lume Artesanais", W / 2, pageH - 10, { align: "center" });
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(...GRAY);
+      doc.text("Obrigada por fazer parte desse momento!", W / 2, pageH - 5, { align: "center" });
+
+      const safeId = payment.orderId ? formatOrderCode(payment.orderId).replace("#", "") : payment.id.slice(0, 8);
+      doc.save(`Comprovante_Pedido_${safeId}.pdf`);
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao gerar o PDF");
+    }
+  };
+
   return (
     <div
       className={cn(
@@ -516,14 +668,23 @@ function PaymentCard({
               );
             })}
             
-            {/* Delete button pushed to the right */}
-            <button
-              onClick={onDelete}
-              className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-rose-100 px-3 py-1.5 text-xs font-bold text-rose-700 shadow-sm ring-1 ring-rose-200 transition hover:bg-rose-200"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-              Excluir
-            </button>
+            {/* Actions pushed to the right */}
+            <div className="ml-auto flex flex-wrap items-center gap-2">
+              <button
+                onClick={generateReceipt}
+                className="inline-flex items-center gap-1.5 rounded-full border border-orange-200 bg-white px-3 py-1.5 text-xs font-bold text-orange-700 shadow-sm transition hover:bg-orange-50"
+              >
+                <Download className="h-3.5 w-3.5" />
+                Comprovante
+              </button>
+              <button
+                onClick={onDelete}
+                className="inline-flex items-center gap-1.5 rounded-full bg-rose-100 px-3 py-1.5 text-xs font-bold text-rose-700 shadow-sm ring-1 ring-rose-200 transition hover:bg-rose-200"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Excluir
+              </button>
+            </div>
           </div>
         </div>
       )}

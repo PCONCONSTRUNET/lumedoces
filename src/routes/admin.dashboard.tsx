@@ -19,9 +19,11 @@ import {
   TicketPercent,
   Users,
   MessageCircle,
+  Settings,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { Toaster } from "sonner";
 
 export const Route = createFileRoute("/admin/dashboard")({
   component: AdminDashboardLayout,
@@ -40,6 +42,7 @@ const navItems = [
   { to: "/admin/dashboard/categorias", label: "Categorias", icon: Tags },
   { to: "/admin/dashboard/produtos", label: "Produtos (Antigo)", icon: Package },
   { to: "/admin/dashboard/horarios", label: "Horários", icon: Clock },
+  { to: "/admin/dashboard/configuracoes", label: "Configurações", icon: Settings },
   { to: "/admin/dashboard/auditoria", label: "Auditoria", icon: ScrollText },
 ] as const;
 
@@ -210,6 +213,7 @@ function AdminDashboardLayout() {
       <main className="flex-1 min-w-0 p-4 md:p-8 overflow-x-hidden">
         <Outlet />
       </main>
+      <Toaster position="top-center" richColors />
     </div>
   );
 }

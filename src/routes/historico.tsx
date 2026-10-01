@@ -23,6 +23,8 @@ const STATUS_CONFIG: Record<OrderStatus, { label: string; icon: any; color: stri
   delivered: { label: "Finalizado", icon: CheckSquare, color: "text-cyan-600", bgColor: "bg-cyan-100" },
   paid: { label: "Pago", icon: CheckCircle2, color: "text-emerald-600", bgColor: "bg-emerald-100" },
   cancelled: { label: "Cancelado", icon: XCircle, color: "text-rose-600", bgColor: "bg-rose-100" },
+  ready: { label: "Pronto", icon: CheckSquare, color: "text-blue-600", bgColor: "bg-blue-100" },
+  dispatched: { label: "Despachado", icon: Truck, color: "text-teal-600", bgColor: "bg-teal-100" },
 };
 
 const TIMELINE_STEPS = [
@@ -99,8 +101,8 @@ function HistoricoPage() {
   return (
     <main className="min-h-screen bg-cream/30 pb-20 pt-8 px-4 sm:px-8">
       <div className="mx-auto max-w-3xl">
-        <Link to="/" className="inline-flex items-center gap-2 text-brand font-bold hover:underline mb-6">
-          <ArrowLeft className="h-4 w-4" /> Voltar ao Cardápio
+        <Link to="/perfil" className="inline-flex items-center gap-2 text-brand font-bold hover:underline mb-6">
+          <ArrowLeft className="h-4 w-4" /> Voltar ao Perfil
         </Link>
         
         <h1 className="font-serif text-3xl font-extrabold text-highlight mb-2">

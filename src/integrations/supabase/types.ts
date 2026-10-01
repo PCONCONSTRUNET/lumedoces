@@ -14,6 +14,37 @@ export type Database = {
   }
   public: {
     Tables: {
+      coupons: {
+        Row: {
+          id: string
+          code: string
+          description: string | null
+          discount_type: "fixed" | "percent"
+          discount_value: number
+          min_order_total: number
+          max_uses: number | null
+          used_count: number
+          starts_at: string | null
+          expires_at: string | null
+          is_active: boolean
+        }
+        Insert: any
+        Update: any
+        Relationships: []
+      }
+      store_settings: {
+        Row: {
+          id: string
+          delivery_enabled: boolean
+          pickup_enabled: boolean
+          delivery_fee: number
+          updated_at: string
+        }
+        Insert: any
+        Update: any
+        Relationships: []
+      }
+
       audit_logs: {
         Row: {
           action: Database["public"]["Enums"]["audit_action"]
@@ -61,6 +92,7 @@ export type Database = {
           is_closed: boolean
           open_time: string
           updated_at: string
+          is_24h: boolean
         }
         Insert: {
           close_time?: string
@@ -69,7 +101,8 @@ export type Database = {
           is_closed?: boolean
           open_time?: string
           updated_at?: string
-        }
+        
+          is_24h?: boolean | null}
         Update: {
           close_time?: string
           day_of_week?: number
@@ -77,7 +110,8 @@ export type Database = {
           is_closed?: boolean
           open_time?: string
           updated_at?: string
-        }
+        
+          is_24h?: boolean | null}
         Relationships: []
       }
       categories: {
@@ -269,6 +303,9 @@ export type Database = {
           subtotal: number
           total: number
           updated_at: string
+          order_number: number
+          coupon_code: string | null
+          coupon_id: string | null
         }
         Insert: {
           created_at?: string
@@ -286,7 +323,10 @@ export type Database = {
           subtotal?: number
           total?: number
           updated_at?: string
-        }
+        
+          order_number?: number
+          coupon_code?: string | null
+          coupon_id?: string | null}
         Update: {
           created_at?: string
           customer_address?: string | null
@@ -303,7 +343,10 @@ export type Database = {
           subtotal?: number
           total?: number
           updated_at?: string
-        }
+        
+          order_number?: number
+          coupon_code?: string | null
+          coupon_id?: string | null}
         Relationships: [
           {
             foreignKeyName: "orders_payment_method_id_fkey"
@@ -481,6 +524,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_pix_payment: {
+        Args: {
+          payload: Json
+        }
+        Returns: {
+          qrCode: string
+          qrCodeBase64: string
+          error?: string
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -495,8 +548,7 @@ export type Database = {
       finance_dre_group: "revenue" | "cost" | "expense"
       finance_kind: "revenue" | "expense"
       finance_status: "paid" | "pending" | "refunded" | "failed"
-      order_status:
-        | "pending"
+      order_status: | "pending" | "confirmed" | "preparing" | "ready_for_pickup" | "out_for_delivery" | "delivered" | "cancelled" | "paid" | "ready" | "dispatched"
         | "confirmed"
         | "preparing"
         | "ready_for_pickup"

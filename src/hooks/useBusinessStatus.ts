@@ -1,4 +1,4 @@
-﻿import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export type BusinessHour = {
@@ -13,17 +13,17 @@ export type BusinessStatus = {
   loading: boolean;
   isOpen: boolean;
   todayHour: BusinessHour | null;
-  label: string; // ex: "Aberto atÃ© 23:00" / "Fechado Â· abre seg 18:00"
+  label: string; // ex: "Aberto até 23:00" / "Fechado • abre seg 18:00"
   allHours: BusinessHour[];
 };
 
-const DAY_LABEL = ["dom", "seg", "ter", "qua", "qui", "sex", "sÃ¡b"];
+const DAY_LABEL = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
 
 function hhmm(t: string) {
   return t.slice(0, 5);
 }
 
-function compute(hours: BusinessHour[]): Omit<BusinessStatus, "loading"> {
+function compute(hours: BusinessHour[]): Omit<BusinessStatus, "loading" | "allHours"> {
   const now = new Date();
   const today = now.getDay();
   const todayHour = hours.find((h) => h.day_of_week === today) ?? null;
@@ -42,18 +42,18 @@ function compute(hours: BusinessHour[]): Omit<BusinessStatus, "loading"> {
     const cur = now.getHours() * 60 + now.getMinutes();
     const open = oH * 60 + oM;
     const close = cH * 60 + cM;
-    // suporte a fechamento depois da meia-noite (ex: 18:00 â†’ 02:00)
+    // suporte a fechamento depois da meia-noite (ex: 18:00 → 02:00)
     const isOpen = close > open ? cur >= open && cur < close : cur >= open || cur < close;
     if (isOpen) {
       return {
         isOpen: true,
         todayHour,
-        label: `Aberto agora Â· atÃ© ${hhmm(todayHour.close_time)}`,
+        label: `Aberto agora • até ${hhmm(todayHour.close_time)}`,
       };
     }
   }
 
-  // achar prÃ³xima abertura
+  // achar próxima abertura
   for (let i = 0; i < 7; i++) {
     const d = (today + i) % 7;
     const h = hours.find((x) => x.day_of_week === d);
@@ -65,7 +65,7 @@ function compute(hours: BusinessHour[]): Omit<BusinessStatus, "loading"> {
         return {
           isOpen: false,
           todayHour,
-          label: h.is_24h ? `Fechado Â· abre hoje 24h` : `Fechado Â· abre hoje ${hhmm(h.open_time)}`,
+          label: h.is_24h ? `Fechado • abre hoje 24h` : `Fechado • abre hoje ${hhmm(h.open_time)}`,
         };
       }
       continue;
@@ -73,7 +73,7 @@ function compute(hours: BusinessHour[]): Omit<BusinessStatus, "loading"> {
     return {
       isOpen: false,
       todayHour,
-      label: h.is_24h ? `Fechado Â· abre ${DAY_LABEL[d]} 24h` : `Fechado Â· abre ${DAY_LABEL[d]} ${hhmm(h.open_time)}`,
+      label: h.is_24h ? `Fechado • abre ${DAY_LABEL[d]} 24h` : `Fechado • abre ${DAY_LABEL[d]} ${hhmm(h.open_time)}`,
     };
   }
 
@@ -95,7 +95,7 @@ export function useBusinessStatus(refreshMs = 60_000): BusinessStatus {
     };
     load();
 
-    // realtime: refletir mudanÃ§as do admin imediatamente
+    // realtime: refletir mudanças do admin imediatamente
     const channel = supabase
       .channel(`business_hours_changes_${channelId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "business_hours" }, () =>
@@ -112,7 +112,7 @@ export function useBusinessStatus(refreshMs = 60_000): BusinessStatus {
     };
   }, [channelId, refreshMs]);
 
-  // referenciamos `tick` sÃ³ pra forÃ§ar recÃ¡lculo a cada minuto
+  // referenciamos `tick` só pra forçar recálculo a cada minuto
   void tick;
   if (!hours) {
     return { loading: true, isOpen: false, todayHour: null, label: "...", allHours: [] };

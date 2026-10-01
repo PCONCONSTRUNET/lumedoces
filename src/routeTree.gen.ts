@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as RastreioRouteImport } from './routes/rastreio'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as HistoricoRouteImport } from './routes/historico'
 import { Route as FuncionamentoRouteImport } from './routes/funcionamento'
+import { Route as EnderecosRouteImport } from './routes/enderecos'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -28,6 +30,7 @@ import { Route as AdminDashboardHorariosRouteImport } from './routes/admin.dashb
 import { Route as AdminDashboardGatewaysRouteImport } from './routes/admin.dashboard.gateways'
 import { Route as AdminDashboardFinanceiroRouteImport } from './routes/admin.dashboard.financeiro'
 import { Route as AdminDashboardCuponsRouteImport } from './routes/admin.dashboard.cupons'
+import { Route as AdminDashboardConfiguracoesRouteImport } from './routes/admin.dashboard.configuracoes'
 import { Route as AdminDashboardClientesRouteImport } from './routes/admin.dashboard.clientes'
 import { Route as AdminDashboardCategoriasRouteImport } from './routes/admin.dashboard.categorias'
 import { Route as AdminDashboardCardapioRouteImport } from './routes/admin.dashboard.cardapio'
@@ -49,6 +52,11 @@ const PrivacidadeRoute = PrivacidadeRouteImport.update({
   path: '/privacidade',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PerfilRoute = PerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HistoricoRoute = HistoricoRouteImport.update({
   id: '/historico',
   path: '/historico',
@@ -57,6 +65,11 @@ const HistoricoRoute = HistoricoRouteImport.update({
 const FuncionamentoRoute = FuncionamentoRouteImport.update({
   id: '/funcionamento',
   path: '/funcionamento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnderecosRoute = EnderecosRouteImport.update({
+  id: '/enderecos',
+  path: '/enderecos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContatoRoute = ContatoRouteImport.update({
@@ -131,6 +144,12 @@ const AdminDashboardCuponsRoute = AdminDashboardCuponsRouteImport.update({
   path: '/cupons',
   getParentRoute: () => AdminDashboardRoute,
 } as any)
+const AdminDashboardConfiguracoesRoute =
+  AdminDashboardConfiguracoesRouteImport.update({
+    id: '/configuracoes',
+    path: '/configuracoes',
+    getParentRoute: () => AdminDashboardRoute,
+  } as any)
 const AdminDashboardClientesRoute = AdminDashboardClientesRouteImport.update({
   id: '/clientes',
   path: '/clientes',
@@ -163,8 +182,10 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/contato': typeof ContatoRoute
+  '/enderecos': typeof EnderecosRoute
   '/funcionamento': typeof FuncionamentoRoute
   '/historico': typeof HistoricoRoute
+  '/perfil': typeof PerfilRoute
   '/privacidade': typeof PrivacidadeRoute
   '/rastreio': typeof RastreioRoute
   '/termos': typeof TermosRoute
@@ -174,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard/cardapio': typeof AdminDashboardCardapioRoute
   '/admin/dashboard/categorias': typeof AdminDashboardCategoriasRoute
   '/admin/dashboard/clientes': typeof AdminDashboardClientesRoute
+  '/admin/dashboard/configuracoes': typeof AdminDashboardConfiguracoesRoute
   '/admin/dashboard/cupons': typeof AdminDashboardCuponsRoute
   '/admin/dashboard/financeiro': typeof AdminDashboardFinanceiroRouteWithChildren
   '/admin/dashboard/gateways': typeof AdminDashboardGatewaysRoute
@@ -188,8 +210,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/contato': typeof ContatoRoute
+  '/enderecos': typeof EnderecosRoute
   '/funcionamento': typeof FuncionamentoRoute
   '/historico': typeof HistoricoRoute
+  '/perfil': typeof PerfilRoute
   '/privacidade': typeof PrivacidadeRoute
   '/rastreio': typeof RastreioRoute
   '/termos': typeof TermosRoute
@@ -199,6 +223,7 @@ export interface FileRoutesByTo {
   '/admin/dashboard/cardapio': typeof AdminDashboardCardapioRoute
   '/admin/dashboard/categorias': typeof AdminDashboardCategoriasRoute
   '/admin/dashboard/clientes': typeof AdminDashboardClientesRoute
+  '/admin/dashboard/configuracoes': typeof AdminDashboardConfiguracoesRoute
   '/admin/dashboard/cupons': typeof AdminDashboardCuponsRoute
   '/admin/dashboard/financeiro': typeof AdminDashboardFinanceiroRouteWithChildren
   '/admin/dashboard/gateways': typeof AdminDashboardGatewaysRoute
@@ -215,8 +240,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/contato': typeof ContatoRoute
+  '/enderecos': typeof EnderecosRoute
   '/funcionamento': typeof FuncionamentoRoute
   '/historico': typeof HistoricoRoute
+  '/perfil': typeof PerfilRoute
   '/privacidade': typeof PrivacidadeRoute
   '/rastreio': typeof RastreioRoute
   '/termos': typeof TermosRoute
@@ -226,6 +253,7 @@ export interface FileRoutesById {
   '/admin/dashboard/cardapio': typeof AdminDashboardCardapioRoute
   '/admin/dashboard/categorias': typeof AdminDashboardCategoriasRoute
   '/admin/dashboard/clientes': typeof AdminDashboardClientesRoute
+  '/admin/dashboard/configuracoes': typeof AdminDashboardConfiguracoesRoute
   '/admin/dashboard/cupons': typeof AdminDashboardCuponsRoute
   '/admin/dashboard/financeiro': typeof AdminDashboardFinanceiroRouteWithChildren
   '/admin/dashboard/gateways': typeof AdminDashboardGatewaysRoute
@@ -243,8 +271,10 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/contato'
+    | '/enderecos'
     | '/funcionamento'
     | '/historico'
+    | '/perfil'
     | '/privacidade'
     | '/rastreio'
     | '/termos'
@@ -254,6 +284,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard/cardapio'
     | '/admin/dashboard/categorias'
     | '/admin/dashboard/clientes'
+    | '/admin/dashboard/configuracoes'
     | '/admin/dashboard/cupons'
     | '/admin/dashboard/financeiro'
     | '/admin/dashboard/gateways'
@@ -268,8 +299,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/contato'
+    | '/enderecos'
     | '/funcionamento'
     | '/historico'
+    | '/perfil'
     | '/privacidade'
     | '/rastreio'
     | '/termos'
@@ -279,6 +312,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard/cardapio'
     | '/admin/dashboard/categorias'
     | '/admin/dashboard/clientes'
+    | '/admin/dashboard/configuracoes'
     | '/admin/dashboard/cupons'
     | '/admin/dashboard/financeiro'
     | '/admin/dashboard/gateways'
@@ -294,8 +328,10 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/contato'
+    | '/enderecos'
     | '/funcionamento'
     | '/historico'
+    | '/perfil'
     | '/privacidade'
     | '/rastreio'
     | '/termos'
@@ -305,6 +341,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard/cardapio'
     | '/admin/dashboard/categorias'
     | '/admin/dashboard/clientes'
+    | '/admin/dashboard/configuracoes'
     | '/admin/dashboard/cupons'
     | '/admin/dashboard/financeiro'
     | '/admin/dashboard/gateways'
@@ -321,8 +358,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   ContatoRoute: typeof ContatoRoute
+  EnderecosRoute: typeof EnderecosRoute
   FuncionamentoRoute: typeof FuncionamentoRoute
   HistoricoRoute: typeof HistoricoRoute
+  PerfilRoute: typeof PerfilRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   RastreioRoute: typeof RastreioRoute
   TermosRoute: typeof TermosRoute
@@ -351,6 +390,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/perfil': {
+      id: '/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/historico': {
       id: '/historico'
       path: '/historico'
@@ -363,6 +409,13 @@ declare module '@tanstack/react-router' {
       path: '/funcionamento'
       fullPath: '/funcionamento'
       preLoaderRoute: typeof FuncionamentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/enderecos': {
+      id: '/enderecos'
+      path: '/enderecos'
+      fullPath: '/enderecos'
+      preLoaderRoute: typeof EnderecosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contato': {
@@ -463,6 +516,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardCuponsRouteImport
       parentRoute: typeof AdminDashboardRoute
     }
+    '/admin/dashboard/configuracoes': {
+      id: '/admin/dashboard/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/admin/dashboard/configuracoes'
+      preLoaderRoute: typeof AdminDashboardConfiguracoesRouteImport
+      parentRoute: typeof AdminDashboardRoute
+    }
     '/admin/dashboard/clientes': {
       id: '/admin/dashboard/clientes'
       path: '/clientes'
@@ -520,6 +580,7 @@ interface AdminDashboardRouteChildren {
   AdminDashboardCardapioRoute: typeof AdminDashboardCardapioRoute
   AdminDashboardCategoriasRoute: typeof AdminDashboardCategoriasRoute
   AdminDashboardClientesRoute: typeof AdminDashboardClientesRoute
+  AdminDashboardConfiguracoesRoute: typeof AdminDashboardConfiguracoesRoute
   AdminDashboardCuponsRoute: typeof AdminDashboardCuponsRoute
   AdminDashboardFinanceiroRoute: typeof AdminDashboardFinanceiroRouteWithChildren
   AdminDashboardGatewaysRoute: typeof AdminDashboardGatewaysRoute
@@ -536,6 +597,7 @@ const AdminDashboardRouteChildren: AdminDashboardRouteChildren = {
   AdminDashboardCardapioRoute: AdminDashboardCardapioRoute,
   AdminDashboardCategoriasRoute: AdminDashboardCategoriasRoute,
   AdminDashboardClientesRoute: AdminDashboardClientesRoute,
+  AdminDashboardConfiguracoesRoute: AdminDashboardConfiguracoesRoute,
   AdminDashboardCuponsRoute: AdminDashboardCuponsRoute,
   AdminDashboardFinanceiroRoute: AdminDashboardFinanceiroRouteWithChildren,
   AdminDashboardGatewaysRoute: AdminDashboardGatewaysRoute,
@@ -567,8 +629,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   ContatoRoute: ContatoRoute,
+  EnderecosRoute: EnderecosRoute,
   FuncionamentoRoute: FuncionamentoRoute,
   HistoricoRoute: HistoricoRoute,
+  PerfilRoute: PerfilRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   RastreioRoute: RastreioRoute,
   TermosRoute: TermosRoute,

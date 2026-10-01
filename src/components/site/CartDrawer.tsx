@@ -13,6 +13,7 @@ import {
   Trash2,
   X,
   MapPin,
+  Truck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PixIcon } from "@/components/PaymentLabel";
@@ -167,7 +168,14 @@ export function CartDrawer() {
   const [confirmedTotal, setConfirmedTotal] = useState(0);
   const [orderNumber, setOrderNumber] = useState<number | null>(null);
   const discount = coupon ? getCouponDiscount(coupon, total) : 0;
-  const finalTotal = Math.max(0, total - discount);
+  const deliveryModeInitial = "pickup"; // will be set in effect
+  const [deliveryMode, setDeliveryMode] = useState<"pickup" | "delivery">(deliveryModeInitial);
+  
+  const [storeSettings, setStoreSettings] = useState<{ delivery_enabled: boolean, pickup_enabled: boolean, delivery_fee: number }>({ delivery_enabled: true, pickup_enabled: true, delivery_fee: 0 });
+  const finalDeliveryFee = deliveryMode === "delivery" && storeSettings.delivery_enabled ? storeSettings.delivery_fee : 0;
+  const finalTotal = Math.max(0, total - discount) + finalDeliveryFee;
+  const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -177,6 +185,22 @@ export function CartDrawer() {
       .eq("is_active", true)
       .order("sort_order")
       .then(({ data }) => setPaymentMethods((data as PaymentMethodRow[]) ?? []));
+      
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user?.user_metadata?.addresses) {
+        const addrs = session.user.user_metadata.addresses;
+        setSavedAddresses(addrs);
+        if (addrs.length > 0) setSelectedAddressId(addrs[0].id);
+      }
+    });
+
+    supabaseUntyped.from("store_settings").select("*").limit(1).maybeSingle().then(({ data }: any) => {
+      if (data) {
+        setStoreSettings(data);
+        if (!data.pickup_enabled && data.delivery_enabled) setDeliveryMode("delivery");
+        if (!data.delivery_enabled && data.pickup_enabled) setDeliveryMode("pickup");
+      }
+    });
   }, [open]);
 
   if (!open) return null;
@@ -249,6 +273,11 @@ export function CartDrawer() {
       toast.error("Informe um telefone com DDD");
       return;
     }
+    
+    if (deliveryMode === "delivery" && !selectedAddressId) {
+      toast.error("Selecione um endereço para entrega");
+      return;
+    }
     if (items.length === 0) {
       toast.error("Seu carrinho está vazio");
       return;
@@ -265,18 +294,33 @@ export function CartDrawer() {
 
     setSaving(true);
     try {
+      let finalAddress = "Retirada no Local";
+      if (deliveryMode === "delivery") {
+        const addr = savedAddresses.find(a => a.id === selectedAddressId);
+        if (addr) {
+          finalAddress = `${addr.street}, ${addr.number}`;
+          if (addr.complement) finalAddress += ` - ${addr.complement}`;
+          finalAddress += ` | ${addr.neighborhood} | ${addr.city} - ${addr.state} | CEP: ${addr.zipCode}`;
+          
+          if (addr.lat && addr.lng) {
+            finalAddress += `\n\n📍 Mapa de Entrega: https://www.google.com/maps?q=${addr.lat},${addr.lng}`;
+          }
+        }
+      }
+      
       const nextOrderId = crypto.randomUUID();
       const paymentMethod = paymentMethods.find((method) => matchesPaymentMethod(method.name, pay));
       const orderPayload = {
         id: nextOrderId,
         customer_name: name.trim(),
         customer_phone: formatPhone(phone),
-        customer_address: "Retirada no local",
+        customer_address: finalAddress,
         address_reference: null,
         notes: obs.trim() || null,
         payment_method_id: paymentMethod?.id ?? null,
         subtotal: total,
         discount,
+        delivery_fee: finalDeliveryFee,
         total: finalTotal,
         coupon_id: coupon?.id ?? null,
         coupon_code: coupon?.code ?? null,
@@ -291,11 +335,12 @@ export function CartDrawer() {
           id: nextOrderId,
           customer_name: name.trim(),
           customer_phone: formatPhone(phone),
-          customer_address: "Retirada no local",
+          customer_address: finalAddress,
           notes: obs.trim() || null,
           payment_method_id: paymentMethod?.id ?? null,
           subtotal: total,
           discount,
+          delivery_fee: finalDeliveryFee,
           total: finalTotal,
           status: pay === "pix" ? "pending" : "confirmed",
         });
@@ -421,13 +466,13 @@ export function CartDrawer() {
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/50 animate-in fade-in sm:items-stretch">
       <div className="flex h-[100dvh] w-full max-w-md flex-col bg-background shadow-2xl animate-in slide-in-from-right sm:h-full">
-        <div className="flex shrink-0 items-center justify-between border-b border-border bg-background px-4 py-3 pt-[max(env(safe-area-inset-top),0.75rem)]">
-          <h2 className="flex items-center gap-2 font-hand text-lg font-bold sm:text-xl">
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-100 bg-white/80 px-5 py-4 pt-[max(env(safe-area-inset-top),1rem)] backdrop-blur-md">
+          <h2 className="flex items-center gap-2 font-hand text-xl font-extrabold text-gray-900 tracking-wide">
             <ShoppingBag className="h-5 w-5 text-brand" /> SEU PEDIDO
           </h2>
           <button
             onClick={handleClose}
-            className="grid h-10 w-10 place-items-center rounded-full bg-white text-highlight shadow-sm hover:bg-white/80"
+            className="grid h-10 w-10 place-items-center rounded-full bg-gray-50 text-gray-400 shadow-sm hover:bg-gray-100 hover:text-gray-900 transition"
             aria-label="Fechar"
           >
             <X className="h-5 w-5" />
@@ -482,17 +527,20 @@ export function CartDrawer() {
             </div>
             )
           ) : items.length === 0 ? (
-            <div className="mt-6 flex flex-col items-center text-center">
-              <img
-                src={brandIcon}
-                alt=""
-                className="h-24 w-auto drop-shadow-lg sm:h-32 rounded-full"
-              />
-              <p className="mt-3 font-hand text-lg font-bold text-foreground">
+            <div className="mt-12 flex flex-col items-center text-center px-4">
+              <div className="relative mb-6">
+                <div className="absolute inset-0 rounded-full bg-brand/10 blur-2xl"></div>
+                <img
+                  src={brandIcon}
+                  alt=""
+                  className="relative h-28 w-auto drop-shadow-xl sm:h-36 rounded-full"
+                />
+              </div>
+              <p className="font-hand text-2xl font-bold text-gray-900">
                 Seu carrinho tá vazio!
               </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Escolhe uns lanches pra mim preparar
+              <p className="mt-2 text-sm text-gray-500 max-w-[250px] leading-relaxed">
+                Escolha algumas delícias do cardápio pra gente preparar pra você.
               </p>
             </div>
           ) : (
@@ -564,15 +612,15 @@ export function CartDrawer() {
 
           {!orderId && (
             <>
-              <div className="mt-5 border-t border-border pt-4">
-                <h3 className="font-hand text-base font-bold">Seus dados</h3>
-                <div className="mt-2 space-y-2">
+              <div className="mt-6 border-t border-gray-100 pt-6">
+                <h3 className="font-hand text-lg font-extrabold text-gray-900 mb-4">Seus dados</h3>
+                <div className="mt-2 space-y-3">
                   <input
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Seu nome *"
                     autoComplete="name"
-                    className="w-full rounded-xl border border-border bg-white shadow-sm px-3 py-3 text-base placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40 sm:text-sm"
+                    className="w-full rounded-2xl border border-gray-200 bg-gray-50 shadow-sm px-4 py-3.5 text-[15px] placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
                   />
                   <input
                     value={phone}
@@ -581,7 +629,7 @@ export function CartDrawer() {
                     inputMode="tel"
                     autoComplete="tel"
                     maxLength={15}
-                    className="w-full rounded-xl border border-border bg-white shadow-sm px-3 py-3 text-base placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40 sm:text-sm"
+                    className="w-full rounded-2xl border border-gray-200 bg-gray-50 shadow-sm px-4 py-3.5 text-[15px] placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
                   />
                   <input
                     value={cpf}
@@ -590,36 +638,128 @@ export function CartDrawer() {
                     inputMode="numeric"
                     autoComplete="off"
                     maxLength={18}
-                    className="w-full rounded-xl border border-border bg-white shadow-sm px-3 py-3 text-base placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40 sm:text-sm"
+                    className="w-full rounded-2xl border border-gray-200 bg-gray-50 shadow-sm px-4 py-3.5 text-[15px] placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
                   />
-                  <div className="mt-3 flex items-start gap-3 rounded-xl border border-brand/20 bg-brand/5 p-3">
-                    <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand/10 text-brand">
-                      <ShoppingBag className="h-4 w-4" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-bold text-brand">Retirada no local</p>
-                      <p className="mt-0.5 text-xs text-foreground/80">
-                        O pedido não será entregue, você deve retirá-lo em nosso endereço: KM1 ATRAS DO FUBICA CAR.
-                      </p>
-                      <a
-                        href="https://www.google.com/maps/place/28%C2%B024'22.9%22S+49%C2%B024'25.2%22W/@-28.4063492,-49.407153,20.75z/data=!4m4!3m3!8m2!3d-28.4063606!4d-49.4069977"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-brand/10 px-3 py-1.5 text-xs font-bold text-brand hover:bg-brand/20 transition"
+                  {/* Toggle de modo de entrega */}
+                  {storeSettings.delivery_enabled && storeSettings.pickup_enabled ? (
+                    // Ambos ativos → mostra toggle
+                    <div className="mt-5 flex gap-2 p-1.5 bg-gray-100 rounded-2xl shadow-inner">
+                      <button 
+                        onClick={() => setDeliveryMode("pickup")}
+                        className={`flex-1 py-2.5 flex items-center justify-center gap-2 rounded-xl font-bold text-[15px] transition-all ${deliveryMode === 'pickup' ? 'bg-white shadow-sm text-brand' : 'text-gray-500 hover:text-gray-700'}`}
                       >
-                        <MapPin className="h-3.5 w-3.5" />
-                        Ver rota no Google Maps
-                      </a>
+                        <ShoppingBag className="h-4 w-4" /> Retirada
+                      </button>
+                      <button 
+                        onClick={() => setDeliveryMode("delivery")}
+                        className={`flex-1 py-2.5 flex items-center justify-center gap-2 rounded-xl font-bold text-[15px] transition-all ${deliveryMode === 'delivery' ? 'bg-white shadow-sm text-brand' : 'text-gray-500 hover:text-gray-700'}`}
+                      >
+                        <Truck className="h-4 w-4" /> Entrega
+                      </button>
                     </div>
-                  </div>
+                  ) : !storeSettings.delivery_enabled && !storeSettings.pickup_enabled ? (
+                    // Nenhum ativo → aviso
+                    <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-700">
+                      ⚠️ Loja não está aceitando pedidos no momento.
+                    </div>
+                  ) : storeSettings.pickup_enabled && !storeSettings.delivery_enabled ? (
+                    // Só retirada ativa → badge informativo
+                    <div className="mt-5 flex items-center gap-3 rounded-2xl border border-brand/20 bg-brand/5 px-4 py-3">
+                      <ShoppingBag className="h-5 w-5 text-brand shrink-0" />
+                      <div>
+                        <p className="font-bold text-brand text-sm">Apenas Retirada no Local</p>
+                        <p className="text-xs text-gray-500">Entrega indisponível no momento</p>
+                      </div>
+                    </div>
+                  ) : (
+                    // Só entrega ativa → badge informativo
+                    <div className="mt-5 flex items-center gap-3 rounded-2xl border border-brand/20 bg-brand/5 px-4 py-3">
+                      <Truck className="h-5 w-5 text-brand shrink-0" />
+                      <div>
+                        <p className="font-bold text-brand text-sm">Apenas Entrega Delivery</p>
+                        <p className="text-xs text-gray-500">Retirada indisponível no momento</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {deliveryMode === "pickup" ? (
+                    <div className="mt-4 flex items-start gap-3 rounded-2xl border border-brand/20 bg-brand/5 p-4 shadow-sm">
+                      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand/10 text-brand">
+                        <ShoppingBag className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1 mt-0.5">
+                        <p className="text-[15px] font-extrabold text-brand">Retirada no local</p>
+                        <p className="mt-1 text-sm text-gray-600 leading-relaxed">
+                          O pedido não será entregue. Retire em: KM1 ATRÁS DO FUBICA CAR.
+                        </p>
+                        <a
+                          href="https://www.google.com/maps/place/28%C2%B024'22.9%22S+49%C2%B024'25.2%22W/@-28.4063492,-49.407153,20.75z/data=!4m4!3m3!8m2!3d-28.4063606!4d-49.4069977"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-brand text-white px-4 py-2.5 text-[13px] font-bold hover:bg-brand/90 transition shadow-sm"
+                        >
+                          <MapPin className="h-4 w-4" />
+                          Ver no mapa
+                        </a>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-3 rounded-xl border border-brand/20 bg-brand/5 p-3">
+                      <p className="text-sm font-bold text-brand mb-3 flex items-center gap-2">
+                        <MapPin className="h-4 w-4" /> Entregar em:
+                      </p>
+                      
+                      {savedAddresses.length > 0 ? (
+                        <div className="space-y-2">
+                          {savedAddresses.map(addr => (
+                            <label key={addr.id} className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition ${selectedAddressId === addr.id ? 'border-brand bg-white shadow-sm' : 'border-transparent hover:bg-white/50'}`}>
+                              <input 
+                                type="radio" 
+                                name="address"
+                                className="mt-1 text-brand focus:ring-brand"
+                                checked={selectedAddressId === addr.id}
+                                onChange={() => setSelectedAddressId(addr.id)}
+                              />
+                              <div className="flex-1">
+                                <p className="font-bold text-gray-800 text-sm">
+                                  {addr.street}, {addr.number}
+                                </p>
+                                {addr.complement && <p className="text-sm text-gray-500">{addr.complement}</p>}
+                                <p className="text-xs text-gray-500 mt-0.5">{addr.neighborhood} - {addr.city}/{addr.state}</p>
+                              </div>
+                            </label>
+                          ))}
+                          
+                          <Link 
+                            to="/enderecos"
+                            onClick={() => setOpen(false)} 
+                            className="block text-center text-xs font-bold text-brand mt-2 hover:underline"
+                          >
+                            Gerenciar meus endereços
+                          </Link>
+                        </div>
+                      ) : (
+                        <div className="text-center py-4 bg-white rounded-lg">
+                          <p className="text-sm text-gray-500 mb-3">Nenhum endereço salvo.</p>
+                          <Link 
+                            to="/enderecos"
+                            onClick={() => setOpen(false)} 
+                            className="inline-block px-4 py-2 bg-brand text-white text-xs font-bold rounded-lg hover:bg-brand/90 transition"
+                          >
+                            Adicionar Endereço
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="mt-4">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <div className="mt-6 border-t border-gray-100 pt-6">
+                <h3 className="text-[13px] font-extrabold uppercase tracking-wider text-gray-400 mb-3">
                   Forma de pagamento
                 </h3>
-                <div className="mt-2 grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-3">
                   {(
                     [
                       { id: "pix", label: "PIX", emoji: "pix" },
@@ -632,31 +772,31 @@ export function CartDrawer() {
                       <button
                         key={p.id}
                         onClick={() => setPay(p.id)}
-                        className={`flex flex-col items-center gap-1 rounded-xl border px-2 py-2.5 text-xs transition ${
+                        className={`flex flex-col items-center gap-2 rounded-2xl border px-2 py-4 text-[13px] transition-all ${
                           active
-                            ? "border-highlight bg-highlight/10 ring-2 ring-highlight/40 text-highlight"
-                            : "border-border bg-white hover:border-highlight/50 text-foreground/80"
+                            ? "border-brand bg-brand/5 ring-2 ring-brand/20 text-brand shadow-sm"
+                            : "border-gray-200 bg-white hover:border-brand/30 text-gray-500 hover:bg-gray-50"
                         }`}
                       >
                         {p.emoji === "pix" ? (
-                          <PixIcon className="h-6 w-6" />
+                          <PixIcon className="h-6 w-6 opacity-90" />
                         ) : p.emoji === "card" ? (
-                          <CreditCard className="h-6 w-6 text-sky-600" />
+                          <CreditCard className="h-6 w-6 text-sky-600 opacity-90" />
                         ) : (
-                          <Banknote className="h-6 w-6 text-green-600" />
+                          <Banknote className="h-6 w-6 text-green-600 opacity-90" />
                         )}
-                        <span className="font-semibold">{p.label}</span>
+                        <span className="font-bold">{p.label}</span>
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              <div className="mt-4 rounded-xl border border-border bg-card p-3">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <div className="mt-6 rounded-2xl border border-gray-100 bg-gray-50 p-4 shadow-inner">
+                <h3 className="text-[13px] font-extrabold uppercase tracking-wider text-gray-400 mb-2">
                   Cupom de desconto
                 </h3>
-                <div className="mt-2 flex gap-2">
+                <div className="flex gap-2">
                   <input
                     value={couponCode}
                     onChange={(e) => {
@@ -664,20 +804,20 @@ export function CartDrawer() {
                       setCoupon(null);
                     }}
                     placeholder="Digite o cupom"
-                    className="min-w-0 flex-1 rounded-xl border border-border bg-white shadow-sm px-3 py-2.5 text-sm uppercase placeholder:normal-case placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40"
+                    className="min-w-0 flex-1 rounded-xl border border-gray-200 bg-white shadow-sm px-4 py-3 text-[15px] uppercase placeholder:normal-case placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/30"
                   />
                   <button
                     type="button"
                     onClick={applyCoupon}
                     disabled={couponLoading || total <= 0}
-                    className="rounded-full bg-highlight px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:opacity-95 disabled:cursor-wait disabled:opacity-60"
+                    className="rounded-xl bg-brand px-5 py-3 text-[15px] font-bold text-white shadow-sm transition hover:bg-brand/90 disabled:cursor-wait disabled:opacity-50"
                   >
                     {couponLoading ? "..." : "Aplicar"}
                   </button>
                 </div>
                 {coupon && (
-                  <div className="mt-2 flex items-center justify-between rounded-lg bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800 ring-1 ring-emerald-100">
-                    <span>{coupon.code} aplicado</span>
+                  <div className="mt-3 flex items-center justify-between rounded-lg bg-emerald-50 px-4 py-2.5 text-sm font-bold text-emerald-800 ring-1 ring-emerald-200 shadow-sm">
+                    <span>{coupon.code} aplicado!</span>
                     <span>-{formatBRL(discount)}</span>
                   </div>
                 )}
@@ -688,7 +828,7 @@ export function CartDrawer() {
                 onChange={(e) => setObs(e.target.value)}
                 placeholder="Observações do pedido (opcional)"
                 rows={2}
-                className="mt-3 w-full resize-none rounded-xl border border-border bg-white shadow-sm px-3 py-2.5 text-base placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-brand/40 sm:text-sm"
+                className="mt-5 w-full resize-none rounded-2xl border border-gray-200 bg-gray-50 shadow-sm px-4 py-3.5 text-[15px] placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
               />
 
               {!status.loading && !status.isOpen && (
@@ -704,38 +844,44 @@ export function CartDrawer() {
           )}
         </div>
 
-        <div className="shrink-0 border-t border-border bg-background px-4 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] shadow-[0_-8px_20px_-12px_rgba(0,0,0,0.15)]">
+        <div className="shrink-0 border-t border-gray-100 bg-white px-5 pt-5 pb-[max(env(safe-area-inset-bottom),1.25rem)] shadow-[0_-8px_30px_-15px_rgba(0,0,0,0.1)]">
           {!orderId && discount > 0 && (
-            <div className="mb-2 flex items-center justify-between text-sm">
-              <span className="font-semibold text-muted-foreground">Desconto</span>
-              <span className="font-extrabold text-emerald-700">-{formatBRL(discount)}</span>
+            <div className="mb-3 flex items-center justify-between text-[15px]">
+              <span className="font-extrabold text-gray-500">Desconto aplicado</span>
+              <span className="font-extrabold text-emerald-600">-{formatBRL(discount)}</span>
             </div>
           )}
-          <div className="flex items-center justify-between">
-            <span className="font-hand text-lg font-bold sm:text-xl">TOTAL</span>
-            <span className="text-xl font-extrabold text-brand tabular-nums">
+          {!orderId && deliveryMode === "delivery" && storeSettings.delivery_enabled && storeSettings.delivery_fee > 0 && (
+            <div className="mb-2 flex items-center justify-between text-[15px]">
+              <span className="font-extrabold text-gray-500">Taxa de entrega</span>
+              <span className="font-extrabold text-gray-900">{formatBRL(storeSettings.delivery_fee)}</span>
+            </div>
+          )}
+          <div className="flex items-center justify-between mb-1">
+            <span className="font-hand text-xl font-extrabold text-gray-900">TOTAL</span>
+            <span className="text-2xl font-extrabold text-brand tabular-nums drop-shadow-sm">
               {formatBRL(orderId ? confirmedTotal : finalTotal)}
             </span>
           </div>
           {orderId ? (
             <button
               onClick={handleClose}
-              className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-full bg-highlight py-3.5 text-[15px] font-bold text-highlight-foreground transition hover:opacity-95 active:scale-[0.99]"
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-brand py-4 text-[16px] font-bold text-white transition hover:bg-brand/90 active:scale-[0.98] shadow-md shadow-brand/20"
             >
-              Fechar
+              Fechar Detalhes
             </button>
           ) : (
             <button
               onClick={handleCheckout}
               disabled={saving || status.loading || !status.isOpen || items.length === 0}
-              className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-full bg-white border-2 border-highlight/20 py-3.5 text-[15px] font-bold text-brand transition disabled:opacity-100 enabled:bg-highlight enabled:text-white enabled:border-highlight enabled:shadow-lg enabled:hover:opacity-95 enabled:active:scale-[0.99]"
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-gray-100 py-4 text-[16px] font-bold text-gray-400 transition disabled:opacity-100 enabled:bg-brand enabled:text-white enabled:shadow-lg enabled:shadow-brand/30 enabled:hover:bg-brand/90 enabled:active:scale-[0.98]"
             >
-              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+              {saving && <Loader2 className="h-5 w-5 animate-spin" />}
               {saving
-                ? "Enviando pedido..."
+                ? "Processando pedido..."
                 : status.isOpen
-                  ? "Finalizar pedido"
-                  : "Pedidos fechados"}
+                  ? "Finalizar pedido agora"
+                  : "Loja Fechada"}
             </button>
           )}
         </div>

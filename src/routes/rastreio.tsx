@@ -177,7 +177,7 @@ function RastreioPage() {
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-brand text-lg">
-                        R$ {Number(order.total_amount).toFixed(2).replace('.', ',')}
+                        R$ {Number(order.total).toFixed(2).replace('.', ',')}
                       </p>
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-white border border-brand/20 text-brand mt-1 shadow-sm">
                         {STATUS_ICONS[order.status || 'pending']}

@@ -46,7 +46,7 @@ function HorariosPage() {
             open_time: r.open_time.slice(0, 5),
             close_time: r.close_time.slice(0, 5),
             is_closed: r.is_closed,
-            is_24h: r.is_24h,
+            is_24h: r.is_24h ?? false,
           })),
         );
       } catch (error) {

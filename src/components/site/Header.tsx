@@ -74,21 +74,30 @@ export function Header() {
             <Link
               to="/historico"
               onClick={() => setNavOpen(false)}
-              className="flex items-center justify-between py-2 text-brand font-bold hover:text-brand/80 transition bg-brand/5 px-3 rounded-lg"
+              className="flex items-center justify-between py-2 text-brand font-bold hover:text-brand/80 transition bg-brand/5 px-3 rounded-lg mb-1"
             >
               <span>Meus Pedidos</span>
               <ArrowRight className="h-4 w-4 opacity-50" />
             </Link>
+            <Link
+              to="/perfil"
+              onClick={() => setNavOpen(false)}
+              className="flex items-center justify-between py-2 text-gray-700 font-bold hover:text-gray-900 transition bg-gray-50 px-3 rounded-lg mb-2"
+            >
+              <span>Meu Perfil</span>
+              <ArrowRight className="h-4 w-4 opacity-50" />
+            </Link>
             
-            <a
-              href={`https://wa.me/${WPP}`}
-              target="_blank"
-              rel="noreferrer"
+            <button
+              onClick={() => {
+                setNavOpen(false);
+                setOpen(true);
+              }}
               className="flex items-center justify-center gap-2 w-full rounded-2xl bg-highlight hover:bg-highlight/90 text-white font-bold py-3 shadow-sm transition mt-2"
             >
-              <MessageCircle className="h-5 w-5 fill-white" />
+              <ShoppingCart className="h-5 w-5 fill-white/20" />
               Fazer pedido
-            </a>
+            </button>
           </nav>
         </div>
       </header>

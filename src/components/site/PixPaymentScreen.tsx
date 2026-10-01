@@ -111,16 +111,11 @@ export function PixPaymentScreen({ logo, orderId, orderNumber, pixQrCode, pixCop
 
   return (
     <div className="flex flex-col items-center text-center pb-6">
-      <div className="w-full bg-brand rounded-2xl pt-6 pb-8 px-4 mb-0 flex flex-col items-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
-        <div className="bg-white/90 px-4 py-2 rounded-xl shadow-lg mb-3">
-          <img src={logo} alt="Lume Artesanais" className="h-8 sm:h-10 w-auto object-contain" />
-        </div>
-        <p className="mt-1 text-white text-2xl font-bold">{formatBRL(confirmedTotal)}</p>
-        <p className="text-white/70 text-xs mt-0.5">Pedido {formatOrderCode(orderId, orderNumber)}</p>
-      </div>
-
-      <div className="w-full bg-white border border-brand/10 rounded-2xl p-5 -mt-4 shadow-sm">
+      <div className="w-full bg-white border border-brand/10 rounded-2xl p-6 shadow-sm flex flex-col items-center">
+        <img src={logo} alt="Lume Artesanais" className="h-12 sm:h-14 w-auto object-contain mb-3" />
+        <p className="text-xl font-bold text-foreground">{formatBRL(confirmedTotal)}</p>
+        <p className="text-muted-foreground text-xs mb-6">Pedido {formatOrderCode(orderId, orderNumber)}</p>
+        
         <p className="text-sm font-semibold text-foreground/70 mb-3">Escaneie o QR Code para pagar</p>
         {pixQrCode ? (
           <div className="flex justify-center">

@@ -25,7 +25,7 @@ import { formatOrderCode } from "@/lib/order-utils";
 import { cn } from "@/lib/utils";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import logoImage from "@/assets/logo_vinho.png";
+import logoImage from "@/assets/logo_lume.png";
 
 export const Route = createFileRoute("/admin/dashboard/pedidos")({
   component: PedidosPage,
@@ -62,6 +62,8 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
   delivered: "Finalizado",
   cancelled: "Cancelado",
   paid: "Pago",
+  ready: "Pronto",
+  dispatched: "Despachado",
 };
 
 const STATUS_BADGE_CLASSES: Record<OrderStatus, string> = {
@@ -73,6 +75,8 @@ const STATUS_BADGE_CLASSES: Record<OrderStatus, string> = {
   delivered: "bg-cyan-500/15 text-cyan-700 ring-cyan-500/25",
   paid: "bg-emerald-500/15 text-emerald-700 ring-emerald-500/25",
   cancelled: "bg-rose-500/15 text-rose-700 ring-rose-500/25",
+  ready: "bg-fuchsia-500/15 text-fuchsia-700 ring-fuchsia-500/25",
+  dispatched: "bg-sky-500/15 text-sky-700 ring-sky-500/25",
 };
 
 const STATUS_ACTIONS: Array<{ status: OrderStatus; label: string }> = [
@@ -175,7 +179,7 @@ function PedidosPage() {
   useEffect(() => {
     let cancelled = false;
 
-    (async () => {
+    const fetchOrders = async () => {
       setLoading(true);
       setError(null);
 
@@ -189,7 +193,34 @@ function PedidosPage() {
         if (itemsRes.error) throw itemsRes.error;
         if (pmRes.error) throw pmRes.error;
         if (cancelled) return;
-        setOrders(ordersRes.data as any[]);
+        
+        let ordersData = ordersRes.data as any[];
+        const now = new Date().getTime();
+        const thirtyMinutes = 30 * 60 * 1000;
+        const toCancelIds: string[] = [];
+
+        ordersData = ordersData.map((order) => {
+          if (order.status === "pending") {
+            const orderTime = new Date(order.created_at).getTime();
+            if (now - orderTime > thirtyMinutes) {
+              toCancelIds.push(order.id);
+              return { ...order, status: "cancelled" };
+            }
+          }
+          return order;
+        });
+
+        if (toCancelIds.length > 0) {
+          supabase
+            .from("orders")
+            .update({ status: "cancelled", updated_at: new Date().toISOString() })
+            .in("id", toCancelIds)
+            .then(({ error }) => {
+              if (error) console.error("Error auto-cancelling orders:", error);
+            });
+        }
+
+        setOrders(ordersData);
         setItems(itemsRes.data as any[]);
         setPaymentMethods(pmRes.data as any[]);
       } catch (err: any) {
@@ -198,10 +229,46 @@ function PedidosPage() {
       } finally {
         if (!cancelled) setLoading(false);
       }
-    })();
+    };
+
+    fetchOrders();
+
+    const interval = setInterval(() => {
+      setOrders(current => {
+        let changed = false;
+        const now = new Date().getTime();
+        const thirtyMinutes = 30 * 60 * 1000;
+        const toCancelIds: string[] = [];
+
+        const next = current.map(order => {
+          if (order.status === "pending") {
+            const orderTime = new Date(order.created_at).getTime();
+            if (now - orderTime > thirtyMinutes) {
+              changed = true;
+              toCancelIds.push(order.id);
+              return { ...order, status: "cancelled" as OrderRow["status"] };
+            }
+          }
+          return order;
+        });
+
+        if (changed && toCancelIds.length > 0) {
+          supabase
+            .from("orders")
+            .update({ status: "cancelled", updated_at: new Date().toISOString() })
+            .in("id", toCancelIds)
+            .then(({ error }) => {
+              if (error) console.error("Error auto-cancelling orders on interval:", error);
+            });
+          return next;
+        }
+        return current;
+      });
+    }, 60000); // Check every minute
 
     return () => {
       cancelled = true;
+      clearInterval(interval);
     };
   }, []);
 
