@@ -161,7 +161,7 @@ export function Menu({ menuRef }: { menuRef: React.RefObject<HTMLDivElement | nu
         <div className="text-center mb-12">
           <h2 className="font-serif text-4xl sm:text-5xl text-foreground font-extrabold tracking-tight">Nosso Cardápio</h2>
           <p className="mx-auto mt-3 max-w-md text-base text-muted-foreground">
-            Explore nossa variedade de hambúrgueres e porções feitos na hora pra você.
+            Explore nossa variedade de doces e salgados artesanais, além de opções saudáveis e veganas feitas com muito carinho para você.
           </p>
         </div>
 

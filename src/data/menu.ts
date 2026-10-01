@@ -2,6 +2,8 @@ import trufaVegana from "@/assets/trufa_vegana.jpg";
 import coxinhaVegana from "@/assets/coxinha_vegana.jpg";
 import boloPoteVegano from "@/assets/bolo_pote_vegano.jpg";
 import kombucha from "@/assets/kombucha.jpg";
+import geladinhoGourmet from "@/assets/geladinho_gourmet.jpg";
+import boloPoteSemLactose from "@/assets/bolo_pote_sem_lactose.jpg";
 
 export type Addon = { name: string; price: number };
 export type OptionItem = { name: string; price: number };
@@ -30,6 +32,25 @@ const extrasDoces: Addon[] = [
 ];
 
 export const products: Product[] = [
+  {
+    id: "geladinho-gourmet-sem-lactose",
+    name: "Geladinho Gourmet Sem Lactose",
+    description: "Cremoso geladinho gourmet sabor coco com chocolate. 100% livre de lactose e super refrescante.",
+    price: 6.5,
+    image: geladinhoGourmet,
+    category: "doces",
+    featured: true,
+  },
+  {
+    id: "bolo-pote-sem-lactose",
+    name: "Bolo de Pote Sem Lactose",
+    description: "Delicioso bolo de pote com camadas de bolo de chocolate molhadinho e mousse cremoso sem lactose.",
+    price: 19.9,
+    image: boloPoteSemLactose,
+    category: "doces",
+    featured: true,
+    addons: extrasDoces,
+  },
   {
     id: "trufa-vegana",
     name: "Trufa Vegana de Chocolate",
