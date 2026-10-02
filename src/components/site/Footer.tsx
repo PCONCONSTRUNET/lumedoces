@@ -88,10 +88,10 @@ export function Footer() {
                 ))}
               </div>
             </li>
-            <li className="flex items-start space-x-3">
+            {/* <li className="flex items-start space-x-3">
               <MapPin className="w-4 h-4 text-amber-200 mt-0.5" />
               <span>Entregamos em toda a região. Consulte as taxas no momento da compra.</span>
-            </li>
+            </li> */}
           </ul>
         </div>
 
