@@ -78,7 +78,7 @@ export function Footer() {
 
         {/* Location & Hours */}
         <div className="flex flex-col space-y-4">
-          <h3 className="text-white font-semibold text-lg">Funcionamento e Entrega com Retirada no Local</h3>
+          <h3 className="text-white font-semibold text-lg">Horários e Retirada</h3>
           <ul className="space-y-3 text-sm">
             <li className="flex items-start space-x-3">
               <Clock className="w-4 h-4 text-amber-200 mt-0.5 shrink-0" />
@@ -114,7 +114,7 @@ export function Footer() {
             <li>
               <Link to="/funcionamento" className="flex items-center space-x-3 hover:text-white/80 transition-colors">
                 <Clock className="w-4 h-4 text-amber-200" />
-                <span>Horários e Entrega com Retirada no Local</span>
+                <span>Horários e Retirada no Local</span>
               </Link>
             </li>
           </ul>

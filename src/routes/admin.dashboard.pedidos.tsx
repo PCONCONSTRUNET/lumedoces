@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import logoImage from "@/assets/logo_lume.png";
+import { useConfirm } from "@/providers/ConfirmProvider";
 
 export const Route = createFileRoute("/admin/dashboard/pedidos")({
   component: PedidosPage,
@@ -167,6 +168,7 @@ function formatDateTimeBR(iso: string | null) {
 }
 
 function PedidosPage() {
+  const { confirm } = useConfirm();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [orders, setOrders] = useState<OrderRow[]>([]);
@@ -371,7 +373,7 @@ function PedidosPage() {
   };
 
   const deleteOrder = async (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir este pedido e todos os seus itens?")) return;
+    if (!(await confirm("Tem certeza que deseja excluir este pedido e todos os seus itens?"))) return;
     
     setUpdatingOrderId(id);
     try {

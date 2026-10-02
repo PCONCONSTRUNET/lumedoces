@@ -14,6 +14,7 @@ import {
   X,
   MapPin,
   Truck,
+  Star,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PixIcon } from "@/components/PaymentLabel";
@@ -22,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatOrderCode } from "@/lib/order-utils";
 import { formatBRL, useCart } from "@/store/cart";
 import brandIcon from "@/assets/icon.png";
+import iconPoints from "@/assets/icon_points_lume.png";
 import logoLume from "@/assets/logo_lume.png";
 import { PixPaymentScreen } from "@/components/site/PixPaymentScreen";
 
@@ -167,15 +169,35 @@ export function CartDrawer() {
   const [pixCopyPaste, setPixCopyPaste] = useState<string | null>(null);
   const [confirmedTotal, setConfirmedTotal] = useState(0);
   const [orderNumber, setOrderNumber] = useState<number | null>(null);
-  const discount = coupon ? getCouponDiscount(coupon, total) : 0;
+  const [sessionUserId, setSessionUserId] = useState<string | null>(null);
+  const [pointsBalance, setPointsBalance] = useState<number>(0);
+  const [usePoints, setUsePoints] = useState<boolean>(false);
+
+  const pointsToUse = usePoints ? Math.floor(pointsBalance / 100) * 100 : 0;
+  const pointsDiscount = (pointsToUse / 100) * 5;
+  const discount = (coupon ? getCouponDiscount(coupon, total) : 0) + pointsDiscount;
   const deliveryModeInitial = "pickup"; // will be set in effect
   const [deliveryMode, setDeliveryMode] = useState<"pickup" | "delivery">(deliveryModeInitial);
   
   const [storeSettings, setStoreSettings] = useState<{ delivery_enabled: boolean, pickup_enabled: boolean, delivery_fee: number }>({ delivery_enabled: true, pickup_enabled: true, delivery_fee: 0 });
-  const finalDeliveryFee = deliveryMode === "delivery" && storeSettings.delivery_enabled ? storeSettings.delivery_fee : 0;
-  const finalTotal = Math.max(0, total - discount) + finalDeliveryFee;
+  const [neighborhoods, setNeighborhoods] = useState<any[]>([]);
   const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+
+  const selectedAddress = savedAddresses.find(a => a.id === selectedAddressId);
+  const matchedNeighborhood = selectedAddress 
+    ? neighborhoods.find(n => n.name.toLowerCase() === selectedAddress.neighborhood.toLowerCase())
+    : null;
+    
+  let baseDeliveryFee = deliveryMode === "delivery" && storeSettings.delivery_enabled 
+    ? (matchedNeighborhood ? matchedNeighborhood.fee : storeSettings.delivery_fee) 
+    : 0;
+
+  if (coupon && coupon.free_shipping) {
+    baseDeliveryFee = 0;
+  }
+  const finalDeliveryFee = baseDeliveryFee;
+  const finalTotal = Math.max(0, total - discount) + finalDeliveryFee;
 
   useEffect(() => {
     if (!open) return;
@@ -200,6 +222,10 @@ export function CartDrawer() {
         if (!data.pickup_enabled && data.delivery_enabled) setDeliveryMode("delivery");
         if (!data.delivery_enabled && data.pickup_enabled) setDeliveryMode("pickup");
       }
+    });
+
+    supabaseUntyped.from("delivery_neighborhoods").select("*").eq("is_active", true).then(({ data }: any) => {
+      if (data) setNeighborhoods(data);
     });
   }, [open]);
 
@@ -620,7 +646,7 @@ export function CartDrawer() {
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Seu nome *"
                     autoComplete="name"
-                    className="w-full rounded-2xl border border-gray-200 bg-gray-50 shadow-sm px-4 py-3.5 text-[15px] placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
+                    className="w-full rounded-xl border border-gray-200 bg-white shadow-sm px-4 py-3.5 text-base text-gray-800 placeholder:text-gray-400 focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10 transition-all"
                   />
                   <input
                     value={phone}
@@ -629,16 +655,16 @@ export function CartDrawer() {
                     inputMode="tel"
                     autoComplete="tel"
                     maxLength={15}
-                    className="w-full rounded-2xl border border-gray-200 bg-gray-50 shadow-sm px-4 py-3.5 text-[15px] placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
+                    className="w-full rounded-xl border border-gray-200 bg-white shadow-sm px-4 py-3.5 text-base text-gray-800 placeholder:text-gray-400 focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10 transition-all"
                   />
                   <input
                     value={cpf}
                     onChange={(e) => setCpf(formatCpfCnpj(e.target.value))}
-                    placeholder="CPF ou CNPJ (opcional, para recibo PIX)"
+                    placeholder="CPF ou CNPJ (opcional)"
                     inputMode="numeric"
                     autoComplete="off"
                     maxLength={18}
-                    className="w-full rounded-2xl border border-gray-200 bg-gray-50 shadow-sm px-4 py-3.5 text-[15px] placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
+                    className="w-full rounded-xl border border-gray-200 bg-white shadow-sm px-4 py-3.5 text-base text-gray-800 placeholder:text-gray-400 focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10 transition-all"
                   />
                   {/* Toggle de modo de entrega */}
                   {storeSettings.delivery_enabled && storeSettings.pickup_enabled ? (
@@ -781,9 +807,9 @@ export function CartDrawer() {
                         {p.emoji === "pix" ? (
                           <PixIcon className="h-6 w-6 opacity-90" />
                         ) : p.emoji === "card" ? (
-                          <CreditCard className="h-6 w-6 text-sky-600 opacity-90" />
+                          <img src="https://img.icons8.com/fluency/48/bank-card-back-side.png" alt="Cartão" className="h-6 w-6 object-contain" />
                         ) : (
-                          <Banknote className="h-6 w-6 text-green-600 opacity-90" />
+                          <img src="https://img.icons8.com/fluency/48/money.png" alt="Dinheiro" className="h-6 w-6 object-contain" />
                         )}
                         <span className="font-bold">{p.label}</span>
                       </button>
@@ -804,7 +830,7 @@ export function CartDrawer() {
                       setCoupon(null);
                     }}
                     placeholder="Digite o cupom"
-                    className="min-w-0 flex-1 rounded-xl border border-gray-200 bg-white shadow-sm px-4 py-3 text-[15px] uppercase placeholder:normal-case placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/30"
+                    className="min-w-0 flex-1 rounded-xl border border-gray-200 bg-white shadow-sm px-4 py-3 text-base uppercase text-gray-800 placeholder:normal-case placeholder:text-gray-400 focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10 transition-all"
                   />
                   <button
                     type="button"
@@ -816,9 +842,19 @@ export function CartDrawer() {
                   </button>
                 </div>
                 {coupon && (
-                  <div className="mt-3 flex items-center justify-between rounded-lg bg-emerald-50 px-4 py-2.5 text-sm font-bold text-emerald-800 ring-1 ring-emerald-200 shadow-sm">
-                    <span>{coupon.code} aplicado!</span>
-                    <span>-{formatBRL(discount)}</span>
+                  <div className="mt-3 flex flex-col justify-center rounded-lg bg-emerald-50 px-4 py-2.5 text-sm font-bold text-emerald-800 ring-1 ring-emerald-200 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <span>{coupon.code} aplicado!</span>
+                      {getCouponDiscount(coupon, total) > 0 && (
+                        <span>-{formatBRL(getCouponDiscount(coupon, total))}</span>
+                      )}
+                    </div>
+                    {coupon.free_shipping && (
+                      <span className="mt-1 flex items-center gap-1.5 text-xs text-emerald-700 font-bold">
+                        <Truck className="h-4 w-4" />
+                        Frete Grátis garantido!
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
@@ -828,7 +864,7 @@ export function CartDrawer() {
                 onChange={(e) => setObs(e.target.value)}
                 placeholder="Observações do pedido (opcional)"
                 rows={2}
-                className="mt-5 w-full resize-none rounded-2xl border border-gray-200 bg-gray-50 shadow-sm px-4 py-3.5 text-[15px] placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand/30 transition"
+                className="mt-5 w-full resize-none rounded-xl border border-gray-200 bg-white shadow-sm px-4 py-3.5 text-base text-gray-800 placeholder:text-gray-400 focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10 transition-all"
               />
 
               {!status.loading && !status.isOpen && (
@@ -844,7 +880,7 @@ export function CartDrawer() {
           )}
         </div>
 
-        <div className="shrink-0 border-t border-gray-100 bg-white px-5 pt-5 pb-[max(env(safe-area-inset-bottom),1.25rem)] shadow-[0_-8px_30px_-15px_rgba(0,0,0,0.1)]">
+        <div className="shrink-0 border-t border-gray-100 bg-white px-5 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] shadow-[0_-8px_30px_-15px_rgba(0,0,0,0.1)]">
           {!orderId && discount > 0 && (
             <div className="mb-3 flex items-center justify-between text-[15px]">
               <span className="font-extrabold text-gray-500">Desconto aplicado</span>
@@ -857,16 +893,24 @@ export function CartDrawer() {
               <span className="font-extrabold text-gray-900">{formatBRL(storeSettings.delivery_fee)}</span>
             </div>
           )}
-          <div className="flex items-center justify-between mb-1">
-            <span className="font-hand text-xl font-extrabold text-gray-900">TOTAL</span>
-            <span className="text-2xl font-extrabold text-brand tabular-nums drop-shadow-sm">
+          <div className="flex items-center justify-between mb-0.5">
+            <span className="font-hand text-lg font-extrabold text-gray-900">TOTAL</span>
+            <span className="text-xl font-extrabold text-brand tabular-nums drop-shadow-sm">
               {formatBRL(orderId ? confirmedTotal : finalTotal)}
             </span>
           </div>
+          {!orderId && items.length > 0 && finalTotal >= 5 && (
+            <div className="flex justify-end mb-1 mt-0.5">
+              <div className="inline-flex items-center gap-1.5 bg-amber-100 text-amber-800 text-[11px] font-bold px-3 py-1.5 rounded-full ring-1 ring-amber-200">
+                <img src={iconPoints} alt="Pontos" className="h-4 w-4 object-contain drop-shadow-sm" />
+                Você vai ganhar {Math.floor(finalTotal / 5)} pontos!
+              </div>
+            </div>
+          )}
           {orderId ? (
             <button
               onClick={handleClose}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-brand py-4 text-[16px] font-bold text-white transition hover:bg-brand/90 active:scale-[0.98] shadow-md shadow-brand/20"
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-brand py-3 text-[15px] font-bold text-white transition hover:bg-brand/90 active:scale-[0.98] shadow-md shadow-brand/20"
             >
               Fechar Detalhes
             </button>
@@ -874,7 +918,7 @@ export function CartDrawer() {
             <button
               onClick={handleCheckout}
               disabled={saving || status.loading || !status.isOpen || items.length === 0}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-gray-100 py-4 text-[16px] font-bold text-gray-400 transition disabled:opacity-100 enabled:bg-brand enabled:text-white enabled:shadow-lg enabled:shadow-brand/30 enabled:hover:bg-brand/90 enabled:active:scale-[0.98]"
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-gray-100 py-3.5 text-[15px] font-bold text-gray-400 transition disabled:opacity-100 enabled:bg-brand enabled:text-white enabled:shadow-lg enabled:shadow-brand/30 enabled:hover:bg-brand/90 enabled:active:scale-[0.98]"
             >
               {saving && <Loader2 className="h-5 w-5 animate-spin" />}
               {saving

@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Loader2, MapPin, Plus, Trash2, Navigation, CheckCircle2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { lazy, Suspense } from "react";
+import { useConfirm } from "@/providers/ConfirmProvider";
 
 const MapPicker = lazy(() => import("@/components/site/MapPicker"));
 
@@ -27,6 +28,7 @@ export type Address = {
 
 
 function EnderecosPage() {
+  const { confirm } = useConfirm();
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -266,7 +268,7 @@ function EnderecosPage() {
   };
 
   const handleRemove = async (id: string) => {
-    if (!confirm("Tem certeza que deseja remover este endereço?")) return;
+    if (!(await confirm("Tem certeza que deseja remover este endereço?"))) return;
     const updatedAddresses = addresses.filter(a => a.id !== id);
     const success = await saveAddressesToMeta(updatedAddresses);
     if (success) {

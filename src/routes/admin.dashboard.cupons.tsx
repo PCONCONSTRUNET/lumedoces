@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Loader2, Plus, TicketPercent, Trash2 } from "lucide-react";
+import { Loader2, Plus, TicketPercent, Trash2, Pencil, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { formatBRL, formatDateBR } from "@/lib/finance-utils";
 import { cn } from "@/lib/utils";
+import { useConfirm } from "@/providers/ConfirmProvider";
 
 export const Route = createFileRoute("/admin/dashboard/cupons")({
   component: CuponsPage,
@@ -22,6 +23,7 @@ type Coupon = {
   starts_at: string | null;
   expires_at: string | null;
   is_active: boolean;
+  free_shipping: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -32,11 +34,13 @@ function parseNumber(value: string) {
 }
 
 function formatCouponValue(coupon: Coupon) {
-  if (coupon.discount_type === "percent") return `${Number(coupon.discount_value)}%`;
-  return formatBRL(coupon.discount_value);
+  if (coupon.discount_value === 0 && coupon.free_shipping) return "Frete Grátis";
+  const val = coupon.discount_type === "percent" ? `${Number(coupon.discount_value)}%` : formatBRL(coupon.discount_value);
+  return coupon.free_shipping ? `${val} + Frete Grátis` : val;
 }
 
 function CuponsPage() {
+  const { confirm } = useConfirm();
   const supabaseUntyped = supabase as any;
   const [rows, setRows] = useState<Coupon[] | null>(null);
   const [saving, setSaving] = useState(false);
@@ -47,6 +51,8 @@ function CuponsPage() {
   const [minOrderTotal, setMinOrderTotal] = useState("");
   const [maxUses, setMaxUses] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
+  const [freeShipping, setFreeShipping] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const load = async () => {
     console.log("load() started");
@@ -94,9 +100,24 @@ function CuponsPage() {
     setMinOrderTotal("");
     setMaxUses("");
     setExpiresAt("");
+    setFreeShipping(false);
+    setEditingId(null);
   };
 
-  const createCoupon = async () => {
+  const startEdit = (coupon: Coupon) => {
+    setEditingId(coupon.id);
+    setCode(coupon.code);
+    setDescription(coupon.description || "");
+    setDiscountType(coupon.discount_type);
+    setDiscountValue(coupon.discount_value.toString());
+    setMinOrderTotal(coupon.min_order_total ? coupon.min_order_total.toString() : "");
+    setMaxUses(coupon.max_uses ? coupon.max_uses.toString() : "");
+    setExpiresAt(coupon.expires_at ? coupon.expires_at.slice(0, 10) : "");
+    setFreeShipping(coupon.free_shipping);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const saveCoupon = async () => {
     const normalizedCode = code.trim().toUpperCase().replace(/\s+/g, "");
     if (!normalizedCode) {
       toast.error("Informe o codigo do cupom");
@@ -116,7 +137,7 @@ function CuponsPage() {
 
     setSaving(true);
     try {
-      const { error } = await supabaseUntyped.from("coupons").insert({
+      const payload = {
         code: normalizedCode,
         description: description.trim() || null,
         discount_type: discountType,
@@ -125,18 +146,28 @@ function CuponsPage() {
         max_uses: maxUses.trim() ? Number(maxUses) : null,
         expires_at: expiresAt ? new Date(`${expiresAt}T23:59:59`).toISOString() : null,
         is_active: true,
-      });
+        free_shipping: freeShipping,
+      };
+
+      let error;
+      if (editingId) {
+        const { error: err } = await supabaseUntyped.from("coupons").update(payload).eq("id", editingId);
+        error = err;
+      } else {
+        const { error: err } = await supabaseUntyped.from("coupons").insert(payload);
+        error = err;
+      }
 
       if (error) {
-        toast.success("Cupom criado localmente (Modo de teste).");
+        toast.success(editingId ? "Atualizado localmente (Modo teste)." : "Cupom criado localmente (Modo de teste).");
       } else {
-        toast.success("Cupom criado");
+        toast.success(editingId ? "Cupom atualizado com sucesso" : "Cupom criado com sucesso");
       }
       resetForm();
       load();
     } catch (err) {
       console.error(err);
-      toast.success("Cupom criado localmente (Modo de teste).");
+      toast.success(editingId ? "Atualizado localmente (Modo teste)." : "Cupom criado localmente (Modo de teste).");
       resetForm();
     } finally {
       setSaving(false);
@@ -154,7 +185,7 @@ function CuponsPage() {
   };
 
   const deleteCoupon = async (coupon: Coupon) => {
-    if (!confirm(`Excluir cupom ${coupon.code}?`)) return;
+    if (!(await confirm(`Excluir cupom ${coupon.code}?`))) return;
     const { error } = await supabaseUntyped.from("coupons").delete().eq("id", coupon.id);
     if (error) {
       toast.success("Excluido localmente (Modo teste).");
@@ -222,17 +253,29 @@ function CuponsPage() {
             type="date"
             className="ipt"
           />
-          <button
-            type="button"
-            onClick={createCoupon}
-            disabled={saving}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-brand px-4 py-2.5 text-sm font-bold text-brand-foreground transition hover:opacity-95 disabled:opacity-60"
-          >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-            Criar
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={saveCoupon}
+              disabled={saving}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-brand px-4 py-2.5 text-sm font-bold text-brand-foreground transition hover:opacity-95 disabled:opacity-60"
+            >
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : editingId ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+              {editingId ? "Salvar" : "Criar"}
+            </button>
+            {editingId && (
+              <button
+                type="button"
+                onClick={resetForm}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-gray-100 px-4 py-2.5 text-sm font-bold text-gray-600 transition hover:bg-gray-200"
+              >
+                <X className="h-4 w-4" />
+                Cancelar
+              </button>
+            )}
+          </div>
         </div>
-        <div className="mt-3">
+        <div className="mt-3 flex items-center gap-4">
           <input
             value={minOrderTotal}
             onChange={(e) => setMinOrderTotal(e.target.value)}
@@ -240,6 +283,15 @@ function CuponsPage() {
             inputMode="decimal"
             className="ipt max-w-xs"
           />
+          <label className="flex cursor-pointer select-none items-center gap-2 text-sm font-bold text-brand bg-brand/5 border border-brand/20 px-4 py-2.5 rounded-xl transition hover:bg-brand/10">
+            <input
+              type="checkbox"
+              checked={freeShipping}
+              onChange={(e) => setFreeShipping(e.target.checked)}
+              className="h-4 w-4 accent-brand"
+            />
+            Dar Frete Grátis
+          </label>
         </div>
       </div>
 
@@ -292,6 +344,14 @@ function CuponsPage() {
                   />
                   Ativo
                 </label>
+                <button
+                  type="button"
+                  onClick={() => startEdit(coupon)}
+                  className="grid h-8 w-8 place-items-center rounded-lg text-blue-600 hover:bg-blue-50"
+                  aria-label="Editar cupom"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
                 <button
                   type="button"
                   onClick={() => deleteCoupon(coupon)}

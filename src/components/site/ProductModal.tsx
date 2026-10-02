@@ -290,7 +290,13 @@ export function ProductModal({
                 {quantity}
               </span>
               <button
-                onClick={() => setQuantity((q) => q + 1)}
+                onClick={() => setQuantity((q) => {
+                  if (product.manage_stock && product.stock !== undefined && q >= product.stock) {
+                    toast.error(`Apenas ${product.stock} em estoque!`);
+                    return q;
+                  }
+                  return q + 1;
+                })}
                 className="flex h-full w-11 items-center justify-center text-xl text-gray-500 hover:text-black"
               >
                 +
@@ -305,7 +311,7 @@ export function ProductModal({
 
             <button
               onClick={handleAdd}
-              disabled={!isValid}
+              disabled={!isValid || (product.manage_stock && typeof product.stock === 'number' && product.stock <= 0) || (product.manage_stock && typeof product.stock === 'number' && quantity > product.stock)}
               className="flex h-[46px] shrink-0 items-center justify-center rounded-full bg-[#ff0000] px-6 text-[13px] font-bold tracking-wide text-white shadow-md active:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               ADICIONAR

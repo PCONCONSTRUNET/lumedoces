@@ -20,6 +20,7 @@ import {
   Users,
   MessageCircle,
   Settings,
+  Truck,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -40,7 +41,8 @@ const navItems = [
   { to: "/admin/dashboard/gateways", label: "Gateways", icon: CreditCard },
   { to: "/admin/dashboard/whatsapp", label: "WhatsApp", icon: MessageCircle },
   { to: "/admin/dashboard/categorias", label: "Categorias", icon: Tags },
-  { to: "/admin/dashboard/produtos", label: "Produtos (Antigo)", icon: Package },
+  { to: "/admin/dashboard/produtos", label: "Produtos", icon: Package },
+  { to: "/admin/dashboard/entregas", label: "Entregas", icon: Truck },
   { to: "/admin/dashboard/horarios", label: "Horários", icon: Clock },
   { to: "/admin/dashboard/configuracoes", label: "Configurações", icon: Settings },
   { to: "/admin/dashboard/auditoria", label: "Auditoria", icon: ScrollText },
@@ -137,7 +139,7 @@ function AdminDashboardLayout() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed md:static inset-y-0 left-0 z-50 shrink-0 bg-card border-r border-border/60 flex flex-col transition-all duration-200 md:translate-x-0",
+          "fixed md:sticky md:top-0 md:h-screen inset-y-0 left-0 z-50 shrink-0 bg-card border-r border-border/60 flex flex-col transition-all duration-200 md:translate-x-0",
           mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
           collapsed ? "w-16 max-w-[85vw] md:w-16" : "w-72 max-w-[85vw] md:w-64"
         )}

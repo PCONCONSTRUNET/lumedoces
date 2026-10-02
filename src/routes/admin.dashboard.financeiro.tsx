@@ -50,6 +50,7 @@ import {
 import { PeriodFilter } from "./admin.dashboard.visao";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { useConfirm } from "@/providers/ConfirmProvider";
 
 export const Route = createFileRoute("/admin/dashboard/financeiro")({
   component: FinanceiroPage,
@@ -77,6 +78,7 @@ type Tx = {
 };
 
 function FinanceiroPage() {
+  const { confirm } = useConfirm();
   const [preset, setPreset] = useState<PeriodPreset>("30d");
   const [customFrom, setCustomFrom] = useState(toISODate(new Date()));
   const [customTo, setCustomTo] = useState(toISODate(new Date()));
@@ -273,7 +275,7 @@ function FinanceiroPage() {
   };
 
   const remove = async (id: string) => {
-    if (!confirm("Excluir este lançamento?")) return;
+    if (!(await confirm("Excluir este lançamento?"))) return;
     const { error } = await supabase.from("finance_transactions").delete().eq("id", id);
     if (error) toast.error("Erro: " + error.message);
     else {
@@ -411,6 +413,98 @@ function FinanceiroPage() {
         />
       </div>
 
+      <div className="rounded-2xl bg-card shadow-sm ring-1 ring-border/60 overflow-hidden">
+        <div className="px-4 py-3 border-b border-border/60 flex items-center justify-between">
+          <h3 className="text-sm font-bold">Movimentações ({txs.length})</h3>
+        </div>
+        {loading ? (
+          <div className="grid place-items-center py-12">
+            <Loader2 className="h-5 w-5 animate-spin text-brand" />
+          </div>
+        ) : txs.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-10 text-center">
+            Nenhum lançamento no período.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-xs uppercase text-muted-foreground border-b border-border/60">
+                <tr>
+                  <th className="text-left px-4 py-2">Data</th>
+                  <th className="text-left">Descrição</th>
+                  <th className="text-left">Categoria</th>
+                  <th className="text-left">Pagamento</th>
+                  <th className="text-left">Status</th>
+                  <th className="text-right">Valor</th>
+                  <th className="text-right px-4">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {txs.map((t) => (
+                  <tr key={t.id} className="border-b border-border/40 hover:bg-muted/30">
+                    <td className="px-4 py-2 whitespace-nowrap">{formatDateBR(t.occurred_at)}</td>
+                    <td>
+                      <div className="flex items-center gap-2">
+                        <span>{t.description}</span>
+                        {t.is_auto && (
+                          <span className="text-[10px] uppercase rounded bg-muted px-1.5 py-0.5 text-muted-foreground">
+                            auto
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td>{categories.find((c) => c.id === t.category_id)?.name ?? "—"}</td>
+                    <td><PaymentLabel name={methods.find((m) => m.id === t.payment_method_id)?.name} /></td>
+                    <td>
+                      <span
+                        className={
+                          "inline-block rounded-full px-2 py-0.5 text-xs font-semibold " +
+                          (t.status === "paid"
+                            ? "bg-emerald-500/10 text-emerald-600"
+                            : "bg-amber-500/10 text-amber-600")
+                        }
+                      >
+                        {t.status === "paid" ? "Pago" : "Pendente"}
+                      </span>
+                    </td>
+                    <td
+                      className={
+                        "text-right font-bold whitespace-nowrap " +
+                        (t.kind === "revenue" ? "text-emerald-600" : "text-rose-600")
+                      }
+                    >
+                      {t.kind === "revenue" ? "+" : "-"} {formatBRL(t.amount)}
+                    </td>
+                    <td className="text-right px-4">
+                      <div className="inline-flex gap-1">
+                        <button
+                          onClick={() => {
+                            setEditing(t);
+                            setModalOpen(true);
+                          }}
+                          disabled={t.is_auto}
+                          className="grid h-8 w-8 place-items-center rounded-lg hover:bg-muted disabled:opacity-30"
+                          title={t.is_auto ? "Lançamento automático" : "Editar"}
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={() => remove(t.id)}
+                          className="grid h-8 w-8 place-items-center rounded-lg text-red-600 hover:bg-red-50"
+                          title="Excluir"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
       <div className="grid lg:grid-cols-2 gap-4">
         <ChartCard title="Receita × Despesa por dia">
           <div className="h-72">
@@ -499,99 +593,6 @@ function FinanceiroPage() {
           </div>
         </ChartCard>
 
-      </div>
-
-      <div className="rounded-2xl bg-card shadow-sm ring-1 ring-border/60 overflow-hidden">
-        <div className="px-4 py-3 border-b border-border/60 flex items-center justify-between">
-          <h3 className="text-sm font-bold">Movimentações ({txs.length})</h3>
-        </div>
-        {loading ? (
-          <div className="grid place-items-center py-12">
-            <Loader2 className="h-5 w-5 animate-spin text-brand" />
-          </div>
-        ) : txs.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-10 text-center">
-            Nenhum lançamento no período.
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-xs uppercase text-muted-foreground border-b border-border/60">
-                <tr>
-                  <th className="text-left px-4 py-2">Data</th>
-                  <th className="text-left">Descrição</th>
-                  <th className="text-left">Categoria</th>
-                  <th className="text-left">Pagamento</th>
-                  <th className="text-left">Status</th>
-                  <th className="text-right">Valor</th>
-                  <th className="text-right px-4">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {txs.map((t) => (
-                  <tr key={t.id} className="border-b border-border/40 hover:bg-muted/30">
-                    <td className="px-4 py-2 whitespace-nowrap">{formatDateBR(t.occurred_at)}</td>
-                    <td>
-                      <div className="flex items-center gap-2">
-                        <span>{t.description}</span>
-                        {t.is_auto && (
-                          <span className="text-[10px] uppercase rounded bg-muted px-1.5 py-0.5 text-muted-foreground">
-                            auto
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td>{categories.find((c) => c.id === t.category_id)?.name ?? "—"}</td>
-                    <td><PaymentLabel name={methods.find((m) => m.id === t.payment_method_id)?.name} /></td>
-                    <td>
-                      <span
-                        className={
-                          "inline-block rounded-full px-2 py-0.5 text-xs font-semibold " +
-                          (t.status === "paid"
-                            ? "bg-emerald-500/10 text-emerald-600"
-                            : "bg-amber-500/10 text-amber-600")
-                        }
-                      >
-                        {t.status === "paid" ? "Pago" : "Pendente"}
-                      </span>
-                    </td>
-                    <td
-                      className={
-                        "text-right font-bold whitespace-nowrap " +
-                        (t.kind === "revenue" ? "text-emerald-600" : "text-rose-600")
-                      }
-                    >
-                      {t.kind === "revenue" ? "+" : "-"} {formatBRL(t.amount)}
-                    </td>
-                    <td className="text-right px-4">
-                      <div className="inline-flex gap-1">
-                        <button
-                          onClick={() => {
-                            setEditing(t);
-                            setModalOpen(true);
-                          }}
-                          disabled={t.is_auto}
-                          className="grid h-8 w-8 place-items-center rounded-lg hover:bg-muted disabled:opacity-30"
-                          title={t.is_auto ? "Lançamento automático" : "Editar"}
-                        >
-                          <Pencil className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          onClick={() => remove(t.id)}
-                          disabled={t.is_auto}
-                          className="grid h-8 w-8 place-items-center rounded-lg text-red-600 hover:bg-red-50 disabled:opacity-30"
-                          title={t.is_auto ? "Lançamento automático" : "Excluir"}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
 
       <TxModal

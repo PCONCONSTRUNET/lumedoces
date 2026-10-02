@@ -13,6 +13,8 @@ const formSchema = z.object({
   base_price: z.number().min(0, "Preço inválido"),
   category_id: z.string().min(1, "Selecione uma categoria"),
   image_url: z.string().optional(),
+  manage_stock: z.boolean(),
+  stock: z.number().min(0, "Estoque não pode ser negativo"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -32,6 +34,8 @@ export function ProdutoWizard({ onClose, onSuccess, categories, initialData }: a
       base_price: initialData?.base_price || 0,
       category_id: initialData?.category_id || "",
       image_url: initialData?.image_url || "",
+      manage_stock: initialData?.manage_stock || false,
+      stock: initialData?.stock || 0,
     }
   });
 
@@ -85,22 +89,26 @@ export function ProdutoWizard({ onClose, onSuccess, categories, initialData }: a
     setIsSubmitting(true);
     try {
       if (initialData) {
-        const { error } = await supabase.from('products').update({
-          name: data.name,
-          description: data.description,
-          base_price: data.base_price,
-          category_id: data.category_id,
-          image_url: data.image_url
-        }).eq('id', initialData.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from('products').insert({
+        const { error } = await (supabase.from('products') as any).update({
           name: data.name,
           description: data.description,
           base_price: data.base_price,
           category_id: data.category_id,
           image_url: data.image_url,
-          is_active: true
+          manage_stock: data.manage_stock,
+          stock: data.stock
+        }).eq('id', initialData.id);
+        if (error) throw error;
+      } else {
+        const { error } = await (supabase.from('products') as any).insert({
+          name: data.name,
+          description: data.description,
+          base_price: data.base_price,
+          category_id: data.category_id,
+          image_url: data.image_url,
+          is_active: true,
+          manage_stock: data.manage_stock,
+          stock: data.stock
         });
         if (error) throw error;
       }
@@ -203,6 +211,33 @@ export function ProdutoWizard({ onClose, onSuccess, categories, initialData }: a
                       />
                       {form.formState.errors.base_price && <p className="text-red-500 text-xs mt-1">{form.formState.errors.base_price.message}</p>}
                     </div>
+
+                    <div className="pt-6 border-t border-gray-100">
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input 
+                          type="checkbox"
+                          {...form.register("manage_stock")}
+                          className="w-5 h-5 rounded border-gray-300 text-[#ff0000] focus:ring-[#ff0000]"
+                        />
+                        <div>
+                          <span className="block text-sm font-semibold text-gray-900">Controlar estoque</span>
+                          <span className="block text-xs text-gray-500">Se ativo, o produto esgota quando chegar a 0</span>
+                        </div>
+                      </label>
+                    </div>
+
+                    {form.watch("manage_stock") && (
+                      <div className="animate-in fade-in slide-in-from-top-2">
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Quantidade em Estoque</label>
+                        <input 
+                          type="number" 
+                          min="0"
+                          {...form.register("stock", { valueAsNumber: true })} 
+                          className="w-40 border border-gray-300 rounded-md p-3 text-sm focus:border-[#ff0000] focus:ring-1 outline-none" 
+                        />
+                        {form.formState.errors.stock && <p className="text-red-500 text-xs mt-1">{form.formState.errors.stock.message}</p>}
+                      </div>
+                    )}
                   </div>
                 )}
 

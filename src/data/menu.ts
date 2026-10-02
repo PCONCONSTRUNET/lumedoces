@@ -23,6 +23,8 @@ export type Product = {
   featured?: boolean;
   addons?: Addon[];
   options?: OptionGroup[];
+  manage_stock?: boolean;
+  stock?: number;
 };
 
 const extrasDoces: Addon[] = [

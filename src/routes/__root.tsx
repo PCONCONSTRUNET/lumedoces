@@ -71,7 +71,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1" },
       { title: "Lume Artesanais — Peça já a sua!" },
       { name: "description", content: "As melhores e mais crocantes mini coxinhas da região! Salgados, combos para festas e muito mais. Faça seu pedido online." },
       { name: "author", content: "Lume Artesanais" },
@@ -85,11 +85,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:description", content: "As melhores e mais crocantes mini coxinhas da região! Salgados e combos. Peça agora." },
       {
         property: "og:image",
-        content: "https://minicoxinhas.vercel.app/open.png",
+        content: "https://minicoxinhas.vercel.app/og-image.png",
       },
       {
         name: "twitter:image",
-        content: "https://minicoxinhas.vercel.app/open.png",
+        content: "https://minicoxinhas.vercel.app/og-image.png",
       },
     ],
     links: [
@@ -124,12 +124,16 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+import { ConfirmProvider } from "@/providers/ConfirmProvider";
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <ConfirmProvider>
+        <Outlet />
+      </ConfirmProvider>
     </QueryClientProvider>
   );
 }

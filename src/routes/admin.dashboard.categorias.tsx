@@ -3,6 +3,7 @@ import { Tags, Plus, Trash2, Loader2, GripVertical } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useConfirm } from "@/providers/ConfirmProvider";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +24,7 @@ type Category = {
 };
 
 function CategoriasPage() {
+  const { confirm } = useConfirm();
   const [rows, setRows] = useState<Category[] | null>(null);
   const [open, setOpen] = useState(false);
   const [newName, setNewName] = useState("");
@@ -108,7 +110,7 @@ function CategoriasPage() {
   };
 
   const onDelete = async (c: Category) => {
-    if (!confirm(`Excluir "${c.name}"? Produtos ficarão sem categoria.`)) return;
+    if (!(await confirm(`Excluir "${c.name}"? Produtos ficarão sem categoria.`))) return;
     const { error } = await supabase.from("categories").delete().eq("id", c.id);
     if (error) {
       toast.error("Não foi possível excluir");

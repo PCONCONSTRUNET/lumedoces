@@ -25,7 +25,7 @@ function FuncionamentoPage() {
           </Link>
           
           <div className="bg-white rounded-2xl p-8 shadow-sm">
-            <h1 className="text-3xl font-bold text-zinc-900 mb-8">Funcionamento e Entrega com Retirada no Local</h1>
+            <h1 className="text-3xl font-bold text-zinc-900 mb-8">Horários e Retirada</h1>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="bg-orange-50 p-6 rounded-xl border border-orange-100">
@@ -64,14 +64,23 @@ function FuncionamentoPage() {
                 <div className="bg-zinc-50 p-6 rounded-xl border border-zinc-100">
                   <div className="flex items-center mb-4 text-emerald-600">
                     <MapPin className="w-6 h-6 mr-3" />
-                    <h2 className="text-xl font-semibold text-zinc-900">Entrega com Retirada no Local</h2>
+                    <h2 className="text-xl font-semibold text-zinc-900">Retirada no Local</h2>
                   </div>
                   <p className="text-zinc-600 leading-relaxed">
-                    Nós entregamos nossos doces e salgados em toda a região. As taxas de entrega variam de acordo com a distância e são calculadas automaticamente no momento de finalizar a sua compra.
+                    Faça seu pedido e venha retirar diretamente com a gente! Seu pedido estará quentinho e separado na hora combinada. Não fazemos entregas no momento.
                   </p>
-                  <p className="text-zinc-600 leading-relaxed mt-4">
-                    <strong>Tempo estimado:</strong> Nossas entregas costumam levar entre 40 a 60 minutos, podendo variar de acordo com o clima e o trânsito da cidade.
+                  <p className="text-zinc-900 font-medium mt-4 mb-4">
+                    Endereço: KM1 ATRÁS DO FUBICA CAR
                   </p>
+                  <a
+                    href="https://www.google.com/maps/search/?api=1&query=Fubica+Car"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-5 rounded-xl transition"
+                  >
+                    <MapPin className="h-5 w-5" />
+                    Abrir no Google Maps
+                  </a>
                 </div>
 
                 <div className="bg-zinc-50 p-6 rounded-xl border border-zinc-100">

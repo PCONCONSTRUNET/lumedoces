@@ -3,10 +3,13 @@ import { formatBRL } from "@/store/cart";
 import type { Product } from "@/data/menu";
 
 export function ProductCard({ product, onClick }: { product: Product; onClick: () => void }) {
+  const isOutOfStock = product.manage_stock && typeof product.stock === 'number' && product.stock <= 0;
+
   return (
     <button
-      onClick={onClick}
-      className="group relative flex h-full w-full flex-col overflow-hidden rounded-2xl bg-white text-left shadow-md ring-1 ring-border/50 transition-all hover:-translate-y-1 hover:shadow-xl dark:bg-card"
+      onClick={isOutOfStock ? undefined : onClick}
+      disabled={isOutOfStock}
+      className={`group relative flex h-full w-full flex-col overflow-hidden rounded-2xl bg-white text-left shadow-md ring-1 ring-border/50 transition-all ${isOutOfStock ? 'opacity-60 cursor-not-allowed grayscale-[0.5]' : 'hover:-translate-y-1 hover:shadow-xl'} dark:bg-card`}
     >
       <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-muted">
         <img
@@ -16,6 +19,11 @@ export function ProductCard({ product, onClick }: { product: Product; onClick: (
           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-black/5" />
+        {isOutOfStock && (
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+            <span className="bg-white text-gray-900 font-bold px-3 py-1 rounded-full text-xs">ESGOTADO</span>
+          </div>
+        )}
       </div>
 
       {product.featured && (

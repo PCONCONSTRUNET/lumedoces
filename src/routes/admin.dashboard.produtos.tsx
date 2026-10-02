@@ -1,22 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Package, Plus, Loader2, Trash2, GripVertical, Save, ImagePlus } from "lucide-react";
+import { Package, Plus, Loader2, Trash2, Edit2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { ProdutoWizard } from "@/components/cardapio/ProdutoWizard";
+import { useConfirm } from "@/providers/ConfirmProvider";
 
 export const Route = createFileRoute("/admin/dashboard/produtos")({
   component: ProdutosPage,
 });
 
 type Category = { id: string; name: string };
-
 type Product = {
   id: string;
   name: string;
@@ -24,47 +18,28 @@ type Product = {
   is_active: boolean;
   category_id: string | null;
   categories: { name: string } | null;
+  image_url: string | null;
 };
-
-type DraftOption = { name: string; additional_price: string };
-type DraftVariation = {
-  name: string;
-  is_required: boolean;
-  min_select: number;
-  max_select: number;
-  options: DraftOption[];
-};
-
-const PRODUCT_IMAGES_BUCKET = "product-images";
 
 function formatBRL(v: number) {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-function parsePrice(s: string): number {
-  const n = Number(s.replace(/\./g, "").replace(",", "."));
-  return Number.isFinite(n) ? n : 0;
-}
-
-function safeFileName(name: string) {
-  const ext = name.split(".").pop()?.toLowerCase() || "png";
-  return `${crypto.randomUUID()}.${ext.replace(/[^a-z0-9]/g, "") || "png"}`;
-}
-
 function ProdutosPage() {
+  const { confirm } = useConfirm();
   const [rows, setRows] = useState<Product[] | null>(null);
+  const [cats, setCats] = useState<Category[]>([]);
   const [open, setOpen] = useState(false);
+  const [editingProd, setEditingProd] = useState<any>(null);
 
   const load = async () => {
-    // Supabase desconectado. Usando mock.
-    setTimeout(() => {
-      setRows([
-        { id: "trufa-vegana", name: "Trufa Vegana de Chocolate", base_price: 8.00, is_active: true, category_id: "doces", categories: { name: "Doces Saudáveis" }, image_url: "/src/assets/trufa_vegana.jpg" } as unknown as Product,
-        { id: "bolo-pote-vegano", name: "Bolo de Pote Cenoura e Cacau", base_price: 18.00, is_active: true, category_id: "doces", categories: { name: "Doces Saudáveis" }, image_url: "/src/assets/bolo_pote_vegano.jpg" } as unknown as Product,
-        { id: "coxinha-vegana", name: "Mini Coxinhas Veganas", base_price: 24.00, is_active: true, category_id: "salgados", categories: { name: "Snacks Saudáveis" }, image_url: "/src/assets/coxinha_vegana.jpg" } as unknown as Product,
-        { id: "kombucha-frutas", name: "Kombucha Frutas Vermelhas", base_price: 15.00, is_active: true, category_id: "bebidas", categories: { name: "Bebidas Naturais" }, image_url: "/src/assets/kombucha.jpg" } as unknown as Product
-      ]);
-    }, 300);
+    const [prodRes, catRes] = await Promise.all([
+      supabase.from('products').select('*, categories(name)').order('name'),
+      supabase.from('categories').select('*').order('sort_order')
+    ]);
+    if (!prodRes.error && prodRes.data) setRows(prodRes.data as any[]);
+    else setRows([]);
+    if (!catRes.error && catRes.data) setCats(catRes.data as any[]);
   };
 
   useEffect(() => {
@@ -72,16 +47,20 @@ function ProdutosPage() {
   }, []);
 
   const onToggle = async (p: Product) => {
-    // await supabase.from("products").update({ is_active: !p.is_active }).eq("id", p.id);
-    toast.success("Status atualizado (Mock)");
+    await supabase.from("products").update({ is_active: !p.is_active }).eq("id", p.id);
+    toast.success("Status atualizado");
     load();
   };
 
   const onDelete = async (p: Product) => {
-    if (!confirm(`Excluir "${p.name}"?`)) return;
-    // const { error } = await supabase.from("products").delete().eq("id", p.id);
-    toast.success("Produto excluído (Mock)");
-    setRows(prev => prev ? prev.filter(prod => prod.id !== p.id) : null);
+    if (!(await confirm(`Excluir "${p.name}"?`))) return;
+    const { error } = await supabase.from("products").delete().eq("id", p.id);
+    if (!error) {
+      toast.success("Produto excluído");
+      setRows(prev => prev ? prev.filter(prod => prod.id !== p.id) : null);
+    } else {
+      toast.error("Erro ao excluir");
+    }
   };
 
   return (
@@ -92,565 +71,110 @@ function ProdutosPage() {
         </span>
         <div className="flex-1">
           <h1 className="font-display text-2xl text-foreground">Produtos</h1>
-          <p className="text-sm text-muted-foreground">Cadastre e gerencie o cardápio.</p>
+          <p className="text-sm text-muted-foreground">Cadastre e gerencie o cardápio (Visão Tabela).</p>
         </div>
         <button
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setEditingProd(null);
+            setOpen(true);
+          }}
           className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2.5 text-sm font-bold text-brand-foreground shadow-md hover:opacity-95 transition"
         >
-          <Plus className="h-4 w-4" /> Novo produto
+          <Plus className="h-4 w-4" />
+          <span className="hidden sm:inline">Novo Produto</span>
         </button>
       </header>
 
-      <div className="rounded-2xl bg-card p-4 shadow-sm ring-1 ring-border/60">
-        {!rows ? (
-          <div className="grid place-items-center py-10">
-            <Loader2 className="h-5 w-5 animate-spin text-brand" />
-          </div>
-        ) : rows.length === 0 ? (
-          <p className="text-center text-sm text-muted-foreground py-8">
-            Nenhum produto cadastrado. Clique em "Novo produto" para começar.
-          </p>
-        ) : (
-          <ul className="divide-y divide-border/60">
-            {rows.map((p: any) => (
-              <li key={p.id} className="flex items-center gap-4 py-4 px-2 hover:bg-gray-50 transition group rounded-lg">
-                <div className="w-16 h-16 rounded-lg bg-gray-200 overflow-hidden shrink-0 border border-gray-200">
-                  {p.image_url ? (
-                    <img src={p.image_url} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400"><ImagePlus className="w-6 h-6"/></div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-foreground truncate">{p.name}</div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {p.categories?.name ?? "Sem categoria"} · {formatBRL(Number(p.base_price))}
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-4">
-                  <label className="flex items-center gap-2 text-xs font-medium cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={p.is_active}
-                      onChange={() => onToggle(p)}
-                      className="h-4 w-4 accent-brand"
-                    />
-                    Ativo
-                  </label>
-                  
-                  <button
-                    onClick={() => {
-                      toast("Abrindo edição (Mock)");
-                    }}
-                    className="flex items-center gap-1 h-8 px-3 rounded-md text-sm font-semibold text-gray-600 border border-gray-300 hover:bg-gray-100 transition opacity-0 group-hover:opacity-100"
-                  >
-                    Editar
-                  </button>
-
-                  <button
-                    onClick={() => onDelete(p)}
-                    className="grid h-8 w-8 place-items-center rounded-lg text-red-600 hover:bg-red-50"
-                    aria-label="Excluir"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <NovoProdutoDialog
-        open={open}
-        onOpenChange={setOpen}
-        onCreated={() => {
-          setOpen(false);
-          load();
-        }}
-      />
-    </div>
-  );
-}
-
-function NovoProdutoDialog({
-  open,
-  onOpenChange,
-  onCreated,
-}: {
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
-  onCreated: () => void;
-}) {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [saving, setSaving] = useState(false);
-
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [basePrice, setBasePrice] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState("");
-  const [categoryId, setCategoryId] = useState<string>("");
-  const [isActive, setIsActive] = useState(true);
-  const [variations, setVariations] = useState<DraftVariation[]>([]);
-
-  useEffect(() => {
-    if (!open) return;
-    // reset
-    setName("");
-    setDescription("");
-    setBasePrice("");
-    setImageUrl("");
-    setImageFile(null);
-    setImagePreview("");
-    setCategoryId("");
-    setIsActive(true);
-    setVariations([]);
-    (async () => {
-      const { data } = await supabase
-        .from("categories")
-        .select("id, name")
-        .eq("is_active", true)
-        .order("sort_order");
-      setCategories((data as Category[]) ?? []);
-    })();
-  }, [open]);
-
-  const onImageFileChange = (file: File | null) => {
-    if (!file) {
-      setImageFile(null);
-      setImagePreview("");
-      return;
-    }
-
-    if (!file.type.startsWith("image/")) {
-      toast.error("Selecione um arquivo de imagem");
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("A imagem deve ter no maximo 5MB");
-      return;
-    }
-
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
-  };
-
-  const uploadImage = async () => {
-    if (!imageFile) return imageUrl.trim() || null;
-
-    const path = `products/${safeFileName(imageFile.name)}`;
-    const { error } = await supabase.storage
-      .from(PRODUCT_IMAGES_BUCKET)
-      .upload(path, imageFile, {
-        cacheControl: "31536000",
-        contentType: imageFile.type,
-      });
-
-    if (error) throw error;
-
-    const { data } = supabase.storage.from(PRODUCT_IMAGES_BUCKET).getPublicUrl(path);
-    return data.publicUrl;
-  };
-
-  const addVariation = () =>
-    setVariations((v) => [
-      ...v,
-      { name: "", is_required: false, min_select: 0, max_select: 1, options: [] },
-    ]);
-  const updateVariation = (i: number, patch: Partial<DraftVariation>) =>
-    setVariations((v) => v.map((x, idx) => (idx === i ? { ...x, ...patch } : x)));
-  const removeVariation = (i: number) =>
-    setVariations((v) => v.filter((_, idx) => idx !== i));
-  const addOption = (vi: number) =>
-    updateVariation(vi, {
-      options: [...variations[vi].options, { name: "", additional_price: "0,00" }],
-    });
-  const updateOption = (vi: number, oi: number, patch: Partial<DraftOption>) =>
-    updateVariation(vi, {
-      options: variations[vi].options.map((o, idx) =>
-        idx === oi ? { ...o, ...patch } : o,
-      ),
-    });
-  const removeOption = (vi: number, oi: number) =>
-    updateVariation(vi, {
-      options: variations[vi].options.filter((_, idx) => idx !== oi),
-    });
-
-  const onSave = async () => {
-    if (!name.trim()) {
-      toast.error("Informe o nome do produto");
-      return;
-    }
-    for (const v of variations) {
-      if (!v.name.trim()) return toast.error("Toda variação precisa de nome");
-      if (v.options.length === 0)
-        return toast.error(`Adicione opções para "${v.name}"`);
-      for (const o of v.options) {
-        if (!o.name.trim())
-          return toast.error(`Toda opção de "${v.name}" precisa de nome`);
-      }
-    }
-    setSaving(true);
-    try {
-      const finalImageUrl = await uploadImage();
-      const { data: product, error: prodErr } = await supabase
-        .from("products")
-        .insert({
-          name: name.trim(),
-          description: description.trim() || null,
-          base_price: parsePrice(basePrice),
-          image_url: finalImageUrl,
-          category_id: categoryId || null,
-          is_active: isActive,
-        })
-        .select("id")
-        .single();
-      if (prodErr || !product) throw prodErr ?? new Error("Falha");
-
-      for (let vi = 0; vi < variations.length; vi++) {
-        const v = variations[vi];
-        const { data: varRow, error: vErr } = await supabase
-          .from("product_variations")
-          .insert({
-            product_id: product.id,
-            name: v.name.trim(),
-            is_required: v.is_required,
-            min_select: v.min_select,
-            max_select: v.max_select,
-            sort_order: vi,
-          })
-          .select("id")
-          .single();
-        if (vErr || !varRow) throw vErr ?? new Error("Falha");
-        const optsPayload = v.options.map((o, oi) => ({
-          variation_id: varRow.id,
-          name: o.name.trim(),
-          additional_price: parsePrice(o.additional_price),
-          sort_order: oi,
-        }));
-        const { error: oErr } = await supabase
-          .from("product_variation_options")
-          .insert(optsPayload);
-        if (oErr) throw oErr;
-      }
-      toast.success("Produto criado!");
-      onCreated();
-    } catch (err) {
-      console.error(err);
-      toast.error("Não foi possível salvar");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-lg">
-        <DialogHeader>
-          <DialogTitle>Novo produto</DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-5">
-          {/* Dados básicos */}
-          <div className="space-y-3">
-            <Field label="Nome*">
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                maxLength={120}
-                className="ipt"
-                placeholder="Ex: Mini coxinha de frango"
-                autoFocus
-              />
-            </Field>
-
-            <Field label="Descrição">
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                maxLength={500}
-                rows={2}
-                className="ipt"
-                placeholder="Descrição curta"
-              />
-            </Field>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <Field label="Preço base (R$)*">
-                <input
-                  value={basePrice}
-                  onChange={(e) => setBasePrice(e.target.value)}
-                  inputMode="decimal"
-                  className="ipt"
-                  placeholder="0,00"
-                />
-              </Field>
-              <Field label="Categoria">
-                <select
-                  value={categoryId}
-                  onChange={(e) => setCategoryId(e.target.value)}
-                  className="ipt"
-                >
-                  <option value="">Sem categoria</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-            </div>
-
-            <Field label="Imagem do produto">
-              <div className="rounded-xl border border-border/60 bg-background p-3">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <div className="grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-xl bg-muted ring-1 ring-border/60">
-                    {imagePreview || imageUrl ? (
-                      <img
-                        src={imagePreview || imageUrl}
-                        alt=""
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <ImagePlus className="h-8 w-8 text-muted-foreground" />
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => onImageFileChange(e.target.files?.[0] ?? null)}
-                      className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-full file:border-0 file:bg-brand file:px-3 file:py-2 file:text-sm file:font-bold file:text-brand-foreground hover:file:opacity-95"
-                    />
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      PNG, JPG ou WebP ate 5MB. Se enviar arquivo, ele substitui a URL abaixo.
-                    </p>
-                    {imageFile && (
-                      <button
-                        type="button"
-                        onClick={() => onImageFileChange(null)}
-                        className="mt-2 text-xs font-bold text-red-600 hover:underline"
-                      >
-                        Remover imagem selecionada
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Field>
-
-            <Field label="URL da imagem (opcional)">
-              <input
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                maxLength={500}
-                className="ipt"
-                placeholder="https://..."
-              />
-            </Field>
-
-            <label className="flex items-center gap-2 text-sm font-medium cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={isActive}
-                onChange={(e) => setIsActive(e.target.checked)}
-                className="h-4 w-4 accent-brand"
-              />
-              Produto ativo
-            </label>
-          </div>
-
-          {/* Variações */}
-          <div className="border-t border-border/60 pt-4">
-            <div className="flex items-center justify-between mb-2">
-              <div>
-                <h3 className="font-semibold text-foreground text-sm">Variações</h3>
-                <p className="text-xs text-muted-foreground">
-                  Ex: Tamanho, Recheio. Opções podem ter valor adicional.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={addVariation}
-                className="inline-flex items-center gap-1 rounded-lg bg-muted px-3 py-1.5 text-xs font-bold hover:bg-muted/70 transition"
-              >
-                <Plus className="h-3 w-3" /> Variação
-              </button>
-            </div>
-
-            {variations.length === 0 && (
-              <p className="text-xs text-muted-foreground py-3 text-center">
-                Sem variações — produto será vendido pelo preço base.
-              </p>
-            )}
-
-            <div className="space-y-3">
-              {variations.map((v, vi) => (
-                <div
-                  key={vi}
-                  className="rounded-xl border border-border/60 p-3 bg-background/50"
-                >
-                  <div className="flex items-start gap-2">
-                    <GripVertical className="h-4 w-4 text-muted-foreground mt-2.5" />
-                    <div className="flex-1 space-y-2">
-                      <input
-                        value={v.name}
-                        onChange={(e) => updateVariation(vi, { name: e.target.value })}
-                        placeholder="Nome da variação (ex: Tamanho)"
-                        maxLength={60}
-                        className="ipt"
-                      />
-                      <div className="grid grid-cols-2 sm:grid-cols-[1fr_1fr_auto] gap-2 items-end">
-                        <label className="block">
-                          <span className="mb-1 block text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Mínimo</span>
-                          <input
-                            type="number"
-                            min={0}
-                            value={v.min_select}
-                            onChange={(e) =>
-                              updateVariation(vi, { min_select: Number(e.target.value) || 0 })
-                            }
-                            className="ipt"
-                          />
-                        </label>
-                        <label className="block">
-                          <span className="mb-1 block text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Máximo</span>
-                          <input
-                            type="number"
-                            min={1}
-                            value={v.max_select}
-                            onChange={(e) =>
-                              updateVariation(vi, { max_select: Number(e.target.value) || 1 })
-                            }
-                            className="ipt"
-                          />
-                        </label>
-                        <label className="flex items-center gap-1.5 text-xs font-medium cursor-pointer select-none px-1 col-span-2 sm:col-span-1 sm:pb-2">
-                          <input
-                            type="checkbox"
-                            checked={v.is_required}
-                            onChange={(e) =>
-                              updateVariation(vi, { is_required: e.target.checked })
-                            }
-                            className="h-4 w-4 accent-brand"
-                          />
-                          Obrigatório
-                        </label>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        {v.options.map((o, oi) => (
-                          <div
-                            key={oi}
-                            className="grid grid-cols-[1fr_130px_auto] gap-2 items-center"
-                          >
-                            <input
-                              value={o.name}
-                              onChange={(e) =>
-                                updateOption(vi, oi, { name: e.target.value })
-                              }
-                              placeholder="Opção (ex: Grande)"
-                              maxLength={60}
-                              className="ipt"
-                            />
-                            <div className="relative">
-                              <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground">
-                                +R$
-                              </span>
-                              <input
-                                value={o.additional_price}
-                                onChange={(e) =>
-                                  updateOption(vi, oi, { additional_price: e.target.value })
-                                }
-                                inputMode="decimal"
-                                className="ipt pl-12 text-right"
-                                placeholder="0,00"
-                              />
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => removeOption(vi, oi)}
-                              className="grid h-8 w-8 place-items-center rounded-lg text-red-600 hover:bg-red-50"
-                              aria-label="Remover opção"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                        ))}
-                        <button
-                          type="button"
-                          onClick={() => addOption(vi)}
-                          className="text-xs font-bold text-brand hover:underline inline-flex items-center gap-1"
-                        >
-                          <Plus className="h-3 w-3" /> Adicionar opção
-                        </button>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeVariation(vi)}
-                      className="grid h-8 w-8 place-items-center rounded-lg text-red-600 hover:bg-red-50"
-                      aria-label="Remover variação"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+      {rows === null ? (
+        <div className="flex justify-center p-12">
+          <Loader2 className="h-8 w-8 animate-spin text-brand" />
         </div>
-
-        <DialogFooter>
-          <button
-            type="button"
-            onClick={() => onOpenChange(false)}
-            className="inline-flex items-center gap-2 rounded-full bg-muted px-4 py-2.5 text-sm font-bold hover:bg-muted/70 transition"
-          >
-            Cancelar
+      ) : rows.length === 0 ? (
+        <div className="text-center py-20 bg-white border border-dashed border-gray-300 rounded-2xl">
+          <Package className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+          <p className="text-gray-500 mb-2">Nenhum produto cadastrado ainda.</p>
+          <button onClick={() => setOpen(true)} className="text-brand font-bold hover:underline">
+            Adicionar o primeiro produto
           </button>
-          <button
-            type="button"
-            onClick={onSave}
-            disabled={saving}
-            className="inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-bold text-brand-foreground shadow-md hover:opacity-95 disabled:opacity-60 transition"
-          >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Salvar
-          </button>
-        </DialogFooter>
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
+              <tr>
+                <th className="px-4 py-3 font-semibold">Produto</th>
+                <th className="px-4 py-3 font-semibold">Categoria</th>
+                <th className="px-4 py-3 font-semibold">Preço Base</th>
+                <th className="px-4 py-3 font-semibold text-center w-24">Status</th>
+                <th className="px-4 py-3 text-right w-32">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {rows.map((row) => (
+                <tr key={row.id} className="group hover:bg-muted/30 transition-colors">
+                  <td className="px-4 py-4 font-medium text-foreground flex items-center gap-3">
+                    {row.image_url ? (
+                      <img src={row.image_url} alt="" className="w-10 h-10 rounded-md object-cover" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center">
+                        <Package className="w-4 h-4 text-gray-400" />
+                      </div>
+                    )}
+                    {row.name}
+                  </td>
+                  <td className="px-4 py-4 text-gray-500">{row.categories?.name || "Sem categoria"}</td>
+                  <td className="px-4 py-4 font-bold text-gray-700">{formatBRL(row.base_price)}</td>
+                  <td className="px-4 py-4 text-center">
+                    <button
+                      onClick={() => onToggle(row)}
+                      className={`inline-flex w-16 justify-center rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wide ${
+                        row.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {row.is_active ? "Ativo" : "Inativo"}
+                    </button>
+                  </td>
+                  <td className="px-4 py-4 text-right">
+                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => {
+                          setEditingProd(row);
+                          setOpen(true);
+                        }}
+                        className="grid h-8 w-8 place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => onDelete(row)}
+                        className="grid h-8 w-8 place-items-center rounded-md text-red-400 hover:bg-red-50 hover:text-red-600 transition"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-        <style>{`
-          .ipt {
-            width: 100%;
-            border-radius: 0.5rem;
-            border: 1px solid var(--border);
-            background: var(--background);
-            color: var(--foreground);
-            padding: 0.5rem 0.75rem;
-            font-size: 0.875rem;
-            outline: none;
-          }
-          .ipt:focus {
-            border-color: var(--brand);
-            box-shadow: 0 0 0 2px color-mix(in oklab, var(--brand) 35%, transparent);
-          }
-        `}</style>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <span className="mb-1 block text-xs font-semibold text-foreground/80">{label}</span>
-      {children}
-    </label>
+      {open && (
+        <ProdutoWizard
+          onClose={() => {
+            setOpen(false);
+            setEditingProd(null);
+          }}
+          onSuccess={() => {
+            setOpen(false);
+            setEditingProd(null);
+            load();
+          }}
+          categories={cats}
+          initialData={editingProd}
+        />
+      )}
+    </div>
   );
 }

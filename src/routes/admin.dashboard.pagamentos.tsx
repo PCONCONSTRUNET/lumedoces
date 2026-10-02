@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import logoImage from "@/assets/logo_lume.png";
+import { useConfirm } from "@/providers/ConfirmProvider";
 
 export const Route = createFileRoute("/admin/dashboard/pagamentos")({
   component: PagamentosPage,
@@ -135,6 +136,7 @@ function isWithinPeriod(value: string, period: PeriodFilter) {
 }
 
 function PagamentosPage() {
+  const { confirm } = useConfirm();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [transactions, setTransactions] = useState<FinanceTransaction[]>([]);
@@ -276,8 +278,8 @@ function PagamentosPage() {
     );
   };
 
-  const deletePayment = (id: string) => {
-    if (confirm("Tem certeza que deseja excluir este pagamento?")) {
+  const deletePayment = async (id: string) => {
+    if (await confirm("Tem certeza que deseja excluir este pagamento?")) {
       setTransactions((prev) => prev.filter((tx) => tx.id !== id));
     }
   };

@@ -9,72 +9,39 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TermosRouteImport } from './routes/termos'
-import { Route as RastreioRouteImport } from './routes/rastreio'
-import { Route as PrivacidadeRouteImport } from './routes/privacidade'
-import { Route as PerfilRouteImport } from './routes/perfil'
-import { Route as HistoricoRouteImport } from './routes/historico'
-import { Route as FuncionamentoRouteImport } from './routes/funcionamento'
-import { Route as EnderecosRouteImport } from './routes/enderecos'
-import { Route as ContatoRouteImport } from './routes/contato'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as ContatoRouteImport } from './routes/contato'
+import { Route as EnderecosRouteImport } from './routes/enderecos'
+import { Route as FuncionamentoRouteImport } from './routes/funcionamento'
+import { Route as HistoricoRouteImport } from './routes/historico'
+import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as RastreioRouteImport } from './routes/rastreio'
+import { Route as TermosRouteImport } from './routes/termos'
+import { Route as TransacoesRouteImport } from './routes/transacoes'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
-import { Route as AdminDashboardWhatsappRouteImport } from './routes/admin.dashboard.whatsapp'
-import { Route as AdminDashboardVisaoRouteImport } from './routes/admin.dashboard.visao'
-import { Route as AdminDashboardProdutosRouteImport } from './routes/admin.dashboard.produtos'
-import { Route as AdminDashboardPedidosRouteImport } from './routes/admin.dashboard.pedidos'
-import { Route as AdminDashboardPagamentosRouteImport } from './routes/admin.dashboard.pagamentos'
-import { Route as AdminDashboardHorariosRouteImport } from './routes/admin.dashboard.horarios'
-import { Route as AdminDashboardGatewaysRouteImport } from './routes/admin.dashboard.gateways'
-import { Route as AdminDashboardFinanceiroRouteImport } from './routes/admin.dashboard.financeiro'
-import { Route as AdminDashboardCuponsRouteImport } from './routes/admin.dashboard.cupons'
-import { Route as AdminDashboardConfiguracoesRouteImport } from './routes/admin.dashboard.configuracoes'
-import { Route as AdminDashboardClientesRouteImport } from './routes/admin.dashboard.clientes'
-import { Route as AdminDashboardCategoriasRouteImport } from './routes/admin.dashboard.categorias'
-import { Route as AdminDashboardCardapioRouteImport } from './routes/admin.dashboard.cardapio'
 import { Route as AdminDashboardAuditoriaRouteImport } from './routes/admin.dashboard.auditoria'
+import { Route as AdminDashboardCardapioRouteImport } from './routes/admin.dashboard.cardapio'
+import { Route as AdminDashboardCategoriasRouteImport } from './routes/admin.dashboard.categorias'
+import { Route as AdminDashboardClientesRouteImport } from './routes/admin.dashboard.clientes'
+import { Route as AdminDashboardConfiguracoesRouteImport } from './routes/admin.dashboard.configuracoes'
+import { Route as AdminDashboardCuponsRouteImport } from './routes/admin.dashboard.cupons'
+import { Route as AdminDashboardEntregasRouteImport } from './routes/admin.dashboard.entregas'
+import { Route as AdminDashboardFinanceiroRouteImport } from './routes/admin.dashboard.financeiro'
+import { Route as AdminDashboardGatewaysRouteImport } from './routes/admin.dashboard.gateways'
+import { Route as AdminDashboardHorariosRouteImport } from './routes/admin.dashboard.horarios'
+import { Route as AdminDashboardPagamentosRouteImport } from './routes/admin.dashboard.pagamentos'
+import { Route as AdminDashboardPedidosRouteImport } from './routes/admin.dashboard.pedidos'
+import { Route as AdminDashboardProdutosRouteImport } from './routes/admin.dashboard.produtos'
+import { Route as AdminDashboardVisaoRouteImport } from './routes/admin.dashboard.visao'
+import { Route as AdminDashboardWhatsappRouteImport } from './routes/admin.dashboard.whatsapp'
 import { Route as AdminDashboardFinanceiroDreRouteImport } from './routes/admin.dashboard.financeiro.dre'
 
-const TermosRoute = TermosRouteImport.update({
-  id: '/termos',
-  path: '/termos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RastreioRoute = RastreioRouteImport.update({
-  id: '/rastreio',
-  path: '/rastreio',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacidadeRoute = PrivacidadeRouteImport.update({
-  id: '/privacidade',
-  path: '/privacidade',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PerfilRoute = PerfilRouteImport.update({
-  id: '/perfil',
-  path: '/perfil',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HistoricoRoute = HistoricoRouteImport.update({
-  id: '/historico',
-  path: '/historico',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FuncionamentoRoute = FuncionamentoRouteImport.update({
-  id: '/funcionamento',
-  path: '/funcionamento',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EnderecosRoute = EnderecosRouteImport.update({
-  id: '/enderecos',
-  path: '/enderecos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContatoRoute = ContatoRouteImport.update({
-  id: '/contato',
-  path: '/contato',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -82,9 +49,49 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const ContatoRoute = ContatoRouteImport.update({
+  id: '/contato',
+  path: '/contato',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnderecosRoute = EnderecosRouteImport.update({
+  id: '/enderecos',
+  path: '/enderecos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FuncionamentoRoute = FuncionamentoRouteImport.update({
+  id: '/funcionamento',
+  path: '/funcionamento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoricoRoute = HistoricoRouteImport.update({
+  id: '/historico',
+  path: '/historico',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerfilRoute = PerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RastreioRoute = RastreioRouteImport.update({
+  id: '/rastreio',
+  path: '/rastreio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TransacoesRoute = TransacoesRouteImport.update({
+  id: '/transacoes',
+  path: '/transacoes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -97,62 +104,14 @@ const AdminDashboardRoute = AdminDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminDashboardWhatsappRoute = AdminDashboardWhatsappRouteImport.update({
-  id: '/whatsapp',
-  path: '/whatsapp',
+const AdminDashboardAuditoriaRoute = AdminDashboardAuditoriaRouteImport.update({
+  id: '/auditoria',
+  path: '/auditoria',
   getParentRoute: () => AdminDashboardRoute,
 } as any)
-const AdminDashboardVisaoRoute = AdminDashboardVisaoRouteImport.update({
-  id: '/visao',
-  path: '/visao',
-  getParentRoute: () => AdminDashboardRoute,
-} as any)
-const AdminDashboardProdutosRoute = AdminDashboardProdutosRouteImport.update({
-  id: '/produtos',
-  path: '/produtos',
-  getParentRoute: () => AdminDashboardRoute,
-} as any)
-const AdminDashboardPedidosRoute = AdminDashboardPedidosRouteImport.update({
-  id: '/pedidos',
-  path: '/pedidos',
-  getParentRoute: () => AdminDashboardRoute,
-} as any)
-const AdminDashboardPagamentosRoute =
-  AdminDashboardPagamentosRouteImport.update({
-    id: '/pagamentos',
-    path: '/pagamentos',
-    getParentRoute: () => AdminDashboardRoute,
-  } as any)
-const AdminDashboardHorariosRoute = AdminDashboardHorariosRouteImport.update({
-  id: '/horarios',
-  path: '/horarios',
-  getParentRoute: () => AdminDashboardRoute,
-} as any)
-const AdminDashboardGatewaysRoute = AdminDashboardGatewaysRouteImport.update({
-  id: '/gateways',
-  path: '/gateways',
-  getParentRoute: () => AdminDashboardRoute,
-} as any)
-const AdminDashboardFinanceiroRoute =
-  AdminDashboardFinanceiroRouteImport.update({
-    id: '/financeiro',
-    path: '/financeiro',
-    getParentRoute: () => AdminDashboardRoute,
-  } as any)
-const AdminDashboardCuponsRoute = AdminDashboardCuponsRouteImport.update({
-  id: '/cupons',
-  path: '/cupons',
-  getParentRoute: () => AdminDashboardRoute,
-} as any)
-const AdminDashboardConfiguracoesRoute =
-  AdminDashboardConfiguracoesRouteImport.update({
-    id: '/configuracoes',
-    path: '/configuracoes',
-    getParentRoute: () => AdminDashboardRoute,
-  } as any)
-const AdminDashboardClientesRoute = AdminDashboardClientesRouteImport.update({
-  id: '/clientes',
-  path: '/clientes',
+const AdminDashboardCardapioRoute = AdminDashboardCardapioRouteImport.update({
+  id: '/cardapio',
+  path: '/cardapio',
   getParentRoute: () => AdminDashboardRoute,
 } as any)
 const AdminDashboardCategoriasRoute =
@@ -161,14 +120,67 @@ const AdminDashboardCategoriasRoute =
     path: '/categorias',
     getParentRoute: () => AdminDashboardRoute,
   } as any)
-const AdminDashboardCardapioRoute = AdminDashboardCardapioRouteImport.update({
-  id: '/cardapio',
-  path: '/cardapio',
+const AdminDashboardClientesRoute = AdminDashboardClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
   getParentRoute: () => AdminDashboardRoute,
 } as any)
-const AdminDashboardAuditoriaRoute = AdminDashboardAuditoriaRouteImport.update({
-  id: '/auditoria',
-  path: '/auditoria',
+const AdminDashboardConfiguracoesRoute =
+  AdminDashboardConfiguracoesRouteImport.update({
+    id: '/configuracoes',
+    path: '/configuracoes',
+    getParentRoute: () => AdminDashboardRoute,
+  } as any)
+const AdminDashboardCuponsRoute = AdminDashboardCuponsRouteImport.update({
+  id: '/cupons',
+  path: '/cupons',
+  getParentRoute: () => AdminDashboardRoute,
+} as any)
+const AdminDashboardEntregasRoute = AdminDashboardEntregasRouteImport.update({
+  id: '/entregas',
+  path: '/entregas',
+  getParentRoute: () => AdminDashboardRoute,
+} as any)
+const AdminDashboardFinanceiroRoute =
+  AdminDashboardFinanceiroRouteImport.update({
+    id: '/financeiro',
+    path: '/financeiro',
+    getParentRoute: () => AdminDashboardRoute,
+  } as any)
+const AdminDashboardGatewaysRoute = AdminDashboardGatewaysRouteImport.update({
+  id: '/gateways',
+  path: '/gateways',
+  getParentRoute: () => AdminDashboardRoute,
+} as any)
+const AdminDashboardHorariosRoute = AdminDashboardHorariosRouteImport.update({
+  id: '/horarios',
+  path: '/horarios',
+  getParentRoute: () => AdminDashboardRoute,
+} as any)
+const AdminDashboardPagamentosRoute =
+  AdminDashboardPagamentosRouteImport.update({
+    id: '/pagamentos',
+    path: '/pagamentos',
+    getParentRoute: () => AdminDashboardRoute,
+  } as any)
+const AdminDashboardPedidosRoute = AdminDashboardPedidosRouteImport.update({
+  id: '/pedidos',
+  path: '/pedidos',
+  getParentRoute: () => AdminDashboardRoute,
+} as any)
+const AdminDashboardProdutosRoute = AdminDashboardProdutosRouteImport.update({
+  id: '/produtos',
+  path: '/produtos',
+  getParentRoute: () => AdminDashboardRoute,
+} as any)
+const AdminDashboardVisaoRoute = AdminDashboardVisaoRouteImport.update({
+  id: '/visao',
+  path: '/visao',
+  getParentRoute: () => AdminDashboardRoute,
+} as any)
+const AdminDashboardWhatsappRoute = AdminDashboardWhatsappRouteImport.update({
+  id: '/whatsapp',
+  path: '/whatsapp',
   getParentRoute: () => AdminDashboardRoute,
 } as any)
 const AdminDashboardFinanceiroDreRoute =
@@ -189,6 +201,7 @@ export interface FileRoutesByFullPath {
   '/privacidade': typeof PrivacidadeRoute
   '/rastreio': typeof RastreioRoute
   '/termos': typeof TermosRoute
+  '/transacoes': typeof TransacoesRoute
   '/admin/dashboard': typeof AdminDashboardRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/admin/dashboard/auditoria': typeof AdminDashboardAuditoriaRoute
@@ -197,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard/clientes': typeof AdminDashboardClientesRoute
   '/admin/dashboard/configuracoes': typeof AdminDashboardConfiguracoesRoute
   '/admin/dashboard/cupons': typeof AdminDashboardCuponsRoute
+  '/admin/dashboard/entregas': typeof AdminDashboardEntregasRoute
   '/admin/dashboard/financeiro': typeof AdminDashboardFinanceiroRouteWithChildren
   '/admin/dashboard/gateways': typeof AdminDashboardGatewaysRoute
   '/admin/dashboard/horarios': typeof AdminDashboardHorariosRoute
@@ -217,6 +231,7 @@ export interface FileRoutesByTo {
   '/privacidade': typeof PrivacidadeRoute
   '/rastreio': typeof RastreioRoute
   '/termos': typeof TermosRoute
+  '/transacoes': typeof TransacoesRoute
   '/admin/dashboard': typeof AdminDashboardRouteWithChildren
   '/admin': typeof AdminIndexRoute
   '/admin/dashboard/auditoria': typeof AdminDashboardAuditoriaRoute
@@ -225,6 +240,7 @@ export interface FileRoutesByTo {
   '/admin/dashboard/clientes': typeof AdminDashboardClientesRoute
   '/admin/dashboard/configuracoes': typeof AdminDashboardConfiguracoesRoute
   '/admin/dashboard/cupons': typeof AdminDashboardCuponsRoute
+  '/admin/dashboard/entregas': typeof AdminDashboardEntregasRoute
   '/admin/dashboard/financeiro': typeof AdminDashboardFinanceiroRouteWithChildren
   '/admin/dashboard/gateways': typeof AdminDashboardGatewaysRoute
   '/admin/dashboard/horarios': typeof AdminDashboardHorariosRoute
@@ -247,6 +263,7 @@ export interface FileRoutesById {
   '/privacidade': typeof PrivacidadeRoute
   '/rastreio': typeof RastreioRoute
   '/termos': typeof TermosRoute
+  '/transacoes': typeof TransacoesRoute
   '/admin/dashboard': typeof AdminDashboardRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/admin/dashboard/auditoria': typeof AdminDashboardAuditoriaRoute
@@ -255,6 +272,7 @@ export interface FileRoutesById {
   '/admin/dashboard/clientes': typeof AdminDashboardClientesRoute
   '/admin/dashboard/configuracoes': typeof AdminDashboardConfiguracoesRoute
   '/admin/dashboard/cupons': typeof AdminDashboardCuponsRoute
+  '/admin/dashboard/entregas': typeof AdminDashboardEntregasRoute
   '/admin/dashboard/financeiro': typeof AdminDashboardFinanceiroRouteWithChildren
   '/admin/dashboard/gateways': typeof AdminDashboardGatewaysRoute
   '/admin/dashboard/horarios': typeof AdminDashboardHorariosRoute
@@ -278,6 +296,7 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/rastreio'
     | '/termos'
+    | '/transacoes'
     | '/admin/dashboard'
     | '/admin/'
     | '/admin/dashboard/auditoria'
@@ -286,6 +305,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard/clientes'
     | '/admin/dashboard/configuracoes'
     | '/admin/dashboard/cupons'
+    | '/admin/dashboard/entregas'
     | '/admin/dashboard/financeiro'
     | '/admin/dashboard/gateways'
     | '/admin/dashboard/horarios'
@@ -306,6 +326,7 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/rastreio'
     | '/termos'
+    | '/transacoes'
     | '/admin/dashboard'
     | '/admin'
     | '/admin/dashboard/auditoria'
@@ -314,6 +335,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard/clientes'
     | '/admin/dashboard/configuracoes'
     | '/admin/dashboard/cupons'
+    | '/admin/dashboard/entregas'
     | '/admin/dashboard/financeiro'
     | '/admin/dashboard/gateways'
     | '/admin/dashboard/horarios'
@@ -335,6 +357,7 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/rastreio'
     | '/termos'
+    | '/transacoes'
     | '/admin/dashboard'
     | '/admin/'
     | '/admin/dashboard/auditoria'
@@ -343,6 +366,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard/clientes'
     | '/admin/dashboard/configuracoes'
     | '/admin/dashboard/cupons'
+    | '/admin/dashboard/entregas'
     | '/admin/dashboard/financeiro'
     | '/admin/dashboard/gateways'
     | '/admin/dashboard/horarios'
@@ -365,64 +389,16 @@ export interface RootRouteChildren {
   PrivacidadeRoute: typeof PrivacidadeRoute
   RastreioRoute: typeof RastreioRoute
   TermosRoute: typeof TermosRoute
+  TransacoesRoute: typeof TransacoesRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/termos': {
-      id: '/termos'
-      path: '/termos'
-      fullPath: '/termos'
-      preLoaderRoute: typeof TermosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/rastreio': {
-      id: '/rastreio'
-      path: '/rastreio'
-      fullPath: '/rastreio'
-      preLoaderRoute: typeof RastreioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacidade': {
-      id: '/privacidade'
-      path: '/privacidade'
-      fullPath: '/privacidade'
-      preLoaderRoute: typeof PrivacidadeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/perfil': {
-      id: '/perfil'
-      path: '/perfil'
-      fullPath: '/perfil'
-      preLoaderRoute: typeof PerfilRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/historico': {
-      id: '/historico'
-      path: '/historico'
-      fullPath: '/historico'
-      preLoaderRoute: typeof HistoricoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/funcionamento': {
-      id: '/funcionamento'
-      path: '/funcionamento'
-      fullPath: '/funcionamento'
-      preLoaderRoute: typeof FuncionamentoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/enderecos': {
-      id: '/enderecos'
-      path: '/enderecos'
-      fullPath: '/enderecos'
-      preLoaderRoute: typeof EnderecosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contato': {
-      id: '/contato'
-      path: '/contato'
-      fullPath: '/contato'
-      preLoaderRoute: typeof ContatoRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -432,11 +408,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/contato': {
+      id: '/contato'
+      path: '/contato'
+      fullPath: '/contato'
+      preLoaderRoute: typeof ContatoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/enderecos': {
+      id: '/enderecos'
+      path: '/enderecos'
+      fullPath: '/enderecos'
+      preLoaderRoute: typeof EnderecosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/funcionamento': {
+      id: '/funcionamento'
+      path: '/funcionamento'
+      fullPath: '/funcionamento'
+      preLoaderRoute: typeof FuncionamentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/historico': {
+      id: '/historico'
+      path: '/historico'
+      fullPath: '/historico'
+      preLoaderRoute: typeof HistoricoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perfil': {
+      id: '/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rastreio': {
+      id: '/rastreio'
+      path: '/rastreio'
+      fullPath: '/rastreio'
+      preLoaderRoute: typeof RastreioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/transacoes': {
+      id: '/transacoes'
+      path: '/transacoes'
+      fullPath: '/transacoes'
+      preLoaderRoute: typeof TransacoesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -453,88 +485,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/dashboard/whatsapp': {
-      id: '/admin/dashboard/whatsapp'
-      path: '/whatsapp'
-      fullPath: '/admin/dashboard/whatsapp'
-      preLoaderRoute: typeof AdminDashboardWhatsappRouteImport
-      parentRoute: typeof AdminDashboardRoute
-    }
-    '/admin/dashboard/visao': {
-      id: '/admin/dashboard/visao'
-      path: '/visao'
-      fullPath: '/admin/dashboard/visao'
-      preLoaderRoute: typeof AdminDashboardVisaoRouteImport
-      parentRoute: typeof AdminDashboardRoute
-    }
-    '/admin/dashboard/produtos': {
-      id: '/admin/dashboard/produtos'
-      path: '/produtos'
-      fullPath: '/admin/dashboard/produtos'
-      preLoaderRoute: typeof AdminDashboardProdutosRouteImport
-      parentRoute: typeof AdminDashboardRoute
-    }
-    '/admin/dashboard/pedidos': {
-      id: '/admin/dashboard/pedidos'
-      path: '/pedidos'
-      fullPath: '/admin/dashboard/pedidos'
-      preLoaderRoute: typeof AdminDashboardPedidosRouteImport
-      parentRoute: typeof AdminDashboardRoute
-    }
-    '/admin/dashboard/pagamentos': {
-      id: '/admin/dashboard/pagamentos'
-      path: '/pagamentos'
-      fullPath: '/admin/dashboard/pagamentos'
-      preLoaderRoute: typeof AdminDashboardPagamentosRouteImport
-      parentRoute: typeof AdminDashboardRoute
-    }
-    '/admin/dashboard/horarios': {
-      id: '/admin/dashboard/horarios'
-      path: '/horarios'
-      fullPath: '/admin/dashboard/horarios'
-      preLoaderRoute: typeof AdminDashboardHorariosRouteImport
-      parentRoute: typeof AdminDashboardRoute
-    }
-    '/admin/dashboard/gateways': {
-      id: '/admin/dashboard/gateways'
-      path: '/gateways'
-      fullPath: '/admin/dashboard/gateways'
-      preLoaderRoute: typeof AdminDashboardGatewaysRouteImport
-      parentRoute: typeof AdminDashboardRoute
-    }
-    '/admin/dashboard/financeiro': {
-      id: '/admin/dashboard/financeiro'
-      path: '/financeiro'
-      fullPath: '/admin/dashboard/financeiro'
-      preLoaderRoute: typeof AdminDashboardFinanceiroRouteImport
-      parentRoute: typeof AdminDashboardRoute
-    }
-    '/admin/dashboard/cupons': {
-      id: '/admin/dashboard/cupons'
-      path: '/cupons'
-      fullPath: '/admin/dashboard/cupons'
-      preLoaderRoute: typeof AdminDashboardCuponsRouteImport
-      parentRoute: typeof AdminDashboardRoute
-    }
-    '/admin/dashboard/configuracoes': {
-      id: '/admin/dashboard/configuracoes'
-      path: '/configuracoes'
-      fullPath: '/admin/dashboard/configuracoes'
-      preLoaderRoute: typeof AdminDashboardConfiguracoesRouteImport
-      parentRoute: typeof AdminDashboardRoute
-    }
-    '/admin/dashboard/clientes': {
-      id: '/admin/dashboard/clientes'
-      path: '/clientes'
-      fullPath: '/admin/dashboard/clientes'
-      preLoaderRoute: typeof AdminDashboardClientesRouteImport
-      parentRoute: typeof AdminDashboardRoute
-    }
-    '/admin/dashboard/categorias': {
-      id: '/admin/dashboard/categorias'
-      path: '/categorias'
-      fullPath: '/admin/dashboard/categorias'
-      preLoaderRoute: typeof AdminDashboardCategoriasRouteImport
+    '/admin/dashboard/auditoria': {
+      id: '/admin/dashboard/auditoria'
+      path: '/auditoria'
+      fullPath: '/admin/dashboard/auditoria'
+      preLoaderRoute: typeof AdminDashboardAuditoriaRouteImport
       parentRoute: typeof AdminDashboardRoute
     }
     '/admin/dashboard/cardapio': {
@@ -544,11 +499,95 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardCardapioRouteImport
       parentRoute: typeof AdminDashboardRoute
     }
-    '/admin/dashboard/auditoria': {
-      id: '/admin/dashboard/auditoria'
-      path: '/auditoria'
-      fullPath: '/admin/dashboard/auditoria'
-      preLoaderRoute: typeof AdminDashboardAuditoriaRouteImport
+    '/admin/dashboard/categorias': {
+      id: '/admin/dashboard/categorias'
+      path: '/categorias'
+      fullPath: '/admin/dashboard/categorias'
+      preLoaderRoute: typeof AdminDashboardCategoriasRouteImport
+      parentRoute: typeof AdminDashboardRoute
+    }
+    '/admin/dashboard/clientes': {
+      id: '/admin/dashboard/clientes'
+      path: '/clientes'
+      fullPath: '/admin/dashboard/clientes'
+      preLoaderRoute: typeof AdminDashboardClientesRouteImport
+      parentRoute: typeof AdminDashboardRoute
+    }
+    '/admin/dashboard/configuracoes': {
+      id: '/admin/dashboard/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/admin/dashboard/configuracoes'
+      preLoaderRoute: typeof AdminDashboardConfiguracoesRouteImport
+      parentRoute: typeof AdminDashboardRoute
+    }
+    '/admin/dashboard/cupons': {
+      id: '/admin/dashboard/cupons'
+      path: '/cupons'
+      fullPath: '/admin/dashboard/cupons'
+      preLoaderRoute: typeof AdminDashboardCuponsRouteImport
+      parentRoute: typeof AdminDashboardRoute
+    }
+    '/admin/dashboard/entregas': {
+      id: '/admin/dashboard/entregas'
+      path: '/entregas'
+      fullPath: '/admin/dashboard/entregas'
+      preLoaderRoute: typeof AdminDashboardEntregasRouteImport
+      parentRoute: typeof AdminDashboardRoute
+    }
+    '/admin/dashboard/financeiro': {
+      id: '/admin/dashboard/financeiro'
+      path: '/financeiro'
+      fullPath: '/admin/dashboard/financeiro'
+      preLoaderRoute: typeof AdminDashboardFinanceiroRouteImport
+      parentRoute: typeof AdminDashboardRoute
+    }
+    '/admin/dashboard/gateways': {
+      id: '/admin/dashboard/gateways'
+      path: '/gateways'
+      fullPath: '/admin/dashboard/gateways'
+      preLoaderRoute: typeof AdminDashboardGatewaysRouteImport
+      parentRoute: typeof AdminDashboardRoute
+    }
+    '/admin/dashboard/horarios': {
+      id: '/admin/dashboard/horarios'
+      path: '/horarios'
+      fullPath: '/admin/dashboard/horarios'
+      preLoaderRoute: typeof AdminDashboardHorariosRouteImport
+      parentRoute: typeof AdminDashboardRoute
+    }
+    '/admin/dashboard/pagamentos': {
+      id: '/admin/dashboard/pagamentos'
+      path: '/pagamentos'
+      fullPath: '/admin/dashboard/pagamentos'
+      preLoaderRoute: typeof AdminDashboardPagamentosRouteImport
+      parentRoute: typeof AdminDashboardRoute
+    }
+    '/admin/dashboard/pedidos': {
+      id: '/admin/dashboard/pedidos'
+      path: '/pedidos'
+      fullPath: '/admin/dashboard/pedidos'
+      preLoaderRoute: typeof AdminDashboardPedidosRouteImport
+      parentRoute: typeof AdminDashboardRoute
+    }
+    '/admin/dashboard/produtos': {
+      id: '/admin/dashboard/produtos'
+      path: '/produtos'
+      fullPath: '/admin/dashboard/produtos'
+      preLoaderRoute: typeof AdminDashboardProdutosRouteImport
+      parentRoute: typeof AdminDashboardRoute
+    }
+    '/admin/dashboard/visao': {
+      id: '/admin/dashboard/visao'
+      path: '/visao'
+      fullPath: '/admin/dashboard/visao'
+      preLoaderRoute: typeof AdminDashboardVisaoRouteImport
+      parentRoute: typeof AdminDashboardRoute
+    }
+    '/admin/dashboard/whatsapp': {
+      id: '/admin/dashboard/whatsapp'
+      path: '/whatsapp'
+      fullPath: '/admin/dashboard/whatsapp'
+      preLoaderRoute: typeof AdminDashboardWhatsappRouteImport
       parentRoute: typeof AdminDashboardRoute
     }
     '/admin/dashboard/financeiro/dre': {
@@ -582,6 +621,7 @@ interface AdminDashboardRouteChildren {
   AdminDashboardClientesRoute: typeof AdminDashboardClientesRoute
   AdminDashboardConfiguracoesRoute: typeof AdminDashboardConfiguracoesRoute
   AdminDashboardCuponsRoute: typeof AdminDashboardCuponsRoute
+  AdminDashboardEntregasRoute: typeof AdminDashboardEntregasRoute
   AdminDashboardFinanceiroRoute: typeof AdminDashboardFinanceiroRouteWithChildren
   AdminDashboardGatewaysRoute: typeof AdminDashboardGatewaysRoute
   AdminDashboardHorariosRoute: typeof AdminDashboardHorariosRoute
@@ -599,6 +639,7 @@ const AdminDashboardRouteChildren: AdminDashboardRouteChildren = {
   AdminDashboardClientesRoute: AdminDashboardClientesRoute,
   AdminDashboardConfiguracoesRoute: AdminDashboardConfiguracoesRoute,
   AdminDashboardCuponsRoute: AdminDashboardCuponsRoute,
+  AdminDashboardEntregasRoute: AdminDashboardEntregasRoute,
   AdminDashboardFinanceiroRoute: AdminDashboardFinanceiroRouteWithChildren,
   AdminDashboardGatewaysRoute: AdminDashboardGatewaysRoute,
   AdminDashboardHorariosRoute: AdminDashboardHorariosRoute,
@@ -636,6 +677,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacidadeRoute: PrivacidadeRoute,
   RastreioRoute: RastreioRoute,
   TermosRoute: TermosRoute,
+  TransacoesRoute: TransacoesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

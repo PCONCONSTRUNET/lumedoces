@@ -10,12 +10,14 @@ import { ComboWizard } from "@/components/cardapio/ComboWizard";
 import { Loader2, Plus, X, ImagePlus, Check, ChevronRight, Settings, BarChart2, Tag, Pause, MoreVertical, Edit2, Copy, Trash2, GripVertical } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { useConfirm } from "@/providers/ConfirmProvider";
 
 export const Route = createFileRoute("/admin/dashboard/cardapio")({
   component: CardapioPage,
 });
 
 function CardapioPage() {
+  const { confirm } = useConfirm();
   const [activeTab, setActiveTab] = useState("Cardápio");
   const [wizardOpen, setWizardOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
@@ -380,8 +382,8 @@ function ProductListItem({ p, onEdit }: any) {
     onSuccess: () => toast.success("Produto removido com sucesso!")
   });
 
-  const onRemove = () => {
-    if(confirm(`Tem certeza que deseja remover ${p.name}?`)) {
+  const onRemove = async () => {
+    if(await confirm(`Tem certeza que deseja remover ${p.name}?`)) {
       removeProduct.mutate();
     }
   };
