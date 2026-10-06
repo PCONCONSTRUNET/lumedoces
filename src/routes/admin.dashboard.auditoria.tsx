@@ -11,6 +11,8 @@ import {
   Pencil,
   Trash2,
   Download,
+  ImageDown,
+  FileText,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -39,17 +41,73 @@ interface AuditLog {
 const TABLE_LABELS: Record<string, string> = {
   products: "Produtos",
   categories: "Categorias",
-  product_variations: "Variações",
+  product_variations: "Variações de produto",
   product_variation_options: "Opções de variação",
   orders: "Pedidos",
-  order_items: "Itens de pedido",
+  order_items: "Itens do pedido",
   payment_methods: "Formas de pagamento",
   finance_categories: "Categorias financeiras",
   finance_transactions: "Lançamentos financeiros",
-  business_hours: "Horários",
+  business_hours: "Horários de funcionamento",
   user_roles: "Papéis de usuário",
   audit_logs: "Auditoria",
+  points_transactions: "Extrato de Pontos",
+  reward_store_items: "Loja de Prêmios (itens)",
+  reward_redemptions: "Resgates de Prêmios",
+  customer_profiles: "Perfis de Clientes",
+  addresses: "Endereços",
+  coupons: "Cupons",
 };
+
+// Translates DB column names to human-readable Portuguese labels
+const FIELD_LABELS: Record<string, string> = {
+  // Common
+  id: "ID",
+  created_at: "Criado em",
+  updated_at: "Atualizado em",
+  user_id: "Usuário (ID)",
+  status: "Status",
+  // Orders
+  total_amount: "Valor total",
+  points_earned: "Pontos ganhos",
+  points_used: "Pontos usados",
+  delivery_address: "Endereço de entrega",
+  payment_method: "Forma de pagamento",
+  notes: "Observações",
+  // Points
+  amount: "Valor (pontos)",
+  type: "Tipo",
+  description: "Descrição",
+  reference_id: "Referência",
+  // Rewards
+  reward_item_id: "Item do prêmio",
+  points_spent: "Pontos gastos",
+  // Store items
+  name: "Nome",
+  image_url: "Imagem",
+  points_cost: "Custo em pontos",
+  stock: "Estoque",
+  is_active: "Ativo",
+  // Finance
+  value: "Valor",
+  category_id: "Categoria",
+  date: "Data",
+  paid: "Pago",
+  // Products
+  price: "Preço",
+  original_price: "Preço original",
+  available: "Disponível",
+  // Business hours
+  day_of_week: "Dia da semana",
+  open_time: "Abertura",
+  close_time: "Fechamento",
+  is_open: "Aberto",
+  // User roles
+  role: "Perfil",
+  email: "E-mail",
+};
+
+const fieldLabel = (f: string) => FIELD_LABELS[f] ?? f;
 
 const PAGE_SIZE = 50;
 
@@ -64,6 +122,7 @@ function AuditoriaPage() {
   const [page, setPage] = useState(0);
   const [total, setTotal] = useState(0);
   const [selected, setSelected] = useState<AuditLog | null>(null);
+  const [itemNames, setItemNames] = useState<Record<string, string>>({});
 
   const tables = useMemo(() => Object.keys(TABLE_LABELS).sort(), []);
 
@@ -86,8 +145,28 @@ function AuditoriaPage() {
 
     const { data, count, error } = await q;
     if (!error && data) {
-      setLogs(data as AuditLog[]);
+      const logs = data as AuditLog[];
+      setLogs(logs);
       setTotal(count ?? 0);
+
+      // Batch-fetch reward item names for any redemption logs
+      const itemIds = [...new Set(
+        logs
+          .filter((l) => l.table_name === "reward_redemptions" && l.new_data?.reward_item_id)
+          .map((l) => String(l.new_data!.reward_item_id))
+      )];
+      if (itemIds.length > 0) {
+        const db = supabase as any;
+        const { data: items } = await db
+          .from("reward_store_items")
+          .select("id, name")
+          .in("id", itemIds);
+        if (items) {
+          const map: Record<string, string> = {};
+          items.forEach((item: any) => { map[item.id] = item.name; });
+          setItemNames(map);
+        }
+      }
     }
     setLoading(false);
   };
@@ -322,7 +401,12 @@ function AuditoriaPage() {
                         <ActionBadge action={l.action} />
                       </td>
                       <td className="px-4 py-2 font-medium">
-                        {TABLE_LABELS[l.table_name] ?? l.table_name}
+                        <div className="flex flex-col">
+                          <span>{TABLE_LABELS[l.table_name] ?? l.table_name}</span>
+                          {getBusinessContext(l, itemNames) && (
+                            <span className="text-[10px] mt-0.5">{getBusinessContext(l, itemNames)}</span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-2 text-xs font-mono text-muted-foreground">
                         {l.record_id ? l.record_id.slice(0, 8) : "—"}
@@ -346,14 +430,15 @@ function AuditoriaPage() {
                             {l.changed_fields.slice(0, 4).map((f) => (
                               <span
                                 key={f}
-                                className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-mono"
+                                className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold"
+                                title={f}
                               >
-                                {f}
+                                {fieldLabel(f)}
                               </span>
                             ))}
                             {l.changed_fields.length > 4 && (
                               <span className="text-[10px] text-muted-foreground">
-                                +{l.changed_fields.length - 4}
+                                +{l.changed_fields.length - 4} campos
                               </span>
                             )}
                           </div>
@@ -401,9 +486,46 @@ function AuditoriaPage() {
         )}
       </div>
 
-      {selected && <DetailModal log={selected} onClose={() => setSelected(null)} />}
+      {selected && <DetailModal log={selected} itemNames={itemNames} onClose={() => setSelected(null)} />}
     </div>
   );
+}
+
+function getBusinessContext(log: AuditLog, itemNames: Record<string, string> = {}) {
+  try {
+    if (log.table_name === "points_transactions" && log.action === "INSERT" && log.new_data) {
+      const amount = Number(log.new_data.amount);
+      const desc = log.new_data.description || "Sem descrição";
+      if (amount > 0) return <span className="text-emerald-600 font-medium">Lançou +{amount} pts ({desc})</span>;
+      if (amount < 0) return <span className="text-rose-600 font-medium">Removeu {amount} pts ({desc})</span>;
+      return <span className="text-muted-foreground font-medium">{desc}</span>;
+    }
+    
+    if (log.table_name === "reward_redemptions" && log.action === "INSERT" && log.new_data) {
+      const itemId = String(log.new_data.reward_item_id ?? "");
+      const itemName = itemNames[itemId] ?? null;
+      return (
+        <span className="text-brand font-medium">
+          Resgate: {itemName ? <strong>{itemName}</strong> : "Prêmio"} ({log.new_data.points_spent} pts)
+        </span>
+      );
+    }
+
+    if (log.table_name === "reward_store_items" && log.action === "UPDATE" && log.changed_fields?.includes("stock")) {
+      const oldStock = log.old_data?.stock ?? "?";
+      const newStock = log.new_data?.stock ?? "?";
+      const itemName = log.new_data?.name ? String(log.new_data.name) : null;
+      return (
+        <span className="text-amber-600 font-medium">
+          Baixa de estoque{itemName ? ` (${itemName})` : ""}: {oldStock} → {newStock}
+        </span>
+      );
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 function ActionBadge({ action }: { action: AuditAction }) {
@@ -437,7 +559,189 @@ function ActionBadge({ action }: { action: AuditAction }) {
   );
 }
 
-function DetailModal({ log, onClose }: { log: AuditLog; onClose: () => void }) {
+
+// ── Audit Receipt Generator (Canvas) ──────────────────────────────────────
+function getBusinessContextStr(log: AuditLog, itemNames: Record<string, string> = {}): string | null {
+  try {
+    if (log.table_name === "points_transactions" && log.action === "INSERT" && log.new_data) {
+      const amount = Number(log.new_data.amount);
+      const desc = log.new_data.description || "Sem descrição";
+      if (amount > 0) return `Lançou +${amount} pts (${desc})`;
+      if (amount < 0) return `Removeu ${amount} pts (${desc})`;
+      return String(desc);
+    }
+    if (log.table_name === "reward_redemptions" && log.action === "INSERT" && log.new_data) {
+      const itemId = String(log.new_data.reward_item_id ?? "");
+      const itemName = itemNames[itemId] ?? "Prêmio";
+      return `Resgate: ${itemName} (${log.new_data.points_spent} pts)`;
+    }
+    if (log.table_name === "reward_store_items" && log.action === "UPDATE" && log.changed_fields?.includes("stock")) {
+      const oldStock = log.old_data?.stock ?? "?";
+      const newStock = log.new_data?.stock ?? "?";
+      const itemName = log.new_data?.name ? String(log.new_data.name) : null;
+      return `Baixa de estoque${itemName ? ` (${itemName})` : ""}: ${oldStock} → ${newStock}`;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+async function generateAuditCanvas(log: AuditLog): Promise<HTMLCanvasElement> {
+  const W = 560;
+  const actionLabel = log.action === "INSERT" ? "Criação" : log.action === "UPDATE" ? "Edição" : "Exclusão";
+  const actionColor = log.action === "INSERT" ? "#059669" : log.action === "UPDATE" ? "#d97706" : "#dc2626";
+  const tableLabel = TABLE_LABELS[log.table_name] ?? log.table_name;
+  const changedFields = log.changed_fields ?? [];
+  const ROWS = changedFields.length > 0 ? changedFields.length : 0;
+  const businessCtx = getBusinessContextStr(log, {});
+  
+  const ctxHeight = businessCtx ? 40 : 0;
+  const H = 180 + ctxHeight + (ROWS > 0 ? 30 + ROWS * 28 + 20 : 0) + 80;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = W * 2; canvas.height = H * 2;
+  const ctx = canvas.getContext("2d")!;
+  ctx.scale(2, 2);
+
+  // Header
+  const grad = ctx.createLinearGradient(0, 0, W, 0);
+  grad.addColorStop(0, "#ad172b"); grad.addColorStop(1, "#7b1020");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, 56);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 16px system-ui, sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText("Lume Artesanais — Comprovante de Auditoria", 20, 35);
+
+  // Body bg
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 56, W, H - 56);
+
+  let y = 80;
+  const L = 20; const R = W - 20;
+
+  // Action badge
+  ctx.fillStyle = actionColor;
+  ctx.beginPath(); ctx.roundRect(L, y - 14, 72, 20, 6); ctx.fill();
+  ctx.fillStyle = "#fff";
+  ctx.font = "bold 11px system-ui, sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText(actionLabel, L + 8, y);
+
+  ctx.fillStyle = "#1e293b";
+  ctx.font = "bold 18px system-ui, sans-serif";
+  ctx.fillText(tableLabel, L + 82, y);
+  y += 22;
+
+  ctx.fillStyle = "#64748b";
+  ctx.font = "12px system-ui, sans-serif";
+  ctx.fillText(new Date(log.created_at).toLocaleString("pt-BR") + " · " + (log.user_email ?? "Sistema"), L, y);
+  y += 24;
+
+  // Divider
+  ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(R, y); ctx.stroke();
+  y += 16;
+  
+  if (businessCtx) {
+    ctx.fillStyle = "#f8fafc";
+    ctx.fillRect(L, y, R - L, 30);
+    ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 1;
+    ctx.strokeRect(L, y, R - L, 30);
+    
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "bold 13px system-ui, sans-serif";
+    ctx.fillText("Resumo: " + businessCtx, L + 10, y + 20);
+    y += 46;
+  }
+
+  // Info rows
+  const drawInfoRow = (label: string, value: string) => {
+    ctx.fillStyle = "#64748b"; ctx.font = "bold 11px system-ui, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText(label, L, y);
+    ctx.fillStyle = "#1e293b"; ctx.font = "12px system-ui, sans-serif";
+    ctx.textAlign = "right";
+    ctx.fillText(value, R, y);
+    ctx.textAlign = "left";
+    y += 20;
+  };
+
+  drawInfoRow("ID do registro:", log.record_id ? log.record_id.slice(0, 20) + "..." : "—");
+  drawInfoRow("IP de origem:", log.ip_address ?? "—");
+  drawInfoRow("Dispositivo:", getDeviceLabel(log.user_agent));
+  y += 10;
+
+  // Changed fields table
+  if (changedFields.length > 0) {
+    ctx.fillStyle = "#ad172b"; ctx.font = "bold 13px system-ui, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("Campos Alterados", L, y);
+    y += 8;
+    ctx.strokeStyle = "#f0d8db"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(R, y); ctx.stroke();
+    y += 14;
+
+    // Table header
+    ctx.fillStyle = "#f8fafc";
+    ctx.fillRect(L, y - 12, R - L, 22);
+    ctx.fillStyle = "#64748b"; ctx.font = "bold 10px system-ui, sans-serif";
+    const col1 = L + 8, col2 = L + 170, col3 = L + 360;
+    ctx.fillText("CAMPO", col1, y + 2);
+    ctx.fillText("ANTES", col2, y + 2);
+    ctx.fillText("DEPOIS", col3, y + 2);
+    y += 20;
+
+    changedFields.forEach((f) => {
+      ctx.fillStyle = "#1e293b"; ctx.font = "bold 11px system-ui, sans-serif";
+      ctx.fillText(fieldLabel(f), col1, y);
+      ctx.fillStyle = "#dc2626"; ctx.font = "11px system-ui, sans-serif";
+      const oldVal = fmt(log.old_data?.[f]);
+      ctx.fillText(oldVal.slice(0, 20), col2, y);
+      ctx.fillStyle = "#059669";
+      const newVal = fmt(log.new_data?.[f]);
+      ctx.fillText(newVal.slice(0, 20), col3, y);
+      y += 24;
+      ctx.strokeStyle = "#f1f5f9"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(L, y - 8); ctx.lineTo(R, y - 8); ctx.stroke();
+    });
+    y += 10;
+  }
+
+  // Footer
+  ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(R, y); ctx.stroke();
+  y += 16;
+  ctx.fillStyle = "#94a3b8"; ctx.font = "11px system-ui, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("Documento gerado automaticamente pelo sistema de auditoria da Lume Artesanais.", W / 2, y);
+
+  return canvas;
+}
+
+async function downloadAuditAsPDF(log: AuditLog) {
+  const canvas = await generateAuditCanvas(log);
+  const imgData = canvas.toDataURL("image/png");
+  const { default: jsPDF } = await import("jspdf");
+  const PX_TO_MM = 25.4 / 96;
+  const W_MM = 560 * PX_TO_MM;
+  const H_MM = (canvas.height / 2) * PX_TO_MM;
+  const doc = new jsPDF({ unit: "mm", format: [W_MM, H_MM], orientation: "portrait" });
+  doc.addImage(imgData, "PNG", 0, 0, W_MM, H_MM);
+  doc.save(`auditoria_lume_${log.id.slice(0, 8)}.pdf`);
+}
+
+async function downloadAuditAsImage(log: AuditLog) {
+  const canvas = await generateAuditCanvas(log);
+  const link = document.createElement("a");
+  link.download = `auditoria_lume_${log.id.slice(0, 8)}.png`;
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+}
+// ──────────────────────────────────────────────────────────────────────────
+
+function DetailModal({ log, itemNames = {}, onClose }: { log: AuditLog; itemNames?: Record<string, string>; onClose: () => void }) {
   const isUpdate = log.action === "UPDATE";
 
   return (
@@ -460,16 +764,38 @@ function DetailModal({ log, onClose }: { log: AuditLog; onClose: () => void }) {
               {log.user_email ?? "Sistema"}
             </p>
           </div>
-          <button
-            onClick={onClose}
-            className="rounded-full p-2 hover:bg-muted transition"
-            aria-label="Fechar"
-          >
-            <X className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => downloadAuditAsImage(log)}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-muted hover:bg-muted/70 px-3 py-1.5 text-xs font-bold transition"
+              title="Baixar como Imagem"
+            >
+              <ImageDown className="h-3.5 w-3.5" /> Imagem
+            </button>
+            <button
+              onClick={() => downloadAuditAsPDF(log)}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-brand/10 text-brand hover:bg-brand/20 px-3 py-1.5 text-xs font-bold transition"
+              title="Baixar como PDF"
+            >
+              <FileText className="h-3.5 w-3.5" /> PDF
+            </button>
+            <button
+              onClick={onClose}
+              className="rounded-full p-2 hover:bg-muted transition ml-1"
+              aria-label="Fechar"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </header>
 
         <div className="px-5 py-4 overflow-y-auto space-y-4">
+          {getBusinessContext(log, itemNames) && (
+            <div className="bg-brand/5 border border-brand/20 rounded-xl p-3 flex items-center gap-3">
+              <span className="text-sm">{getBusinessContext(log, itemNames)}</span>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-3 text-xs">
             <Info label="ID do registro" value={log.record_id ?? "—"} mono />
             <Info label="Tabela (técnico)" value={log.table_name} mono />
@@ -498,7 +824,7 @@ function DetailModal({ log, onClose }: { log: AuditLog; onClose: () => void }) {
                   <tbody>
                     {log.changed_fields.map((f) => (
                       <tr key={f} className="border-t border-border/40">
-                        <td className="px-3 py-1.5 font-mono font-semibold">{f}</td>
+                        <td className="px-3 py-1.5 font-semibold" title={f}>{fieldLabel(f)}</td>
                         <td className="px-3 py-1.5 font-mono text-rose-600 dark:text-rose-400 break-all">
                           {fmt(log.old_data?.[f])}
                         </td>

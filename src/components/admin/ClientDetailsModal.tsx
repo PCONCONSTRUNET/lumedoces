@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { X, ShoppingBag, Coins, ArrowUp, ArrowDown, Loader2 } from "lucide-react";
+import { X, ShoppingBag, Coins, ArrowUp, ArrowDown, Loader2, Trash2 } from "lucide-react";
 import { formatBRL } from "@/store/cart";
 
 export function ClientDetailsModal({ client, onClose, isOpen }: { client: any; onClose: () => void; isOpen: boolean }) {
@@ -34,9 +34,10 @@ export function ClientDetailsModal({ client, onClose, isOpen }: { client: any; o
         .single();
         
       const { data: adjustments } = await supabaseUntyped
-        .from("points_adjustments")
+        .from("points_transactions")
         .select("*")
         .eq("user_id", client.user_id)
+        .eq("type", "manual_adjustment")
         .order("created_at", { ascending: false });
 
       return {
@@ -52,10 +53,11 @@ export function ClientDetailsModal({ client, onClose, isOpen }: { client: any; o
       const points = parseInt(pointsInput);
       if (isNaN(points) || points === 0) throw new Error("Valor inválido");
       
-      const { error } = await supabaseUntyped.from("points_adjustments").insert({
+      const { error } = await supabaseUntyped.from("points_transactions").insert({
         user_id: client.user_id,
-        points: points,
-        reason: pointsReason || (points > 0 ? "Ajuste manual (Adição)" : "Ajuste manual (Remoção)")
+        amount: points,
+        type: "manual_adjustment",
+        description: pointsReason || (points > 0 ? "Ajuste manual (Adição)" : "Ajuste manual (Remoção)")
       });
       if (error) throw error;
     },
@@ -77,9 +79,31 @@ export function ClientDetailsModal({ client, onClose, isOpen }: { client: any; o
             <h2 className="text-2xl font-extrabold text-gray-900">{client.name}</h2>
             <p className="text-sm text-gray-500">{client.phone} • CPF: {client.cpf || "Não informado"}</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition">
-            <X className="h-6 w-6 text-gray-400" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={async () => {
+                if (window.confirm('Excluir este cliente? Essa ação removerá o perfil, mas não apagará os pedidos do histórico.')) {
+                  try {
+                    if (client.user_id) {
+                      await supabaseUntyped.from('customer_profiles').delete().eq('id', client.user_id);
+                    }
+                    queryClient.invalidateQueries({ queryKey: ['admin-clientes'] });
+                    onClose();
+                  } catch (e) {
+                    console.error(e);
+                    alert('Erro ao excluir cliente.');
+                  }
+                }
+              }} 
+              className="p-2 hover:bg-red-50 hover:text-red-600 text-gray-400 rounded-full transition"
+              title="Excluir Cliente"
+            >
+              <Trash2 className="h-5 w-5" />
+            </button>
+            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition">
+              <X className="h-6 w-6 text-gray-400" />
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -176,12 +200,12 @@ export function ClientDetailsModal({ client, onClose, isOpen }: { client: any; o
                       pointsData?.adjustments?.map((adj: any) => (
                         <div key={adj.id} className="flex justify-between items-center p-3 border border-gray-100 rounded-lg bg-gray-50 text-sm">
                           <div>
-                            <p className="font-medium text-gray-800">{adj.reason}</p>
+                            <p className="font-medium text-gray-800">{adj.description}</p>
                             <p className="text-xs text-gray-500">{new Date(adj.created_at).toLocaleString('pt-BR')}</p>
                           </div>
-                          <span className={`font-bold ${adj.points > 0 ? "text-green-600" : "text-red-600"} flex items-center gap-1`}>
-                            {adj.points > 0 ? <ArrowUp className="h-3 w-3"/> : <ArrowDown className="h-3 w-3"/>}
-                            {Math.abs(adj.points)}
+                          <span className={`font-bold ${adj.amount > 0 ? "text-green-600" : "text-red-600"} flex items-center gap-1`}>
+                            {adj.amount > 0 ? <ArrowUp className="h-3 w-3"/> : <ArrowDown className="h-3 w-3"/>}
+                            {Math.abs(adj.amount)}
                           </span>
                         </div>
                       ))

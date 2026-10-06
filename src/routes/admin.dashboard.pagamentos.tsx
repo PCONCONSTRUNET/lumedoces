@@ -271,16 +271,35 @@ function PagamentosPage() {
     [periodPayments],
   );
 
-  const updatePaymentStatus = (id: string, newStatus: PaymentStatus) => {
-    // Para modo offline mock
-    setTransactions((prev) =>
-      prev.map((tx) => (tx.id === id ? { ...tx, status: newStatus as any } : tx))
-    );
+  const updatePaymentStatus = async (id: string, newStatus: PaymentStatus) => {
+    if (id.startsWith('order-')) {
+      toast.error('Este pagamento é derivado de um pedido. Altere o status no próprio pedido.');
+      return;
+    }
+    try {
+      const { error } = await supabase.from('finance_transactions').update({ status: newStatus as any }).eq('id', id);
+      if (error) throw error;
+      setTransactions((prev) => prev.map((tx) => (tx.id === id ? { ...tx, status: newStatus as any } : tx)));
+      toast.success('Status atualizado!');
+    } catch (err: any) {
+      toast.error('Erro ao atualizar: ' + err.message);
+    }
   };
 
   const deletePayment = async (id: string) => {
-    if (await confirm("Tem certeza que deseja excluir este pagamento?")) {
-      setTransactions((prev) => prev.filter((tx) => tx.id !== id));
+    if (id.startsWith('order-')) {
+      toast.error('Este pagamento é derivado de um pedido. Cancele o pedido na aba Pedidos.');
+      return;
+    }
+    if (await confirm('Tem certeza que deseja excluir este pagamento?')) {
+      try {
+        const { error } = await supabase.from('finance_transactions').delete().eq('id', id);
+        if (error) throw error;
+        setTransactions((prev) => prev.filter((tx) => tx.id !== id));
+        toast.success('Pagamento excluído com sucesso!');
+      } catch (err: any) {
+        toast.error('Erro ao excluir: ' + err.message);
+      }
     }
   };
 

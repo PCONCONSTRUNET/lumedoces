@@ -21,6 +21,7 @@ import {
   MessageCircle,
   Settings,
   Truck,
+  Gift,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -42,6 +43,8 @@ const navItems = [
   { to: "/admin/dashboard/whatsapp", label: "WhatsApp", icon: MessageCircle },
   { to: "/admin/dashboard/categorias", label: "Categorias", icon: Tags },
   { to: "/admin/dashboard/produtos", label: "Produtos", icon: Package },
+  { to: "/admin/dashboard/loja-premios", label: "Loja de Prêmios", icon: Gift },
+  { to: "/admin/dashboard/resgates", label: "Resgates", icon: Gift },
   { to: "/admin/dashboard/entregas", label: "Entregas", icon: Truck },
   { to: "/admin/dashboard/horarios", label: "Horários", icon: Clock },
   { to: "/admin/dashboard/configuracoes", label: "Configurações", icon: Settings },

@@ -15,9 +15,11 @@ import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as EnderecosRouteImport } from './routes/enderecos'
 import { Route as FuncionamentoRouteImport } from './routes/funcionamento'
 import { Route as HistoricoRouteImport } from './routes/historico'
+import { Route as LojaRouteImport } from './routes/loja'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as RastreioRouteImport } from './routes/rastreio'
+import { Route as ResgatesRouteImport } from './routes/resgates'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as TransacoesRouteImport } from './routes/transacoes'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
@@ -32,9 +34,11 @@ import { Route as AdminDashboardEntregasRouteImport } from './routes/admin.dashb
 import { Route as AdminDashboardFinanceiroRouteImport } from './routes/admin.dashboard.financeiro'
 import { Route as AdminDashboardGatewaysRouteImport } from './routes/admin.dashboard.gateways'
 import { Route as AdminDashboardHorariosRouteImport } from './routes/admin.dashboard.horarios'
+import { Route as AdminDashboardLojaPremiosRouteImport } from './routes/admin.dashboard.loja-premios'
 import { Route as AdminDashboardPagamentosRouteImport } from './routes/admin.dashboard.pagamentos'
 import { Route as AdminDashboardPedidosRouteImport } from './routes/admin.dashboard.pedidos'
 import { Route as AdminDashboardProdutosRouteImport } from './routes/admin.dashboard.produtos'
+import { Route as AdminDashboardResgatesRouteImport } from './routes/admin.dashboard.resgates'
 import { Route as AdminDashboardVisaoRouteImport } from './routes/admin.dashboard.visao'
 import { Route as AdminDashboardWhatsappRouteImport } from './routes/admin.dashboard.whatsapp'
 import { Route as AdminDashboardFinanceiroDreRouteImport } from './routes/admin.dashboard.financeiro.dre'
@@ -69,6 +73,11 @@ const HistoricoRoute = HistoricoRouteImport.update({
   path: '/historico',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LojaRoute = LojaRouteImport.update({
+  id: '/loja',
+  path: '/loja',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PerfilRoute = PerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
@@ -82,6 +91,11 @@ const PrivacidadeRoute = PrivacidadeRouteImport.update({
 const RastreioRoute = RastreioRouteImport.update({
   id: '/rastreio',
   path: '/rastreio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResgatesRoute = ResgatesRouteImport.update({
+  id: '/resgates',
+  path: '/resgates',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermosRoute = TermosRouteImport.update({
@@ -157,6 +171,12 @@ const AdminDashboardHorariosRoute = AdminDashboardHorariosRouteImport.update({
   path: '/horarios',
   getParentRoute: () => AdminDashboardRoute,
 } as any)
+const AdminDashboardLojaPremiosRoute =
+  AdminDashboardLojaPremiosRouteImport.update({
+    id: '/loja-premios',
+    path: '/loja-premios',
+    getParentRoute: () => AdminDashboardRoute,
+  } as any)
 const AdminDashboardPagamentosRoute =
   AdminDashboardPagamentosRouteImport.update({
     id: '/pagamentos',
@@ -171,6 +191,11 @@ const AdminDashboardPedidosRoute = AdminDashboardPedidosRouteImport.update({
 const AdminDashboardProdutosRoute = AdminDashboardProdutosRouteImport.update({
   id: '/produtos',
   path: '/produtos',
+  getParentRoute: () => AdminDashboardRoute,
+} as any)
+const AdminDashboardResgatesRoute = AdminDashboardResgatesRouteImport.update({
+  id: '/resgates',
+  path: '/resgates',
   getParentRoute: () => AdminDashboardRoute,
 } as any)
 const AdminDashboardVisaoRoute = AdminDashboardVisaoRouteImport.update({
@@ -197,9 +222,11 @@ export interface FileRoutesByFullPath {
   '/enderecos': typeof EnderecosRoute
   '/funcionamento': typeof FuncionamentoRoute
   '/historico': typeof HistoricoRoute
+  '/loja': typeof LojaRoute
   '/perfil': typeof PerfilRoute
   '/privacidade': typeof PrivacidadeRoute
   '/rastreio': typeof RastreioRoute
+  '/resgates': typeof ResgatesRoute
   '/termos': typeof TermosRoute
   '/transacoes': typeof TransacoesRoute
   '/admin/dashboard': typeof AdminDashboardRouteWithChildren
@@ -214,9 +241,11 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard/financeiro': typeof AdminDashboardFinanceiroRouteWithChildren
   '/admin/dashboard/gateways': typeof AdminDashboardGatewaysRoute
   '/admin/dashboard/horarios': typeof AdminDashboardHorariosRoute
+  '/admin/dashboard/loja-premios': typeof AdminDashboardLojaPremiosRoute
   '/admin/dashboard/pagamentos': typeof AdminDashboardPagamentosRoute
   '/admin/dashboard/pedidos': typeof AdminDashboardPedidosRoute
   '/admin/dashboard/produtos': typeof AdminDashboardProdutosRoute
+  '/admin/dashboard/resgates': typeof AdminDashboardResgatesRoute
   '/admin/dashboard/visao': typeof AdminDashboardVisaoRoute
   '/admin/dashboard/whatsapp': typeof AdminDashboardWhatsappRoute
   '/admin/dashboard/financeiro/dre': typeof AdminDashboardFinanceiroDreRoute
@@ -227,9 +256,11 @@ export interface FileRoutesByTo {
   '/enderecos': typeof EnderecosRoute
   '/funcionamento': typeof FuncionamentoRoute
   '/historico': typeof HistoricoRoute
+  '/loja': typeof LojaRoute
   '/perfil': typeof PerfilRoute
   '/privacidade': typeof PrivacidadeRoute
   '/rastreio': typeof RastreioRoute
+  '/resgates': typeof ResgatesRoute
   '/termos': typeof TermosRoute
   '/transacoes': typeof TransacoesRoute
   '/admin/dashboard': typeof AdminDashboardRouteWithChildren
@@ -244,9 +275,11 @@ export interface FileRoutesByTo {
   '/admin/dashboard/financeiro': typeof AdminDashboardFinanceiroRouteWithChildren
   '/admin/dashboard/gateways': typeof AdminDashboardGatewaysRoute
   '/admin/dashboard/horarios': typeof AdminDashboardHorariosRoute
+  '/admin/dashboard/loja-premios': typeof AdminDashboardLojaPremiosRoute
   '/admin/dashboard/pagamentos': typeof AdminDashboardPagamentosRoute
   '/admin/dashboard/pedidos': typeof AdminDashboardPedidosRoute
   '/admin/dashboard/produtos': typeof AdminDashboardProdutosRoute
+  '/admin/dashboard/resgates': typeof AdminDashboardResgatesRoute
   '/admin/dashboard/visao': typeof AdminDashboardVisaoRoute
   '/admin/dashboard/whatsapp': typeof AdminDashboardWhatsappRoute
   '/admin/dashboard/financeiro/dre': typeof AdminDashboardFinanceiroDreRoute
@@ -259,9 +292,11 @@ export interface FileRoutesById {
   '/enderecos': typeof EnderecosRoute
   '/funcionamento': typeof FuncionamentoRoute
   '/historico': typeof HistoricoRoute
+  '/loja': typeof LojaRoute
   '/perfil': typeof PerfilRoute
   '/privacidade': typeof PrivacidadeRoute
   '/rastreio': typeof RastreioRoute
+  '/resgates': typeof ResgatesRoute
   '/termos': typeof TermosRoute
   '/transacoes': typeof TransacoesRoute
   '/admin/dashboard': typeof AdminDashboardRouteWithChildren
@@ -276,9 +311,11 @@ export interface FileRoutesById {
   '/admin/dashboard/financeiro': typeof AdminDashboardFinanceiroRouteWithChildren
   '/admin/dashboard/gateways': typeof AdminDashboardGatewaysRoute
   '/admin/dashboard/horarios': typeof AdminDashboardHorariosRoute
+  '/admin/dashboard/loja-premios': typeof AdminDashboardLojaPremiosRoute
   '/admin/dashboard/pagamentos': typeof AdminDashboardPagamentosRoute
   '/admin/dashboard/pedidos': typeof AdminDashboardPedidosRoute
   '/admin/dashboard/produtos': typeof AdminDashboardProdutosRoute
+  '/admin/dashboard/resgates': typeof AdminDashboardResgatesRoute
   '/admin/dashboard/visao': typeof AdminDashboardVisaoRoute
   '/admin/dashboard/whatsapp': typeof AdminDashboardWhatsappRoute
   '/admin/dashboard/financeiro/dre': typeof AdminDashboardFinanceiroDreRoute
@@ -292,9 +329,11 @@ export interface FileRouteTypes {
     | '/enderecos'
     | '/funcionamento'
     | '/historico'
+    | '/loja'
     | '/perfil'
     | '/privacidade'
     | '/rastreio'
+    | '/resgates'
     | '/termos'
     | '/transacoes'
     | '/admin/dashboard'
@@ -309,9 +348,11 @@ export interface FileRouteTypes {
     | '/admin/dashboard/financeiro'
     | '/admin/dashboard/gateways'
     | '/admin/dashboard/horarios'
+    | '/admin/dashboard/loja-premios'
     | '/admin/dashboard/pagamentos'
     | '/admin/dashboard/pedidos'
     | '/admin/dashboard/produtos'
+    | '/admin/dashboard/resgates'
     | '/admin/dashboard/visao'
     | '/admin/dashboard/whatsapp'
     | '/admin/dashboard/financeiro/dre'
@@ -322,9 +363,11 @@ export interface FileRouteTypes {
     | '/enderecos'
     | '/funcionamento'
     | '/historico'
+    | '/loja'
     | '/perfil'
     | '/privacidade'
     | '/rastreio'
+    | '/resgates'
     | '/termos'
     | '/transacoes'
     | '/admin/dashboard'
@@ -339,9 +382,11 @@ export interface FileRouteTypes {
     | '/admin/dashboard/financeiro'
     | '/admin/dashboard/gateways'
     | '/admin/dashboard/horarios'
+    | '/admin/dashboard/loja-premios'
     | '/admin/dashboard/pagamentos'
     | '/admin/dashboard/pedidos'
     | '/admin/dashboard/produtos'
+    | '/admin/dashboard/resgates'
     | '/admin/dashboard/visao'
     | '/admin/dashboard/whatsapp'
     | '/admin/dashboard/financeiro/dre'
@@ -353,9 +398,11 @@ export interface FileRouteTypes {
     | '/enderecos'
     | '/funcionamento'
     | '/historico'
+    | '/loja'
     | '/perfil'
     | '/privacidade'
     | '/rastreio'
+    | '/resgates'
     | '/termos'
     | '/transacoes'
     | '/admin/dashboard'
@@ -370,9 +417,11 @@ export interface FileRouteTypes {
     | '/admin/dashboard/financeiro'
     | '/admin/dashboard/gateways'
     | '/admin/dashboard/horarios'
+    | '/admin/dashboard/loja-premios'
     | '/admin/dashboard/pagamentos'
     | '/admin/dashboard/pedidos'
     | '/admin/dashboard/produtos'
+    | '/admin/dashboard/resgates'
     | '/admin/dashboard/visao'
     | '/admin/dashboard/whatsapp'
     | '/admin/dashboard/financeiro/dre'
@@ -385,9 +434,11 @@ export interface RootRouteChildren {
   EnderecosRoute: typeof EnderecosRoute
   FuncionamentoRoute: typeof FuncionamentoRoute
   HistoricoRoute: typeof HistoricoRoute
+  LojaRoute: typeof LojaRoute
   PerfilRoute: typeof PerfilRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   RastreioRoute: typeof RastreioRoute
+  ResgatesRoute: typeof ResgatesRoute
   TermosRoute: typeof TermosRoute
   TransacoesRoute: typeof TransacoesRoute
 }
@@ -436,6 +487,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HistoricoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/loja': {
+      id: '/loja'
+      path: '/loja'
+      fullPath: '/loja'
+      preLoaderRoute: typeof LojaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/perfil': {
       id: '/perfil'
       path: '/perfil'
@@ -455,6 +513,13 @@ declare module '@tanstack/react-router' {
       path: '/rastreio'
       fullPath: '/rastreio'
       preLoaderRoute: typeof RastreioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resgates': {
+      id: '/resgates'
+      path: '/resgates'
+      fullPath: '/resgates'
+      preLoaderRoute: typeof ResgatesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/termos': {
@@ -555,6 +620,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardHorariosRouteImport
       parentRoute: typeof AdminDashboardRoute
     }
+    '/admin/dashboard/loja-premios': {
+      id: '/admin/dashboard/loja-premios'
+      path: '/loja-premios'
+      fullPath: '/admin/dashboard/loja-premios'
+      preLoaderRoute: typeof AdminDashboardLojaPremiosRouteImport
+      parentRoute: typeof AdminDashboardRoute
+    }
     '/admin/dashboard/pagamentos': {
       id: '/admin/dashboard/pagamentos'
       path: '/pagamentos'
@@ -574,6 +646,13 @@ declare module '@tanstack/react-router' {
       path: '/produtos'
       fullPath: '/admin/dashboard/produtos'
       preLoaderRoute: typeof AdminDashboardProdutosRouteImport
+      parentRoute: typeof AdminDashboardRoute
+    }
+    '/admin/dashboard/resgates': {
+      id: '/admin/dashboard/resgates'
+      path: '/resgates'
+      fullPath: '/admin/dashboard/resgates'
+      preLoaderRoute: typeof AdminDashboardResgatesRouteImport
       parentRoute: typeof AdminDashboardRoute
     }
     '/admin/dashboard/visao': {
@@ -625,9 +704,11 @@ interface AdminDashboardRouteChildren {
   AdminDashboardFinanceiroRoute: typeof AdminDashboardFinanceiroRouteWithChildren
   AdminDashboardGatewaysRoute: typeof AdminDashboardGatewaysRoute
   AdminDashboardHorariosRoute: typeof AdminDashboardHorariosRoute
+  AdminDashboardLojaPremiosRoute: typeof AdminDashboardLojaPremiosRoute
   AdminDashboardPagamentosRoute: typeof AdminDashboardPagamentosRoute
   AdminDashboardPedidosRoute: typeof AdminDashboardPedidosRoute
   AdminDashboardProdutosRoute: typeof AdminDashboardProdutosRoute
+  AdminDashboardResgatesRoute: typeof AdminDashboardResgatesRoute
   AdminDashboardVisaoRoute: typeof AdminDashboardVisaoRoute
   AdminDashboardWhatsappRoute: typeof AdminDashboardWhatsappRoute
 }
@@ -643,9 +724,11 @@ const AdminDashboardRouteChildren: AdminDashboardRouteChildren = {
   AdminDashboardFinanceiroRoute: AdminDashboardFinanceiroRouteWithChildren,
   AdminDashboardGatewaysRoute: AdminDashboardGatewaysRoute,
   AdminDashboardHorariosRoute: AdminDashboardHorariosRoute,
+  AdminDashboardLojaPremiosRoute: AdminDashboardLojaPremiosRoute,
   AdminDashboardPagamentosRoute: AdminDashboardPagamentosRoute,
   AdminDashboardPedidosRoute: AdminDashboardPedidosRoute,
   AdminDashboardProdutosRoute: AdminDashboardProdutosRoute,
+  AdminDashboardResgatesRoute: AdminDashboardResgatesRoute,
   AdminDashboardVisaoRoute: AdminDashboardVisaoRoute,
   AdminDashboardWhatsappRoute: AdminDashboardWhatsappRoute,
 }
@@ -673,9 +756,11 @@ const rootRouteChildren: RootRouteChildren = {
   EnderecosRoute: EnderecosRoute,
   FuncionamentoRoute: FuncionamentoRoute,
   HistoricoRoute: HistoricoRoute,
+  LojaRoute: LojaRoute,
   PerfilRoute: PerfilRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   RastreioRoute: RastreioRoute,
+  ResgatesRoute: ResgatesRoute,
   TermosRoute: TermosRoute,
   TransacoesRoute: TransacoesRoute,
 }

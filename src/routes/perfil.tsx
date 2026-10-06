@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { User, LogOut, ArrowLeft, Loader2, ShoppingBag, ChevronRight, MapPin, HelpCircle, ShieldCheck, Receipt } from "lucide-react";
+import { User, LogOut, ArrowLeft, Loader2, ShoppingBag, ChevronRight, MapPin, HelpCircle, ShieldCheck, Receipt, Store, Gift } from "lucide-react";
 import { toast } from "sonner";
 import logo from "@/assets/logo_lume.png";
 import iconPoints from "@/assets/icon_points_lume.png";
@@ -24,14 +24,21 @@ function PerfilPage() {
   const [phoneInput, setPhoneInput] = useState("");
 
   useEffect(() => {
+    const fetchPoints = async (userId: string) => {
+      try {
+        const supabaseUntyped = supabase as any;
+        const { data } = await supabaseUntyped.from("customer_points_balance").select("balance").eq("user_id", userId).single();
+        if (data) setPointsBalance(data.balance);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) {
         setUserData(session.user.user_metadata);
-        const supabaseUntyped = supabase as any;
-        supabaseUntyped.from("customer_points_balance").select("balance").eq("user_id", session.user.id).single().then(({ data }: any) => {
-          if (data) setPointsBalance(data.balance);
-        }).catch(() => {});
+        fetchPoints(session.user.id);
       }
       setLoading(false);
     });
@@ -40,8 +47,10 @@ function PerfilPage() {
       setSession(session);
       if (session) {
         setUserData(session.user.user_metadata);
+        fetchPoints(session.user.id);
       } else {
         setUserData(null);
+        setPointsBalance(0);
       }
     });
 
@@ -180,7 +189,7 @@ function PerfilPage() {
           </h1>
         </div>
 
-        {(!session || !session.user.email?.includes('@cliente')) ? (
+        {!session ? (
           <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 text-center max-w-md mx-auto mt-12">
             <img src={logo} alt="Lume Artesanais" className="h-16 w-auto mx-auto mb-6 drop-shadow-sm" />
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Falta pouco!</h2>
@@ -224,8 +233,8 @@ function PerfilPage() {
                 <div className="pt-2">
                   <button
                     type="submit"
-                    disabled={loggingIn || cpfInput.length < 14}
-                    className="w-full flex items-center justify-center gap-2 bg-brand text-white font-bold text-lg py-4 px-4 rounded-xl hover:bg-brand/90 transition shadow-md disabled:opacity-50"
+                    disabled={loggingIn}
+                    className="w-full flex items-center justify-center gap-2 bg-brand text-white font-bold text-lg py-4 px-4 rounded-xl hover:bg-brand/90 transition shadow-md disabled:opacity-70"
                   >
                     {loggingIn ? <Loader2 className="h-6 w-6 animate-spin" /> : "Criar minha conta"}
                   </button>
@@ -261,8 +270,8 @@ function PerfilPage() {
                 <div className="space-y-3">
                   <button
                     type="submit"
-                    disabled={loggingIn || cpfInput.length < 14}
-                    className="w-full flex items-center justify-center gap-2 bg-brand text-white font-bold text-lg py-4 px-4 rounded-xl hover:bg-brand/90 transition shadow-md disabled:opacity-50"
+                    disabled={loggingIn}
+                    className="w-full flex items-center justify-center gap-2 bg-brand text-white font-bold text-lg py-4 px-4 rounded-xl hover:bg-brand/90 transition shadow-md disabled:opacity-70"
                   >
                     {loggingIn ? <Loader2 className="h-6 w-6 animate-spin" /> : "Continuar"}
                   </button>
@@ -304,23 +313,41 @@ function PerfilPage() {
 
             {/* Carteira de Pontos */}
             {session?.user?.email?.includes('@cliente') && (
-              <div className="bg-gradient-to-r from-brand to-highlight rounded-3xl shadow-sm border border-brand/20 p-6 flex items-center justify-between text-white">
+              <Link to="/loja" className="bg-gradient-to-r from-brand to-highlight rounded-3xl shadow-sm border border-brand/20 p-6 flex items-center justify-between text-white hover:opacity-95 active:opacity-90 transition-opacity">
                 <div className="flex items-center gap-4">
                   <img src={iconPoints} alt="Moeda Lume" className="h-20 w-20 object-contain drop-shadow-md" />
                   <div>
                     <h3 className="text-lg font-bold opacity-90 leading-none mb-1">Meus Pontos</h3>
                     <p className="text-3xl font-extrabold leading-none">{pointsBalance} pts</p>
+                    <p className="text-sm opacity-70 mt-1">Toque para ver a loja de prêmios</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm opacity-90">Equivale a</p>
-                  <p className="text-xl font-bold">R$ {((Math.floor(pointsBalance / 100) * 100) / 100 * 5).toFixed(2).replace('.', ',')}</p>
-                </div>
-              </div>
+                <ChevronRight className="h-6 w-6 opacity-60 shrink-0" />
+              </Link>
             )}
 
             {/* Lista de Opções do Menu */}
             <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+
+              <Link to="/loja" className="flex items-center justify-between p-5 hover:bg-gray-50 transition active:bg-gray-100 border-b border-gray-50">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-amber-50 rounded-xl text-amber-600">
+                    <Store className="h-6 w-6" />
+                  </div>
+                  <span className="font-bold text-gray-800 text-lg">Loja de Prêmios</span>
+                </div>
+                <ChevronRight className="h-5 w-5 text-gray-400" />
+              </Link>
+
+              <Link to="/resgates" className="flex items-center justify-between p-5 hover:bg-gray-50 transition active:bg-gray-100 border-b border-gray-50">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-purple-50 rounded-xl text-purple-600">
+                    <Gift className="h-6 w-6" />
+                  </div>
+                  <span className="font-bold text-gray-800 text-lg">Meus Resgates</span>
+                </div>
+                <ChevronRight className="h-5 w-5 text-gray-400" />
+              </Link>
 
               <Link to="/transacoes" className="flex items-center justify-between p-5 hover:bg-gray-50 transition active:bg-gray-100 border-b border-gray-50">
                 <div className="flex items-center gap-4">

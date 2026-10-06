@@ -33,7 +33,7 @@ function ClientesPage() {
       const { data: ordersData, error: ordersError } = await supabase
         .from("orders")
         .select("customer_name, customer_phone, total, created_at, status")
-        .in("status", ["delivered", "paid"]);
+        .in("status", ["delivered", "paid", "completed", "pending", "confirmed", "preparing", "out_for_delivery"]);
         
       if (ordersError) console.error("Orders Error:", ordersError);
 
