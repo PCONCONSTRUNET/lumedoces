@@ -46,7 +46,7 @@ export function Footer() {
         {/* Brand & Slogan */}
         <div className="flex flex-col space-y-4">
           <div className="bg-white p-2 rounded-xl inline-block w-fit">
-            <img src={logo} alt="Lume Doces" className="w-24 h-auto object-contain" />
+            <img src={logo} alt="Lume Artesanais" className="w-28 h-auto object-contain" />
           </div>
           <p className="text-sm text-white/80 mt-2 font-medium">
             Lume Artesanais

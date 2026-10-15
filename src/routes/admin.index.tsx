@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Lock, Mail, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import banner from "@/assets/banner.png";
+import logo from "@/assets/logo_lume.png";
 import { toast, Toaster } from "sonner";
 
 export const Route = createFileRoute("/admin/")({
@@ -85,7 +86,8 @@ function AdminLogin() {
       <Toaster position="top-center" richColors />
       <div className="w-full max-w-sm rounded-3xl bg-white p-8 shadow-2xl ring-1 ring-border relative z-10 flex flex-col justify-center">
 
-        <div className="text-center">
+        <div className="text-center flex flex-col items-center">
+          <img src={logo} alt="Lume Artesanais" className="h-12 w-auto object-contain mb-3 drop-shadow-sm" />
           <h1 className="font-display text-4xl text-brand">ADMIN</h1>
           <p className="mt-2 text-sm text-foreground/70">
             Acesso restrito — Lume Artesanais

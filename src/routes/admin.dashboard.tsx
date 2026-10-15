@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import logo from "@/assets/logo_lume.png";
 import { Toaster } from "sonner";
 
 export const Route = createFileRoute("/admin/dashboard")({
@@ -242,23 +243,17 @@ function AdminDashboardLayout() {
       >
         <div className="p-4 border-b border-border/70 flex items-center justify-between gap-2.5 bg-gradient-to-r from-card via-card to-muted/30">
           <div className="flex items-center gap-3 min-w-0">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-brand text-brand-foreground shadow-md shadow-brand/20">
-              <ShieldCheck className="h-5 w-5" />
-            </span>
-            {!collapsed && (
+            {!collapsed ? (
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <h2 className="font-display text-base font-bold text-brand leading-none">
-                    Lume Admin
-                  </h2>
-                  <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full bg-brand/10 text-brand">
-                    Painel
-                  </span>
-                </div>
-                <p className="text-[11px] text-muted-foreground truncate mt-0.5 font-medium">
+                <img src={logo} alt="Lume Artesanais" className="h-8 w-auto object-contain object-left mb-1" />
+                <p className="text-[11px] text-muted-foreground truncate font-medium">
                   {email || "Administrador"}
                 </p>
               </div>
+            ) : (
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-brand text-brand-foreground shadow-md shadow-brand/20">
+                <ShieldCheck className="h-5 w-5" />
+              </span>
             )}
           </div>
 
