@@ -1,22 +1,19 @@
 import { useState, useEffect } from "react";
 import bannerMobile01 from "@/assets/banner_mobile_01.png";
-import bannerMobile02 from "@/assets/banner_mobile_02_fds.png";
 import bannerPc01 from "@/assets/banner_pc_01.png";
-import bannerPc02 from "@/assets/banner_pc_02.png";
-import bannerMobile03 from "@/assets/banner_mobile_pontos_03.png";
-import bannerPc03 from "@/assets/banner_pc_pontos_03.png";
 
 export function Hero({ onOrder }: { onOrder?: () => void }) {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const mobileBanners = [bannerMobile01, bannerMobile02, bannerMobile03];
-  const desktopBanners = [bannerPc01, bannerPc02, bannerPc03];
+  const mobileBanners = [bannerMobile01];
+  const desktopBanners = [bannerPc01];
 
   useEffect(() => {
+    if (desktopBanners.length <= 1 && mobileBanners.length <= 1) return;
     const interval = setInterval(() => {
       setCurrentSlide((prev) => prev + 1);
     }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [desktopBanners.length, mobileBanners.length]);
 
   return (
     <section id="top" className="relative w-full">
