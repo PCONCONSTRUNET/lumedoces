@@ -24,7 +24,7 @@ import { formatOrderCode } from "@/lib/order-utils";
 import { formatBRL, useCart } from "@/store/cart";
 import brandIcon from "@/assets/icon.png";
 import iconPoints from "@/assets/icon_points_lume.png";
-import logoLume from "@/assets/logo_lume.png";
+import logoLume from "@/assets/logo_geral.png";
 import { PixPaymentScreen } from "@/components/site/PixPaymentScreen";
 
 type PayMethod = "pix" | "cartao" | "dinheiro";

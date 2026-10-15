@@ -5,7 +5,7 @@ import { Clock, CheckCircle2, ChefHat, Truck, CheckSquare, XCircle, ArrowLeft, P
 import { formatBRL } from "@/store/cart";
 import { formatOrderCode } from "@/lib/order-utils";
 import type { Database } from "@/integrations/supabase/types";
-import logo from "@/assets/logo_lume.png";
+import logo from "@/assets/logo_geral.png";
 import { products } from "@/data/menu";
 
 export const Route = createFileRoute("/historico")({

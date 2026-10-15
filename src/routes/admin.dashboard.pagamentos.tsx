@@ -22,7 +22,7 @@ import { formatOrderCode } from "@/lib/order-utils";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
-import logoImage from "@/assets/logo_lume.png";
+import logoImage from "@/assets/logo_geral.png";
 import { useConfirm } from "@/providers/ConfirmProvider";
 
 export const Route = createFileRoute("/admin/dashboard/pagamentos")({

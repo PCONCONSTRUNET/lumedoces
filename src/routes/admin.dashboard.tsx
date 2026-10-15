@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
-import logo from "@/assets/logo_lume.png";
+import logo from "@/assets/logo_geral.png";
 import { Toaster } from "sonner";
 
 export const Route = createFileRoute("/admin/dashboard")({

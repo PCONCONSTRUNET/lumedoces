@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, LogOut, ArrowLeft, Loader2, ShoppingBag, ChevronRight, MapPin, HelpCircle, ShieldCheck, Receipt, Store, Gift } from "lucide-react";
 import { toast } from "sonner";
-import logo from "@/assets/logo_lume.png";
+import logo from "@/assets/logo_geral.png";
 import iconPoints from "@/assets/icon_points_lume.png";
 
 export const Route = createFileRoute("/perfil")({

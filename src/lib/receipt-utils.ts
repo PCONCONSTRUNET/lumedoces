@@ -42,7 +42,7 @@ async function drawReceiptToCanvas(data: ReceiptData): Promise<HTMLCanvasElement
 
   // Logo
   try {
-    const logoModule = await import("@/assets/logo_lume.png");
+    const logoModule = await import("@/assets/logo_geral.png");
     const logoSrc = logoModule.default ?? logoModule;
     const logo = await loadImage(logoSrc as string);
     const logoH = 56;

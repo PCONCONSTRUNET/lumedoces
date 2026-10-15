@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Moon, ShoppingCart, Sun, Menu as MenuIcon, X, ArrowRight, MessageCircle } from "lucide-react";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { Link } from "@tanstack/react-router";
-import logo from "@/assets/logo_lume.png";
+import logo from "@/assets/logo_geral.png";
 import { useCart } from "@/store/cart";
 
 const WPP = "5548996915303";

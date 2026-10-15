@@ -1,6 +1,6 @@
 import { Instagram, MapPin, Clock, Phone, Mail, FileText, Shield } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import logo from "@/assets/logo_lume.png";
+import logo from "@/assets/logo_geral.png";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { useBusinessStatus, type BusinessHour } from "@/hooks/useBusinessStatus";
 

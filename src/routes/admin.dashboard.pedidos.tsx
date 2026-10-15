@@ -27,7 +27,7 @@ import { formatOrderCode } from "@/lib/order-utils";
 import { cn } from "@/lib/utils";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import logoImage from "@/assets/logo_lume.png";
+import logoImage from "@/assets/logo_geral.png";
 import { useConfirm } from "@/providers/ConfirmProvider";
 
 export const Route = createFileRoute("/admin/dashboard/pedidos")({
