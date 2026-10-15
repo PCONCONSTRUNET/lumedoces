@@ -52,48 +52,48 @@ function CardapioPage() {
   };
 
   return (
-    <div className="bg-white rounded-md shadow-sm border border-gray-200 min-h-[calc(100vh-6rem)]">
-      <div className="border-b border-gray-200 p-6 pb-0">
-        <div className="flex items-center justify-between mb-4">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 min-h-[calc(100vh-6rem)] overflow-hidden">
+      <div className="border-b border-gray-200 p-4 sm:p-6 pb-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Cardápio</h1>
-            <p className="text-sm text-gray-500 mt-1">Defina quais os itens seus clientes podem pedir pelo app</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Cardápio</h1>
+            <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Defina quais os itens seus clientes podem pedir pelo app</p>
           </div>
-          <div className="flex gap-2">
-            <button onClick={seedTestProducts} className="bg-orange-100 text-orange-700 text-xs font-bold px-3 rounded-md hover:bg-orange-200">
-              Gerar Dados Teste
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <button onClick={seedTestProducts} className="bg-orange-100 text-orange-700 text-xs font-bold px-3 py-2 rounded-lg hover:bg-orange-200 transition">
+              Dados Teste
             </button>
-            <button className="grid place-items-center h-10 w-10 border border-gray-300 rounded-md hover:bg-gray-50 text-gray-600">
-              <Settings className="w-5 h-5" />
+            <button className="grid place-items-center h-9 w-9 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-600 transition">
+              <Settings className="w-4 h-4" />
             </button>
-            <button className="grid place-items-center h-10 w-10 border border-gray-300 rounded-md hover:bg-gray-50 text-gray-600">
-              <BarChart2 className="w-5 h-5" />
+            <button className="grid place-items-center h-9 w-9 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-600 transition">
+              <BarChart2 className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        <div className="flex items-center gap-6 mt-6">
+        <div className="flex items-center gap-4 sm:gap-6 mt-3 sm:mt-6 overflow-x-auto no-scrollbar whitespace-nowrap">
           {["Cardápio", "Produtos", "Complementos", "PDV"].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-3 text-sm font-semibold border-b-2 transition-colors ${
+              className={`pb-3 text-sm font-semibold border-b-2 transition-colors shrink-0 ${
                 activeTab === tab
-                  ? "border-[#ff0000] text-[#ff0000]"
+                  ? "border-brand text-brand"
                   : "border-transparent text-gray-500 hover:text-gray-900"
               }`}
             >
               {tab}
             </button>
           ))}
-          <button className="pb-3 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-900 flex items-center gap-2">
-            Otimizador de cardápio
-            <span className="bg-[#ff0000]/10 text-[#ff0000] text-[10px] px-1.5 py-0.5 rounded-full uppercase tracking-wider font-bold">Novo</span>
+          <button className="pb-3 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-900 flex items-center gap-2 shrink-0">
+            Otimizador
+            <span className="bg-brand/10 text-brand text-[10px] px-1.5 py-0.5 rounded-full uppercase tracking-wider font-bold">Novo</span>
           </button>
         </div>
       </div>
 
-      <div className="p-6">
+      <div className="p-3.5 sm:p-6">
         {loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map(i => (
@@ -194,26 +194,26 @@ function SortableCategory({ cat, catProducts, index, onAddExistingProduct, onEdi
 
   return (
     <div ref={setNodeRef} style={style} className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm relative">
-      <div className="bg-gray-50/80 px-6 py-4 flex items-center justify-between border-b border-gray-200">
-        <div className="flex items-center gap-2 group">
-          <div {...attributes} {...listeners} className="text-gray-400 hover:text-gray-900 cursor-grab active:cursor-grabbing mr-2 px-1">
+      <div className="bg-gray-50/80 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-200">
+        <div className="flex items-center gap-2 group min-w-0">
+          <div {...attributes} {...listeners} className="text-gray-400 hover:text-gray-900 cursor-grab active:cursor-grabbing mr-1 px-1">
             <GripVertical className="w-5 h-5" />
           </div>
-          <span className="font-bold text-gray-900 text-lg">{cat.name}</span>
+          <span className="font-bold text-gray-900 text-base sm:text-lg truncate">{cat.name}</span>
           <button 
             onClick={() => toast.success("Editar categoria em breve")}
-            className="w-7 h-7 rounded grid place-items-center text-gray-400 hover:text-gray-900 hover:bg-gray-200 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="w-7 h-7 rounded grid place-items-center text-gray-400 hover:text-gray-900 hover:bg-gray-200 transition-opacity"
             title="Editar categoria"
           >
             <Edit2 className="w-4 h-4" />
           </button>
-          <span className="text-sm text-gray-500 ml-2">({catProducts.length} item{catProducts.length !== 1 ? 's' : ''})</span>
+          <span className="text-xs sm:text-sm text-gray-500 shrink-0">({catProducts.length})</span>
         </div>
-        <div className="flex items-center gap-2">
-          <button className="bg-white border border-gray-300 text-gray-700 text-xs font-bold rounded-md px-3 py-1.5">Criar combo</button>
+        <div className="flex items-center gap-2 self-end sm:self-auto">
+          <button className="bg-white border border-gray-300 text-gray-700 text-xs font-bold rounded-lg px-2.5 py-1.5 hover:bg-gray-50 transition">Criar combo</button>
           <button 
             onClick={() => onAddExistingProduct(cat.id)}
-            className="bg-white border border-gray-300 text-gray-700 text-xs font-bold rounded-md px-3 py-1.5"
+            className="bg-white border border-gray-300 text-gray-700 text-xs font-bold rounded-lg px-2.5 py-1.5 hover:bg-gray-50 transition"
           >
             Adicionar produto
           </button>
@@ -389,41 +389,41 @@ function ProductListItem({ p, onEdit }: any) {
   };
 
   return (
-    <div className="p-4 px-6 flex items-center justify-between hover:bg-gray-50 group transition border-b border-gray-100 last:border-0 relative">
-      <div className="flex items-center gap-4">
-        <div className="w-16 h-16 rounded-lg bg-gray-200 overflow-hidden shrink-0 border border-gray-200">
+    <div className="p-3.5 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-gray-50/70 group transition border-b border-gray-100 last:border-0 relative">
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
           {p.image_url ? (
             <img src={p.image_url} alt="" className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400">Sem foto</div>
+            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">Sem foto</div>
           )}
         </div>
-        <div>
-          <div className="font-semibold text-gray-900 text-[15px]">{p.name}</div>
+        <div className="min-w-0 flex-1">
+          <div className="font-bold text-gray-900 text-sm sm:text-[15px] truncate">{p.name}</div>
           <div className="flex items-center gap-2 mt-1">
-            <span className="text-[10px] font-bold text-gray-900 border border-gray-200 px-2 py-0.5 rounded-full uppercase tracking-wider">
+            <span className="text-[9px] sm:text-[10px] font-bold text-gray-700 border border-gray-200 px-2 py-0.5 rounded-full uppercase tracking-wider">
               Oferta Simples
             </span>
           </div>
         </div>
       </div>
       
-      <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 pt-2 sm:pt-0 border-t border-gray-100 sm:border-t-0">
         <button 
           onClick={() => {
             setDraftStock(stock);
             setStockModal(true);
           }}
-          className="text-[13px] font-semibold text-gray-600 border border-gray-300 px-3 py-1.5 rounded-md hover:bg-gray-100 flex items-center gap-1.5"
+          className="text-xs sm:text-[13px] font-semibold text-gray-700 border border-gray-300 px-2.5 py-1.5 rounded-lg hover:bg-gray-100 flex items-center gap-1.5 active:scale-95 transition"
         >
           <span>Estoque</span>
-          <span className="bg-gray-200 text-gray-800 rounded-md px-1.5 py-0.5 text-[11px] leading-none tabular-nums font-bold">
+          <span className="bg-gray-200 text-gray-800 rounded px-1.5 py-0.5 text-[11px] leading-none tabular-nums font-bold">
             {stock !== "" ? stock : 0}
           </span>
         </button>
         
-        <div className="flex items-center border border-gray-300 rounded-md bg-white overflow-hidden h-8">
-          <div className="px-3 py-1.5 text-[13px] font-semibold text-gray-900 tabular-nums border-r border-gray-300 flex items-center h-full">
+        <div className="flex items-center border border-gray-300 rounded-lg bg-white overflow-hidden h-8">
+          <div className="px-2.5 py-1 text-xs sm:text-[13px] font-bold text-gray-900 tabular-nums border-r border-gray-300 flex items-center h-full">
             R$ {p.base_price.toFixed(2).replace('.', ',')}
           </div>
           <button className="px-2 h-full hover:bg-gray-100 text-gray-500 grid place-items-center">
@@ -431,14 +431,17 @@ function ProductListItem({ p, onEdit }: any) {
           </button>
         </div>
 
-        <button className="w-8 h-8 rounded-md border border-gray-300 grid place-items-center hover:bg-gray-100 text-gray-500">
-          <Pause className="w-4 h-4 fill-current" />
+        <button 
+          className="w-8 h-8 rounded-lg border border-gray-300 grid place-items-center hover:bg-gray-100 text-gray-500 active:scale-95 transition"
+          title="Pausar produto"
+        >
+          <Pause className="w-3.5 h-3.5 fill-current" />
         </button>
 
         <div className="relative">
           <button 
             onClick={() => setMenuOpen(!menuOpen)}
-            className={`w-8 h-8 rounded-md border border-gray-300 grid place-items-center text-gray-500 transition ${menuOpen ? 'bg-gray-900 text-white border-gray-900' : 'hover:bg-gray-100'}`}
+            className={`w-8 h-8 rounded-lg border border-gray-300 grid place-items-center text-gray-500 transition active:scale-95 ${menuOpen ? 'bg-gray-900 text-white border-gray-900' : 'hover:bg-gray-100'}`}
           >
             <MoreVertical className="w-4 h-4" />
           </button>

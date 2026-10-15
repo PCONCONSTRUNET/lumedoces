@@ -146,38 +146,38 @@ function ConfiguracoesPage() {
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-8 flex items-center gap-3">
-        <div className="grid h-12 w-12 place-items-center rounded-2xl bg-brand/10 text-brand">
-          <Settings2 className="h-6 w-6" />
+    <div className="p-3.5 sm:p-6">
+      <div className="mb-6 sm:mb-8 flex items-center gap-3">
+        <div className="grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-2xl bg-brand/10 text-brand shrink-0">
+          <Settings2 className="h-5 w-5 sm:h-6 sm:w-6" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Configurações da Loja</h1>
-          <p className="text-gray-500">Gerencie taxas, fretes e opções de retirada</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Configurações da Loja</h1>
+          <p className="text-xs sm:text-sm text-gray-500">Gerencie taxas, fretes e opções de retirada</p>
         </div>
       </div>
 
       <div className="mx-auto max-w-2xl">
         <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
           
-          <div className="p-6 border-b border-gray-100">
-            <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="p-4 sm:p-6 border-b border-gray-100">
+            <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
               <Truck className="h-5 w-5 text-brand" /> Opções de Entrega e Retirada
             </h2>
             
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Toggle Retirada */}
-              <label className="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:bg-gray-50 cursor-pointer transition">
-                <div className="flex items-center gap-4">
+              <label className="flex items-center justify-between p-3.5 sm:p-4 rounded-xl border border-gray-100 hover:bg-gray-50 cursor-pointer transition gap-3">
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                   <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-full transition ${settings.pickup_enabled ? 'bg-brand/10 text-brand' : 'bg-gray-100 text-gray-400'}`}>
                     <ShoppingBag className="h-5 w-5" />
                   </div>
-                  <div>
-                    <p className="font-bold text-gray-900">Retirada no Local</p>
-                    <p className="text-sm text-gray-500">Permitir que clientes busquem o pedido no estabelecimento</p>
+                  <div className="min-w-0">
+                    <p className="font-bold text-gray-900 text-sm sm:text-base">Retirada no Local</p>
+                    <p className="text-xs text-gray-500 leading-tight">Clientes buscam no estabelecimento</p>
                   </div>
                 </div>
-                <div className="relative inline-flex h-6 w-11 items-center rounded-full">
+                <div className="relative inline-flex h-6 w-11 items-center rounded-full shrink-0">
                   <input 
                     type="checkbox" 
                     className="sr-only peer"
@@ -189,17 +189,17 @@ function ConfiguracoesPage() {
               </label>
 
               {/* Toggle Entrega */}
-              <label className="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:bg-gray-50 cursor-pointer transition">
-                <div className="flex items-center gap-4">
+              <label className="flex items-center justify-between p-3.5 sm:p-4 rounded-xl border border-gray-100 hover:bg-gray-50 cursor-pointer transition gap-3">
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                   <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-full transition ${settings.delivery_enabled ? 'bg-brand/10 text-brand' : 'bg-gray-100 text-gray-400'}`}>
                     <Truck className="h-5 w-5" />
                   </div>
-                  <div>
-                    <p className="font-bold text-gray-900">Entrega Delivery</p>
-                    <p className="text-sm text-gray-500">Realizar entregas de pedidos no endereço do cliente</p>
+                  <div className="min-w-0">
+                    <p className="font-bold text-gray-900 text-sm sm:text-base">Entrega Delivery</p>
+                    <p className="text-xs text-gray-500 leading-tight">Entregas no endereço do cliente</p>
                   </div>
                 </div>
-                <div className="relative inline-flex h-6 w-11 items-center rounded-full">
+                <div className="relative inline-flex h-6 w-11 items-center rounded-full shrink-0">
                   <input 
                     type="checkbox" 
                     className="sr-only peer"
@@ -212,32 +212,32 @@ function ConfiguracoesPage() {
 
               {/* Taxa de Entrega */}
               {settings.delivery_enabled && (
-                <div className="pt-2 pl-14 animate-in fade-in slide-in-from-top-2">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                <div className="pt-2 pl-0 sm:pl-14 animate-in fade-in slide-in-from-top-2">
+                  <label className="block text-xs sm:text-sm font-bold text-gray-700 mb-2">
                     Taxa de Entrega Fixa
                   </label>
-                  <div className="flex items-center gap-3">
-                    <span className="text-gray-500 font-medium">R$</span>
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <span className="text-gray-500 font-bold text-sm">R$</span>
                     <input
                       type="number"
                       step="0.01"
                       min="0"
                       value={feeInput}
                       onChange={(e) => setFeeInput(e.target.value)}
-                      className="w-32 rounded-xl border border-gray-200 bg-white px-3 py-2 focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                      className="w-28 sm:w-32 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
                     />
-                    <span className="text-sm text-gray-400 ml-2">Ex: 5.00 ou 12.50</span>
+                    <span className="text-xs text-gray-400">Ex: 5.00 ou 12.50</span>
                   </div>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="bg-gray-50 p-6 flex justify-end">
+          <div className="bg-gray-50 p-4 sm:p-6 flex justify-end">
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-2 rounded-xl bg-brand px-6 py-3 text-sm font-bold text-white transition hover:bg-brand/90 disabled:opacity-50 shadow-sm"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-brand px-6 py-3 text-sm font-bold text-white transition hover:bg-brand/90 disabled:opacity-50 active:scale-95 shadow-sm"
             >
               {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
               {saving ? "Salvando..." : "Salvar Configurações"}

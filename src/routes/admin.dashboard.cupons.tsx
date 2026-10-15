@@ -212,17 +212,17 @@ function CuponsPage() {
       </header>
 
       <div className="mb-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-border/60">
-        <div className="grid gap-3 lg:grid-cols-[1fr_1fr_160px_160px_140px_160px_auto]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_160px_160px_140px_160px_auto] gap-2.5 sm:gap-3">
           <input
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase())}
-            placeholder="Codigo"
+            placeholder="Código"
             className="ipt uppercase"
           />
           <input
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Descricao"
+            placeholder="Descrição"
             className="ipt"
           />
           <select
@@ -253,12 +253,12 @@ function CuponsPage() {
             type="date"
             className="ipt"
           />
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 col-span-1 sm:col-span-2 lg:col-span-1">
             <button
               type="button"
               onClick={saveCoupon}
               disabled={saving}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-brand px-4 py-2.5 text-sm font-bold text-brand-foreground transition hover:opacity-95 disabled:opacity-60"
+              className="w-full lg:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-bold text-brand-foreground transition hover:opacity-95 disabled:opacity-60 active:scale-95 shadow-sm"
             >
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : editingId ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
               {editingId ? "Salvar" : "Criar"}
@@ -267,7 +267,7 @@ function CuponsPage() {
               <button
                 type="button"
                 onClick={resetForm}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-gray-100 px-4 py-2.5 text-sm font-bold text-gray-600 transition hover:bg-gray-200"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-gray-100 px-4 py-2.5 text-sm font-bold text-gray-600 transition hover:bg-gray-200 active:scale-95"
               >
                 <X className="h-4 w-4" />
                 Cancelar

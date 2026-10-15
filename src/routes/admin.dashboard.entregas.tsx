@@ -176,42 +176,44 @@ function EntregasPage() {
           </button>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
+        <div className="overflow-x-auto rounded-2xl border border-border bg-white shadow-sm">
           <table className="w-full text-left text-sm">
             <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
               <tr>
                 <th className="px-4 py-3 font-semibold">Bairro</th>
-                <th className="px-4 py-3 font-semibold w-32">Taxa</th>
+                <th className="px-4 py-3 font-semibold w-28 sm:w-32">Taxa</th>
                 <th className="px-4 py-3 font-semibold text-center w-24">Status</th>
-                <th className="px-4 py-3 text-right w-32">Ações</th>
+                <th className="px-4 py-3 text-right w-24 sm:w-32">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {rows?.map((row) => (
                 <tr key={row.id} className="group hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-4 font-medium text-foreground">{row.name}</td>
-                  <td className="px-4 py-4 text-green-600 font-bold">{formatBRL(row.fee)}</td>
-                  <td className="px-4 py-4 text-center">
+                  <td className="px-4 py-3.5 font-medium text-foreground">{row.name}</td>
+                  <td className="px-4 py-3.5 text-green-600 font-bold whitespace-nowrap">{formatBRL(row.fee)}</td>
+                  <td className="px-4 py-3.5 text-center">
                     <button
                       onClick={() => onToggle(row)}
-                      className={`inline-flex w-16 justify-center rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wide ${
+                      className={`inline-flex w-16 justify-center rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wide active:scale-95 transition ${
                         row.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
                       }`}
                     >
                       {row.is_active ? "Ativo" : "Inativo"}
                     </button>
                   </td>
-                  <td className="px-4 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <td className="px-4 py-3.5 text-right">
+                    <div className="flex items-center justify-end gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => openForm(row)}
-                        className="grid h-8 w-8 place-items-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition"
+                        className="grid h-8 w-8 place-items-center rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 active:scale-95 transition"
+                        title="Editar bairro"
                       >
                         <Edit2 className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => onDelete(row)}
-                        className="grid h-8 w-8 place-items-center rounded-md text-red-400 hover:bg-red-50 hover:text-red-600 transition"
+                        className="grid h-8 w-8 place-items-center rounded-lg text-rose-500 hover:bg-rose-50 hover:text-rose-700 active:scale-95 transition"
+                        title="Excluir bairro"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>

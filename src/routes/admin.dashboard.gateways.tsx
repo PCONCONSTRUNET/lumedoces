@@ -82,10 +82,10 @@ function GatewaysPage() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl p-6">
-      <div className="mb-8">
-        <h1 className="font-serif text-3xl font-extrabold text-gray-900">Gateways de Pagamento</h1>
-        <p className="mt-2 text-sm text-gray-600">
+    <div className="mx-auto max-w-4xl p-3.5 sm:p-6">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="font-serif text-2xl sm:text-3xl font-extrabold text-gray-900">Gateways de Pagamento</h1>
+        <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-gray-600">
           Configure os meios de pagamento para receber dos seus clientes automaticamente.
         </p>
       </div>
@@ -177,7 +177,7 @@ function GatewaysPage() {
               <button
                 onClick={handleSave}
                 disabled={loading}
-                className="flex items-center gap-2 rounded-full bg-brand px-6 py-2.5 text-sm font-bold text-white shadow-md hover:bg-brand/90 transition-colors disabled:opacity-50"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-bold text-white shadow-md hover:bg-brand/90 active:scale-95 transition-colors disabled:opacity-50"
               >
                 {loading ? "Salvando..." : (
                   <>

@@ -15,6 +15,8 @@ import {
   Trash2,
   Truck,
   UtensilsCrossed,
+  Phone,
+  MessageCircle,
   type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -611,7 +613,7 @@ function PedidosPage() {
         </div>
       </header>
 
-      <div className="mb-4 grid grid-cols-2 gap-2 lg:grid-cols-4 xl:grid-cols-7">
+      <div className="mb-4 flex md:grid overflow-x-auto md:overflow-visible no-scrollbar pb-2 md:pb-0 gap-2 md:grid-cols-4 xl:grid-cols-7 overscroll-contain">
         {FILTER_CARDS.map((filterCard) => {
           const selected = statusFilter === filterCard.key;
           const count =
@@ -625,7 +627,7 @@ function PedidosPage() {
               type="button"
               onClick={() => setStatusFilter(filterCard.key)}
               className={cn(
-                "relative min-h-[96px] overflow-hidden rounded-2xl p-3 text-left ring-1 transition",
+                "relative min-h-[90px] shrink-0 min-w-[136px] md:min-w-0 overflow-hidden rounded-2xl p-3 text-left ring-1 transition active:scale-[0.98]",
                 selected
                   ? cn(filterCard.toneActive, "shadow-sm")
                   : cn(filterCard.tone, "hover:shadow-sm"),
@@ -650,11 +652,11 @@ function PedidosPage() {
                 >
                   <filterCard.icon className="h-4 w-4" />
                 </span>
-                <span className="text-2xl font-bold leading-none">{count}</span>
+                <span className="text-xl md:text-2xl font-bold leading-none">{count}</span>
               </div>
-              <p className="mt-3 text-sm font-semibold">{filterCard.label}</p>
-              <p className="mt-0.5 text-xs opacity-70">
-                {selected ? "Filtro ativo" : "Toque para filtrar"}
+              <p className="mt-2 text-xs md:text-sm font-semibold truncate">{filterCard.label}</p>
+              <p className="mt-0.5 text-[10px] md:text-xs opacity-70">
+                {selected ? "Ativo" : "Filtrar"}
               </p>
             </button>
           );
@@ -756,30 +758,56 @@ function PedidosPage() {
                 {isOpen && (
                   <div className="mt-4 space-y-4 rounded-2xl border border-brand/15 bg-white/90 p-4 shadow-inner shadow-brand/5">
                     <div className="grid gap-3 text-sm sm:grid-cols-2">
-                      <p>
-                        <span className="font-semibold">Telefone:</span>{" "}
-                        {order.customer_phone || "Nao informado"}
-                      </p>
+                      <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-orange-50/70 border border-orange-100 sm:col-span-2">
+                        <div className="min-w-0">
+                          <span className="font-semibold text-foreground/80">Telefone:</span>{" "}
+                          <span className="font-bold text-foreground">{order.customer_phone || "Não informado"}</span>
+                        </div>
+                        {order.customer_phone && (
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <a
+                              href={`tel:${order.customer_phone.replace(/\D/g, "")}`}
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-border text-xs font-semibold text-foreground/80 hover:bg-muted active:scale-95 transition"
+                              title="Ligar para cliente"
+                            >
+                              <Phone className="h-3.5 w-3.5 text-blue-600" />
+                              <span>Ligar</span>
+                            </a>
+                            <a
+                              href={`https://wa.me/55${order.customer_phone.replace(/\D/g, "")}?text=${encodeURIComponent(
+                                `Olá ${order.customer_name || ""}, tudo bem? Aqui é da Lume Artesanais referente ao seu pedido ${formatOrderCode(order.id, order.order_number)}!`
+                              )}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 active:scale-95 transition shadow-sm"
+                              title="Conversar no WhatsApp"
+                            >
+                              <MessageCircle className="h-3.5 w-3.5" />
+                              <span>WhatsApp</span>
+                            </a>
+                          </div>
+                        )}
+                      </div>
                       <p>
                         <span className="font-semibold">Pagamento:</span> {paymentName}
                       </p>
-                      <p className="sm:col-span-2">
-                        <span className="font-semibold">Situacao do pagamento:</span>{" "}
+                      <p>
+                        <span className="font-semibold">Situação do pagamento:</span>{" "}
                         {order.payment_status === "paid" || order.status === "paid"
                           ? `Pago em ${formatDateTimeBR(order.paid_at)}`
-                          : "Nao pago"}
+                          : "Não pago"}
                       </p>
                       <p className="sm:col-span-2">
-                        <span className="font-semibold">Endereco:</span>{" "}
-                        {order.customer_address || "Nao informado"}
+                        <span className="font-semibold">Endereço:</span>{" "}
+                        {order.customer_address || "Não informado"}
                       </p>
                       <p className="sm:col-span-2">
-                        <span className="font-semibold">Referencia:</span>{" "}
-                        {order.address_reference || "Nao informado"}
+                        <span className="font-semibold">Referência:</span>{" "}
+                        {order.address_reference || "Não informado"}
                       </p>
                       <p className="sm:col-span-2">
-                        <span className="font-semibold">Observacoes:</span>{" "}
-                        {order.notes || "Sem observacoes"}
+                        <span className="font-semibold">Observações:</span>{" "}
+                        {order.notes || "Sem observações"}
                       </p>
                     </div>
 
@@ -798,9 +826,9 @@ function PedidosPage() {
                                 disabled={updatingOrderId === order.id}
                                 onClick={() => updateOrderStatus(order, action.status)}
                                 className={cn(
-                                  "rounded-full px-3 py-1.5 text-xs font-bold ring-1 transition disabled:cursor-wait disabled:opacity-60",
+                                  "rounded-full px-3 py-1.5 text-xs font-bold ring-1 transition disabled:cursor-wait disabled:opacity-60 active:scale-95",
                                   active
-                                    ? "bg-brand text-brand-foreground ring-brand"
+                                    ? "bg-brand text-brand-foreground ring-brand shadow-sm"
                                     : "bg-white text-foreground ring-orange-100 hover:bg-orange-100",
                                 )}
                               >
@@ -811,11 +839,11 @@ function PedidosPage() {
                         </div>
                       </div>
 
-                      <div className="flex flex-col gap-2 items-end">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 lg:flex lg:flex-col gap-2 w-full lg:w-auto mt-2 lg:mt-0">
                         <button
                           type="button"
                           onClick={() => generateReceipt(order, detailsItems, paymentName)}
-                          className="inline-flex min-w-36 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-bold ring-1 transition bg-white text-orange-600 ring-orange-200 hover:bg-orange-50"
+                          className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-xs md:text-sm font-bold ring-1 transition bg-white text-orange-600 ring-orange-200 hover:bg-orange-50 active:scale-95 shadow-sm"
                         >
                           <Download className="h-4 w-4" />
                           Gerar PDF
@@ -825,7 +853,7 @@ function PedidosPage() {
                           disabled={updatingOrderId === order.id}
                           onClick={() => toggleOrderPaid(order)}
                           className={cn(
-                            "inline-flex min-w-36 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-bold ring-1 transition disabled:cursor-wait disabled:opacity-60",
+                            "inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-xs md:text-sm font-bold ring-1 transition disabled:cursor-wait disabled:opacity-60 active:scale-95 shadow-sm",
                             order.payment_status === "paid" || order.status === "paid"
                               ? "bg-emerald-600 text-white ring-emerald-600 hover:bg-emerald-700"
                               : "bg-white text-emerald-700 ring-emerald-200 hover:bg-emerald-50",
@@ -838,7 +866,7 @@ function PedidosPage() {
                           type="button"
                           disabled={updatingOrderId === order.id}
                           onClick={() => deleteOrder(order.id)}
-                          className="inline-flex min-w-36 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-bold ring-1 transition bg-white text-rose-600 ring-rose-200 hover:bg-rose-50 disabled:cursor-wait disabled:opacity-60"
+                          className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-xs md:text-sm font-bold ring-1 transition bg-white text-rose-600 ring-rose-200 hover:bg-rose-50 active:scale-95 disabled:cursor-wait disabled:opacity-60 shadow-sm"
                         >
                           <Trash2 className="h-4 w-4" />
                           Excluir

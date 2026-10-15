@@ -379,16 +379,16 @@ export function PeriodFilter({
     { k: "custom", l: "Personalizado" },
   ];
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <div className="flex flex-wrap gap-1.5 rounded-full bg-muted p-1">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+      <div className="flex items-center gap-1 overflow-x-auto no-scrollbar rounded-xl sm:rounded-full bg-muted p-1 max-w-full">
         {opts.map((o) => (
           <button
             key={o.k}
             onClick={() => setPreset(o.k)}
             className={
-              "rounded-full px-3 py-1.5 text-xs font-bold transition " +
+              "rounded-lg sm:rounded-full px-3 py-1.5 text-xs font-bold transition shrink-0 active:scale-95 " +
               (preset === o.k
-                ? "bg-brand text-brand-foreground shadow"
+                ? "bg-brand text-brand-foreground shadow-sm"
                 : "text-foreground/70 hover:text-foreground")
             }
           >
@@ -397,19 +397,19 @@ export function PeriodFilter({
         ))}
       </div>
       {preset === "custom" && (
-        <div className="flex items-center gap-2 text-xs">
+        <div className="flex items-center gap-2 text-xs flex-wrap">
           <input
             type="date"
             value={customFrom}
             onChange={(e) => setCustomFrom(e.target.value)}
-            className="rounded-lg border border-border bg-background px-2 py-1.5"
+            className="rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-medium"
           />
-          <span className="text-muted-foreground">até</span>
+          <span className="text-muted-foreground text-xs">até</span>
           <input
             type="date"
             value={customTo}
             onChange={(e) => setCustomTo(e.target.value)}
-            className="rounded-lg border border-border bg-background px-2 py-1.5"
+            className="rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-medium"
           />
         </div>
       )}

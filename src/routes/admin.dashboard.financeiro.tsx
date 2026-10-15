@@ -426,82 +426,168 @@ function FinanceiroPage() {
             Nenhum lançamento no período.
           </p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-xs uppercase text-muted-foreground border-b border-border/60">
-                <tr>
-                  <th className="text-left px-4 py-2">Data</th>
-                  <th className="text-left">Descrição</th>
-                  <th className="text-left">Categoria</th>
-                  <th className="text-left">Pagamento</th>
-                  <th className="text-left">Status</th>
-                  <th className="text-right">Valor</th>
-                  <th className="text-right px-4">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {txs.map((t) => (
-                  <tr key={t.id} className="border-b border-border/40 hover:bg-muted/30">
-                    <td className="px-4 py-2 whitespace-nowrap">{formatDateBR(t.occurred_at)}</td>
-                    <td>
-                      <div className="flex items-center gap-2">
-                        <span>{t.description}</span>
-                        {t.is_auto && (
-                          <span className="text-[10px] uppercase rounded bg-muted px-1.5 py-0.5 text-muted-foreground">
-                            auto
+          <>
+            {/* Mobile Cards List */}
+            <div className="md:hidden divide-y divide-border/50">
+              {txs.map((t) => {
+                const catName = categories.find((c) => c.id === t.category_id)?.name ?? "Sem categoria";
+                const pmName = methods.find((m) => m.id === t.payment_method_id)?.name;
+
+                return (
+                  <div key={t.id} className="p-3.5 space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-xs text-muted-foreground font-medium">
+                            {formatDateBR(t.occurred_at)}
                           </span>
-                        )}
+                          {t.is_auto && (
+                            <span className="text-[9px] uppercase font-bold rounded bg-muted px-1.5 py-0.5 text-muted-foreground">
+                              auto
+                            </span>
+                          )}
+                        </div>
+                        <p className="font-bold text-foreground text-sm leading-tight mt-0.5">
+                          {t.description}
+                        </p>
                       </div>
-                    </td>
-                    <td>{categories.find((c) => c.id === t.category_id)?.name ?? "—"}</td>
-                    <td><PaymentLabel name={methods.find((m) => m.id === t.payment_method_id)?.name} /></td>
-                    <td>
-                      <span
+
+                      <div
                         className={
-                          "inline-block rounded-full px-2 py-0.5 text-xs font-semibold " +
-                          (t.status === "paid"
-                            ? "bg-emerald-500/10 text-emerald-600"
-                            : "bg-amber-500/10 text-amber-600")
+                          "text-base font-black whitespace-nowrap text-right shrink-0 " +
+                          (t.kind === "revenue" ? "text-emerald-600" : "text-rose-600")
                         }
                       >
-                        {t.status === "paid" ? "Pago" : "Pendente"}
-                      </span>
-                    </td>
-                    <td
-                      className={
-                        "text-right font-bold whitespace-nowrap " +
-                        (t.kind === "revenue" ? "text-emerald-600" : "text-rose-600")
-                      }
-                    >
-                      {t.kind === "revenue" ? "+" : "-"} {formatBRL(t.amount)}
-                    </td>
-                    <td className="text-right px-4">
-                      <div className="inline-flex gap-1">
+                        {t.kind === "revenue" ? "+" : "-"} {formatBRL(t.amount)}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2 pt-1 text-xs">
+                      <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                        <span className="rounded-md bg-muted px-2 py-0.5 text-[11px] font-semibold text-foreground/80 truncate max-w-[120px]">
+                          {catName}
+                        </span>
+                        {pmName && (
+                          <span className="text-[11px] text-muted-foreground truncate">
+                            <PaymentLabel name={pmName} />
+                          </span>
+                        )}
+                        <span
+                          className={
+                            "inline-block rounded-full px-2 py-0.5 text-[10px] font-bold " +
+                            (t.status === "paid"
+                              ? "bg-emerald-500/10 text-emerald-600"
+                              : "bg-amber-500/10 text-amber-600")
+                          }
+                        >
+                          {t.status === "paid" ? "Pago" : "Pendente"}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1 shrink-0">
                         <button
                           onClick={() => {
                             setEditing(t);
                             setModalOpen(true);
                           }}
                           disabled={t.is_auto}
-                          className="grid h-8 w-8 place-items-center rounded-lg hover:bg-muted disabled:opacity-30"
+                          className="grid h-8 w-8 place-items-center rounded-lg hover:bg-muted text-foreground/70 disabled:opacity-30 active:scale-95 transition"
                           title={t.is_auto ? "Lançamento automático" : "Editar"}
                         >
                           <Pencil className="h-3.5 w-3.5" />
                         </button>
                         <button
                           onClick={() => remove(t.id)}
-                          className="grid h-8 w-8 place-items-center rounded-lg text-red-600 hover:bg-red-50"
+                          className="grid h-8 w-8 place-items-center rounded-lg text-rose-600 hover:bg-rose-50 active:scale-95 transition"
                           title="Excluir"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
-                    </td>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-xs uppercase text-muted-foreground border-b border-border/60">
+                  <tr>
+                    <th className="text-left px-4 py-2">Data</th>
+                    <th className="text-left">Descrição</th>
+                    <th className="text-left">Categoria</th>
+                    <th className="text-left">Pagamento</th>
+                    <th className="text-left">Status</th>
+                    <th className="text-right">Valor</th>
+                    <th className="text-right px-4">Ações</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {txs.map((t) => (
+                    <tr key={t.id} className="border-b border-border/40 hover:bg-muted/30">
+                      <td className="px-4 py-2 whitespace-nowrap">{formatDateBR(t.occurred_at)}</td>
+                      <td>
+                        <div className="flex items-center gap-2">
+                          <span>{t.description}</span>
+                          {t.is_auto && (
+                            <span className="text-[10px] uppercase rounded bg-muted px-1.5 py-0.5 text-muted-foreground">
+                              auto
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td>{categories.find((c) => c.id === t.category_id)?.name ?? "—"}</td>
+                      <td><PaymentLabel name={methods.find((m) => m.id === t.payment_method_id)?.name} /></td>
+                      <td>
+                        <span
+                          className={
+                            "inline-block rounded-full px-2 py-0.5 text-xs font-semibold " +
+                            (t.status === "paid"
+                              ? "bg-emerald-500/10 text-emerald-600"
+                              : "bg-amber-500/10 text-amber-600")
+                          }
+                        >
+                          {t.status === "paid" ? "Pago" : "Pendente"}
+                        </span>
+                      </td>
+                      <td
+                        className={
+                          "text-right font-bold whitespace-nowrap " +
+                          (t.kind === "revenue" ? "text-emerald-600" : "text-rose-600")
+                        }
+                      >
+                        {t.kind === "revenue" ? "+" : "-"} {formatBRL(t.amount)}
+                      </td>
+                      <td className="text-right px-4">
+                        <div className="inline-flex gap-1">
+                          <button
+                            onClick={() => {
+                              setEditing(t);
+                              setModalOpen(true);
+                            }}
+                            disabled={t.is_auto}
+                            className="grid h-8 w-8 place-items-center rounded-lg hover:bg-muted disabled:opacity-30"
+                            title={t.is_auto ? "Lançamento automático" : "Editar"}
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            onClick={() => remove(t.id)}
+                            className="grid h-8 w-8 place-items-center rounded-lg text-red-600 hover:bg-red-50"
+                            title="Excluir"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Loader2, Phone, ShoppingBag, Calendar, ArrowUpDown, Search } from "lucide-react";
+import { Users, Loader2, Phone, ShoppingBag, Calendar, ArrowUpDown, Search, MessageCircle } from "lucide-react";
 import { useState, useMemo } from "react";
 import { formatBRL } from "@/store/cart";
 import { ClientDetailsModal } from "@/components/admin/ClientDetailsModal";
@@ -165,7 +165,97 @@ function ClientesPage() {
       </div>
 
       <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile Cards List */}
+        <div className="md:hidden divide-y divide-gray-100">
+          {filteredAndSorted.length > 0 ? (
+            filteredAndSorted.map((client) => {
+              const cleanPhone = client.phone.replace(/\D/g, "");
+              const hasValidPhone = cleanPhone.length >= 8;
+
+              return (
+                <div key={client.phone} className="p-4 space-y-3 hover:bg-gray-50/70 transition">
+                  <div className="flex items-start justify-between gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedClient(client)}
+                      className="text-left font-bold text-gray-900 hover:text-brand transition text-base leading-tight"
+                    >
+                      {client.name}
+                    </button>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-bold text-blue-700 ring-1 ring-inset ring-blue-700/10 shrink-0">
+                      <ShoppingBag className="h-3 w-3" />
+                      {client.order_count} ped.
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                      <span>
+                        {client.last_order === "-"
+                          ? "Sem compras"
+                          : new Date(client.last_order).toLocaleDateString("pt-BR", {
+                              day: "2-digit",
+                              month: "short",
+                            })}
+                      </span>
+                    </div>
+                    <div className="font-extrabold text-sm text-emerald-600">
+                      {formatBRL(client.total_spent)}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-gray-100">
+                    <span className="text-xs text-gray-500 font-medium truncate">
+                      {client.phone}
+                    </span>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {hasValidPhone && (
+                        <>
+                          <a
+                            href={`tel:${cleanPhone}`}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-xs font-semibold text-gray-700 hover:bg-gray-100 active:scale-95 transition"
+                            title="Ligar"
+                          >
+                            <Phone className="h-3 w-3 text-blue-600" />
+                            <span>Ligar</span>
+                          </a>
+                          <a
+                            href={`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(
+                              `Olá ${client.name}, tudo bem? Aqui é da Lume Artesanais!`
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 active:scale-95 transition shadow-sm"
+                            title="WhatsApp"
+                          >
+                            <MessageCircle className="h-3 w-3" />
+                            <span>Whats</span>
+                          </a>
+                        </>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedClient(client)}
+                        className="px-2.5 py-1.5 rounded-lg border border-brand/20 bg-brand/5 text-xs font-bold text-brand hover:bg-brand/10 active:scale-95 transition"
+                      >
+                        Ver
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <p className="px-6 py-10 text-center text-gray-500 text-sm">
+              Nenhum cliente encontrado.
+            </p>
+          )}
+        </div>
+
+        {/* Desktop Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-sm text-gray-600">
             <thead className="bg-gray-50 text-xs uppercase text-gray-500 border-b border-gray-200">
               <tr>

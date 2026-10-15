@@ -286,7 +286,7 @@ function WhatsappPage() {
             <button
               onClick={handleSave}
               disabled={loading}
-              className="flex items-center gap-2 rounded-full bg-brand px-6 py-2.5 text-sm font-bold text-white shadow-md hover:bg-brand/90 transition-colors disabled:opacity-50"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-bold text-white shadow-md hover:bg-brand/90 active:scale-95 transition-colors disabled:opacity-50"
             >
               {loading ? "Salvando..." : (
                 <>
